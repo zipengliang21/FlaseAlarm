@@ -2,17 +2,17 @@
 
 **Basic character movement (w/a/s/d):** world_system.cpp, on_key(), line 465-502
 
-**Basic collision detection (player with walls/floors):**
+**Basic collision detection (player with walls/floors):** world_system.cpp, handle_collisions method, line 407-428, when the collision is detected between player and the wall, it will set the player velocity to 0, and set the position backward by 30 units with respect to the velocity direction when this collision happens.
 
 **Sprite with key element (player, security guards/camera, door, fire alarm):**
 
-world_system.cpp, restart_game, line 256-260, line 351 create student(player) with a given location.
+player: world_system.cpp, restart_game, line 256-260, line 351 create student(player) with a given location.
 
-world_system.cpp, restart_game, line 265-266, create a fire alarm(exit) in the upper right corner of the map. 
+fire alarm: world_system.cpp, restart_game, line 265-266, create a fire alarm in the upper right corner of the map. 
 
-world_system.cpp, restart_game, line 268-349, a few loops are being used to create a wall conditionally. In this loop, if the space has not been used, then this space is left for doors. 
+door/wall: world_system.cpp, restart_game, line 268-349, a few loops are being used to create a wall conditionally. In this loop, if the space has not been used, then this space is left for doors. 
 
-world_system.cpp, restart_game, line 354, create guard with a given location 
+security guard: world_system.cpp, restart_game, line 354, create guard with a given location 
 
 Basic level map with static walls:world_system.cpp, restart_game, line 264-349: we used square wall and for loops to create walls for rooms at all corners of the map
 
