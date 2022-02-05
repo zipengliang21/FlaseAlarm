@@ -1,0 +1,1 @@
+We accomplished most of our proposal for the Skeletal Game stage. Character movements and collision detection were completed. The design for the entry level is finished as well as the camera control. There are discrepancies where the lighting system and the control menu were pushed back to later milestones due to short of time. 
