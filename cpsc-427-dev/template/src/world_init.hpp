@@ -31,5 +31,7 @@ Entity createExit(RenderSystem* renderer, vec2 position);
 Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
+// create game state
+GameState* createGameState();
 
 

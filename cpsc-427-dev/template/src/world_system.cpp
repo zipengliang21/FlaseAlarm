@@ -1,6 +1,6 @@
 // Header
 #include "world_system.hpp"
-#include "world_init.hpp"
+//#include "world_init.hpp"
 
 // stlib
 #include <cassert>
@@ -253,8 +253,10 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create new game state
-	gameState = createGameState();
+	// Create new game state if we don't already have a game state
+	if (gameState == NULL) {
+		gameState = createGameState();
+	}
 
 	// Create a new student
 	player_student = createStudent(renderer, { bg_X /2, bg_Y - 50 });

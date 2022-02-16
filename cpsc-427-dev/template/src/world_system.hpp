@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "world_init.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -59,6 +60,7 @@ private:
 	Entity player_student;
 	Entity guard;
 	Entity exit;
+	GameState *gameState;
 
 	// music references
 	Mix_Music* background_music;

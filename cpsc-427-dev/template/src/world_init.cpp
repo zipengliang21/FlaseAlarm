@@ -170,3 +170,8 @@ Entity createLine(vec2 position, vec2 scale)
 	registry.debugComponents.emplace(entity);
 	return entity;
 }
+
+// Reload game state from file, create game state
+GameState* createGameState() {
+	return new GameState();
+}
