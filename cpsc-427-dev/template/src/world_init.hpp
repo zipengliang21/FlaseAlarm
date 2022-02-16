@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
+#include "game_state.hpp"
 
 // These are ahrd coded to the dimensions of the entity texture
 const float STUDENT_BB_WIDTH = 0.3f * 165.f;

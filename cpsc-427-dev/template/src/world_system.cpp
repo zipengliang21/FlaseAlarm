@@ -253,6 +253,9 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
+	// Create new game state
+	gameState = createGameState();
+
 	// Create a new student
 	player_student = createStudent(renderer, { bg_X /2, bg_Y - 50 });
 
