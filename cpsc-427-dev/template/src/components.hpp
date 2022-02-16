@@ -153,7 +153,8 @@ enum class TEXTURE_ASSET_ID {
 	WALL = EAGLE + 1,
 	EXIT = WALL + 1,
 	WIN = EXIT + 1,
-	TEXTURE_COUNT = WIN + 1
+	LEVEL1 = WIN + 1,
+	TEXTURE_COUNT = LEVEL1 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

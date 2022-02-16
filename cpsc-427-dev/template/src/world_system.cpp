@@ -253,12 +253,11 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create a new chicken
+	// Create a new student
 	player_student = createStudent(renderer, { bg_X /2, bg_Y - 50 });
 
-	// Create textbox
-	auto student_pos = registry.motions.get(player_student).position;
-	//createTextBox(renderer, { student_pos.x + 100, student_pos.y - 100 });
+	// Create Level Selection
+	createTextBox(renderer, {bg_X/2, bg_Y - 50}, TEXTURE_ASSET_ID::LEVEL1, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT);
 
 
 	const float WALL_SIZE = 20.2f;
@@ -432,7 +431,7 @@ void WorldSystem::handle_collisions() {
 				if (!registry.wins.has(entity)) {
 					registry.wins.emplace(entity);
 				}
-				createTextBox(renderer, { bg_X / 2, bg_Y / 2 });
+				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT);
 			}
 			
 		}

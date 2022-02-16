@@ -15,6 +15,8 @@ const float EXIT_BB_WIDTH = 0.1f * 900.f;
 const float EXIT_BB_HEIGHT = 0.1f * 1000.f;
 const float WIN_BB_WIDTH = 0.4f * 512.f;
 const float WIN_BB_HEIGHT = 0.4f * 512.f;
+const float BUTTON_BB_WIDTH = 0.4f * 512.f;
+const float BUTTON_BB_HEIGHT = 0.15f * 512.f;
 
 // the player
 Entity createStudent(RenderSystem* renderer, vec2 pos);
@@ -24,8 +26,8 @@ Entity createGuard(RenderSystem* renderer, vec2 position);
 Entity createWall(RenderSystem* renderer, vec2 position);
 // the exit
 Entity createExit(RenderSystem* renderer, vec2 position);
-// the textbox
-Entity createTextBox(RenderSystem* renderer, vec2 position);
+// the textbox,  or button, display an image asset as a box
+Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 
