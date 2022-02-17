@@ -60,7 +60,7 @@ private:
 	Entity player_student;
 	Entity guard;
 	Entity exit;
-	GameState *gameState;
+	GameState* gameState = NULL;
 
 	// music references
 	Mix_Music* background_music;
@@ -68,6 +68,9 @@ private:
 	Mix_Chunk* chicken_eat_sound;
 	Mix_Chunk* wall_collision_sound;
 	Mix_Chunk* fire_alarm_sound;
+
+	// button handlers
+	void level1ButtonHandler();
 
 	// C++ random number generator
 	std::default_random_engine rng;

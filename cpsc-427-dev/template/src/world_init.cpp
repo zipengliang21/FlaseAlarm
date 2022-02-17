@@ -1,5 +1,6 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <string>
 
 Entity createStudent(RenderSystem* renderer, vec2 pos)
 {
@@ -124,7 +125,7 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height) {
+Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction) {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
@@ -137,6 +138,9 @@ Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_I
 	// motion.angle = 0.f;
 	motion.velocity = { 0,0 };
 	motion.position = position;
+
+	// Initialize Clickable component with position, size and hanlder
+	auto& clickable = registry.clickables.emplace(entity, position, width, height, buttonAction);
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	motion.scale = vec2({ width, height }); // TODO

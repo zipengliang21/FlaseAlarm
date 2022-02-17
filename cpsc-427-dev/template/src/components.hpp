@@ -123,6 +123,22 @@ struct WinTimer
 	float counter_ms = 3000;
 };
 
+struct Clickable
+{
+	Clickable(vec2 p, float w, float h, std::string ba) {
+		position = p;
+		width = w;
+		height = h;
+		buttonAction = ba;
+	}
+
+	vec2 position;
+	float width;
+	float height;
+	std::string buttonAction;
+	// void (*handler) ();
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -154,7 +170,12 @@ enum class TEXTURE_ASSET_ID {
 	EXIT = WALL + 1,
 	WIN = EXIT + 1,
 	LEVEL1 = WIN + 1,
-	TEXTURE_COUNT = LEVEL1 + 1
+	LEVEL2 = LEVEL1 + 1,
+	LEVEL3 = LEVEL2 + 1,
+	LEVEL4 = LEVEL3 + 1,
+	LEVEL5 = LEVEL4 + 1,
+	LEVEL6 = LEVEL5 + 1,
+	TEXTURE_COUNT = LEVEL6 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

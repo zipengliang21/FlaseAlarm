@@ -1,6 +1,6 @@
 // Header
 #include "world_system.hpp"
-//#include "world_init.hpp"
+#include "world_init.hpp"
 
 // stlib
 #include <cassert>
@@ -231,6 +231,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	return true;
 }
 
+// button handlers for level selections
+// void WorldSystem::level1ButtonHandler() {
+// 	if (1 <= gameState->gameLevel.unlockedLevel) {
+// 		gameState->gameLevel.currLevel = 1;
+// 	}
+// 	// TODO: display something different when the user can't access a certain level
+// }
+
+
+
+
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
@@ -258,104 +269,120 @@ void WorldSystem::restart_game() {
 		gameState = createGameState();
 	}
 
-	// Create a new student
-	player_student = createStudent(renderer, { bg_X /2, bg_Y - 50 });
+	// TODO: depend on current gameState, we either display menu or the game of a specific level
+	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+		// if we are in level selection menu
 
-	// Create Level Selection
-	createTextBox(renderer, {bg_X/2, bg_Y - 50}, TEXTURE_ASSET_ID::LEVEL1, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT);
-
-
-	const float WALL_SIZE = 20.2f;
-	// Create a new exit
-	exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
-
-	// Create walls 
-	float counter_X = 0;
-	float counter_Y = 0;
-	while (counter_X < bg_X) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_X += WALL_SIZE;
+		// Create Level Selection
+		float paddingFactor = 10;
+		createTextBox(renderer, { bg_X / 2, 5* (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL1, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level1");
+		createTextBox(renderer, { bg_X / 2, 6 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL2, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level2");
+		createTextBox(renderer, { bg_X / 2, 7 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL3, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level3");
+		createTextBox(renderer, { bg_X / 2, 8 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL4, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level4");
+		createTextBox(renderer, { bg_X / 2, 9 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL5, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level5");
+		createTextBox(renderer, { bg_X / 2, 10 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL6, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level6");
 	}
-	
-	while (counter_Y < bg_Y) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_Y += WALL_SIZE;
-	}
+	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+		// user selected level, display game component of that level
 
-	while (counter_X > 0) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_X -= WALL_SIZE;
-	}
+		// TODO: select game level here
+		// Create a new student
+		player_student = createStudent(renderer, { bg_X / 2, bg_Y - 50 });
 
-	while (counter_Y > 0) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_Y -= WALL_SIZE;
-	}
+		const float WALL_SIZE = 20.2f;
+		// Create a new exit
+		exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
 
-	float bl_X = bg_X * 3 / 8;
-	float bl_Y = bg_Y * 5 / 8;
-	while(bl_X > 0) {
-		if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X > (bg_X * 3 / 8 - 3 * WALL_SIZE)) {
+		// Create walls 
+		float counter_X = 0;
+		float counter_Y = 0;
+		while (counter_X < bg_X) {
+			createWall(renderer, { counter_X, counter_Y });
+			counter_X += WALL_SIZE;
+		}
+
+		while (counter_Y < bg_Y) {
+			createWall(renderer, { counter_X, counter_Y });
+			counter_Y += WALL_SIZE;
+		}
+
+		while (counter_X > 0) {
+			createWall(renderer, { counter_X, counter_Y });
+			counter_X -= WALL_SIZE;
+		}
+
+		while (counter_Y > 0) {
+			createWall(renderer, { counter_X, counter_Y });
+			counter_Y -= WALL_SIZE;
+		}
+
+		float bl_X = bg_X * 3 / 8;
+		float bl_Y = bg_Y * 5 / 8;
+		while (bl_X > 0) {
+			if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X >(bg_X * 3 / 8 - 3 * WALL_SIZE)) {
+				createWall(renderer, { bl_X, bl_Y });
+			}
+			bl_X -= WALL_SIZE;
+		}
+
+		bl_X = bg_X * 3 / 8;
+		while (bl_Y < bg_Y) {
 			createWall(renderer, { bl_X, bl_Y });
+			bl_Y += WALL_SIZE;
 		}
-		bl_X -= WALL_SIZE;
-	}
 
-	bl_X = bg_X * 3 / 8;
-	while (bl_Y < bg_Y) {
-		createWall(renderer, { bl_X, bl_Y });
-		bl_Y += WALL_SIZE;
-	}
-
-	float ul_X = bg_X * 3 / 8;
-	float ul_Y = bg_Y * 3 / 8;
-	while (ul_X > 0) {
-		createWall(renderer, { ul_X, ul_Y });
-		ul_X -= WALL_SIZE;
-	}
-
-	ul_X = bg_X * 3 / 8;
-	while (ul_Y > 0) {
-		if (ul_Y < (bg_Y * 3 / 8 - 10 * WALL_SIZE) || ul_Y >(bg_Y * 3 / 8 - 6 * WALL_SIZE)) {
+		float ul_X = bg_X * 3 / 8;
+		float ul_Y = bg_Y * 3 / 8;
+		while (ul_X > 0) {
 			createWall(renderer, { ul_X, ul_Y });
+			ul_X -= WALL_SIZE;
 		}
-		ul_Y -= WALL_SIZE;
-	}
 
-	float ur_X = bg_X * 5 / 8;
-	float ur_Y = bg_Y * 3 / 8;
-	while (ur_X < bg_X) {
-		if (ur_X < (bg_X * 5 / 8 + 5 * WALL_SIZE) || ur_X >(bg_X * 5 / 8 + 9 * WALL_SIZE)) {
+		ul_X = bg_X * 3 / 8;
+		while (ul_Y > 0) {
+			if (ul_Y < (bg_Y * 3 / 8 - 10 * WALL_SIZE) || ul_Y >(bg_Y * 3 / 8 - 6 * WALL_SIZE)) {
+				createWall(renderer, { ul_X, ul_Y });
+			}
+			ul_Y -= WALL_SIZE;
+		}
+
+		float ur_X = bg_X * 5 / 8;
+		float ur_Y = bg_Y * 3 / 8;
+		while (ur_X < bg_X) {
+			if (ur_X < (bg_X * 5 / 8 + 5 * WALL_SIZE) || ur_X >(bg_X * 5 / 8 + 9 * WALL_SIZE)) {
+				createWall(renderer, { ur_X, ur_Y });
+			}
+			ur_X += WALL_SIZE;
+		}
+
+		ur_X = bg_X * 5 / 8;
+		while (ur_Y > 0) {
 			createWall(renderer, { ur_X, ur_Y });
+			ur_Y -= WALL_SIZE;
 		}
-		ur_X += WALL_SIZE;
-	}
 
-	ur_X = bg_X * 5 / 8;
-	while (ur_Y > 0) {
-		createWall(renderer, { ur_X, ur_Y });
-		ur_Y -= WALL_SIZE;
-	}
-
-	float ub_X = bg_X * 5 / 8;
-	float ub_Y = bg_Y * 5 / 8;
-	while (ub_X < bg_X) {
-		createWall(renderer, { ub_X, ub_Y });
-		ub_X += WALL_SIZE;
-	}
-
-	ub_X = bg_X * 5 / 8;
-	while (ub_Y < bg_Y) {
-		if (ub_Y < (bg_Y * 5 / 8 + 4 * WALL_SIZE) || ub_Y >(bg_Y * 5 / 8 + 8 * WALL_SIZE)) {
+		float ub_X = bg_X * 5 / 8;
+		float ub_Y = bg_Y * 5 / 8;
+		while (ub_X < bg_X) {
 			createWall(renderer, { ub_X, ub_Y });
+			ub_X += WALL_SIZE;
 		}
-		ub_Y += WALL_SIZE;
+
+		ub_X = bg_X * 5 / 8;
+		while (ub_Y < bg_Y) {
+			if (ub_Y < (bg_Y * 5 / 8 + 4 * WALL_SIZE) || ub_Y >(bg_Y * 5 / 8 + 8 * WALL_SIZE)) {
+				createWall(renderer, { ub_X, ub_Y });
+			}
+			ub_Y += WALL_SIZE;
+		}
+
+		registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
+
+		// Create security guard, TODO: make it a list of guard
+		guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
 	}
 
-	registry.colors.insert(player_student, {1, 0.8f, 0.8f});
-
-	// Create security guard, TODO: make it a list of guard
-	guard = createGuard(renderer, vec2(bg_X - 100 , bg_Y /2));
+	
 	//registry.motions.get(guard).position = { window_width_px - 100 , window_height_px / 2 };
 	//registry.motions.get(guard).velocity = { -100.f , 0 };
 	// !! TODO A3: Enable static eggs on the ground
@@ -436,7 +463,7 @@ void WorldSystem::handle_collisions() {
 				if (!registry.wins.has(entity)) {
 					registry.wins.emplace(entity);
 				}
-				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT);
+				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT, NULL);
 			}
 			
 		}
@@ -566,4 +593,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
+
+	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+	}
 }

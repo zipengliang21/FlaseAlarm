@@ -28,7 +28,7 @@ Entity createWall(RenderSystem* renderer, vec2 position);
 // the exit
 Entity createExit(RenderSystem* renderer, vec2 position);
 // the textbox,  or button, display an image asset as a box
-Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height);
+Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // create game state
