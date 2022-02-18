@@ -30,6 +30,9 @@ public:
 	ComponentContainer<Win> wins;
 	ComponentContainer<Stoped> stopeds;
 	ComponentContainer<WinTimer> winTimers;
+	ComponentContainer<Camera> cameras;
+	ComponentContainer<Light> lights;
+	ComponentContainer<RotateTimer> rotateTimers;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -54,6 +57,9 @@ public:
 		registry_list.push_back(&wins);
 		registry_list.push_back(&stopeds);
 		registry_list.push_back(&winTimers);
+		registry_list.push_back(&cameras);
+		registry_list.push_back(&lights);
+		registry_list.push_back(&rotateTimers);
 	}
 
 	void clear_all_components() {

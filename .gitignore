@@ -1,2 +1,8 @@
 .vs*
 cpsc-427-dev/template/out/build/*
+/cpsc-427-dev/template/x64/Debug/*
+False Alarm.vcxproj.user
+False Alarm.vcxproj.filters
+False Alarm.vcxproj
+False Alarm.sln
+cpsc-427-dev/template/ext/project_path.hpp

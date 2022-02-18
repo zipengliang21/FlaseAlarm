@@ -32,6 +32,16 @@ struct Stoped
 
 };
 
+struct Camera
+{
+
+};
+
+struct Light
+{
+
+};
+
 // All data relevant to the shape and motion of entities
 struct Motion {
 	vec2 position = { 0, 0 };
@@ -77,6 +87,10 @@ struct DeathTimer
 // Timer that controls how long before guard turns around
 struct WalkTimer {
 	float counter_ms = 12000;
+};
+
+struct RotateTimer {
+	float counter_ms = 3000;
 };
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
@@ -153,7 +167,9 @@ enum class TEXTURE_ASSET_ID {
 	WALL = EAGLE + 1,
 	EXIT = WALL + 1,
 	WIN = EXIT + 1,
-	TEXTURE_COUNT = WIN + 1
+	CAMERA = WIN + 1,
+	LIGHT = CAMERA + 1,
+	TEXTURE_COUNT = LIGHT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

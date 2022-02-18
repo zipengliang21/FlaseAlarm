@@ -59,6 +59,8 @@ private:
 	Entity player_student;
 	Entity guard;
 	Entity exit;
+	Entity camera;
+	Entity light;
 
 	// music references
 	Mix_Music* background_music;
