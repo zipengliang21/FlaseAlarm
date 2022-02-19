@@ -42,8 +42,8 @@ public:
 	}
 	enum class GAME_STATE {
 		LEVEL_SELECTION = 0,
-		LEVEL_SELECTED = 1,
-		GAME_STATE_COUNT = LEVEL_SELECTED + 1
+		LEVEL1_SELECTED = 1,
+		GAME_STATE_COUNT = LEVEL1_SELECTED + 1
 	};
 
 	const int game_state_count = (int)GAME_STATE::GAME_STATE_COUNT;

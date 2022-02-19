@@ -5,6 +5,8 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <string>
+#include <iostream>
 
 #include "physics_system.hpp"
 
@@ -18,6 +20,10 @@ const float PLAYER_SPEED = 400;
 // Background size
 float bg_X = window_width_px * 1.5;
 float bg_Y = window_height_px * 1.5;
+
+// global variable to remember cursor position
+float cursorX;
+float cursorY;
 
 // Create the bug world
 WorldSystem::WorldSystem()
@@ -93,8 +99,10 @@ GLFWwindow* WorldSystem::create_window() {
 	glfwSetWindowUserPointer(window, this);
 	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
 	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto cursor_button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->mouse_button_callback( _0, _1, _2 ); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, cursor_button_redirect);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -282,7 +290,7 @@ void WorldSystem::restart_game() {
 		createTextBox(renderer, { bg_X / 2, 9 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL5, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level5");
 		createTextBox(renderer, { bg_X / 2, 10 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL6, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level6");
 	}
-	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+	else if (gameState->state == GameState::GAME_STATE::LEVEL1_SELECTED) {
 		// user selected level, display game component of that level
 
 		// TODO: select game level here
@@ -592,8 +600,103 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	(vec2)mouse_position; // dummy to avoid compiler warning
+	//(vec2)mouse_position; // dummy to avoid compiler warning
 
+	cursorX = mouse_position[0];
+	cursorY = mouse_position[1];
+	//std::cout << cursorX << " " << cursorY << std::endl;
 	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+	}
+}
+
+bool inRange(vec2 buttonPos, int buttonWidth, int buttonHeight) {
+	float buttonLeft = buttonPos.x - (buttonWidth / 2);
+	float buttonRight = buttonPos.x + (buttonWidth / 2);
+	float buttonTop = buttonPos.y - (buttonHeight / 2);
+	float buttonBot = buttonPos.y + (buttonHeight / 2);
+	float normalizedCursorX = cursorX * 1.5; // TODO: this is related to background size
+	float normalizedCursorY = cursorY + (550 - 160);
+	bool xInRange = (buttonLeft <= normalizedCursorX) && (buttonRight >= normalizedCursorX);
+	bool yInRange = (buttonTop <= normalizedCursorY) && (buttonBot >= normalizedCursorY);
+	std::cout << "buttonPos " << buttonPos[0] << " " << buttonPos[1] << std::endl;
+	std::cout << "buttonWidth " << buttonWidth << std::endl;
+	std::cout << "buttonHeight " << buttonHeight << std::endl;
+	std::cout << "normalizedCursorX " << normalizedCursorX << std::endl;
+	std::cout << "normalizedCursorY " << normalizedCursorY << std::endl;
+	std::cout << "buttonTop " << buttonTop << std::endl;
+	std::cout << "buttonBot " << buttonBot << std::endl;
+	std::cout << "xInRange " << xInRange << std::endl;
+	std::cout << "yInRange " << yInRange << std::endl;
+	return xInRange && yInRange;
+}
+
+
+Clickable* findClickedButton() {
+	// uses cursorX and cursorY to see if it is in range of any button
+	std::cout << "findClickedButton" << std::endl;
+	for (auto &c : registry.clickables.components) {
+		std::cout << "----check button range ----" << std::endl;
+		if (inRange(c.position, c.width, c.height)) {
+			std::cout << "Found Clicked Button" << std::endl;
+			return &c; // TODO: does this work?
+		}
+	}
+	return NULL;
+}
+
+int WorldSystem::changeLevel(std::string buttonAction) {
+	int switchToLevel = -1;
+	if (buttonAction == "level1") {
+		switchToLevel = 1;
+		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
+	}
+	else if (buttonAction == "level2") {
+		switchToLevel = 2;
+		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
+	}
+	else if (buttonAction == "level3") {
+		switchToLevel = 3;
+		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
+	}
+	else if (buttonAction == "level4") {
+		switchToLevel = 4;
+		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
+	}
+	else if (buttonAction == "level5") {
+		switchToLevel = 5;
+		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
+	}
+	else if (buttonAction == "level6") {
+		switchToLevel = 6;
+		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
+	}
+
+	return switchToLevel;
+
+	// change level to switchToLevel
+
+}
+
+
+void WorldSystem::mouse_button_callback(int button, int action, int mods) {
+	std::cout << "IN mouse_button_callback" << std::endl;
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		std::cout << "Left Button Released" << std::endl;
+		Clickable* clickedClickable = findClickedButton();
+		if (clickedClickable != NULL) {
+
+			std::string buttonAction = clickedClickable->buttonAction;
+			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+				// if we are on level selection page
+				int new_level = changeLevel(buttonAction);
+				if (new_level != -1) {
+					std::cout << new_level << std::endl;
+					restart_game();
+					return; // we changed the level
+				}
+			}
+			
+			
+		}
 	}
 }
