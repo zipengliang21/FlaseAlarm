@@ -119,3 +119,180 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 
 	return true;
 }
+
+TEXTURE_ASSET_ID Player::GetTexId(double nowTime)
+{
+	//printf("%f + %f --- %f\n", lastSwitchTime, switchFrame, nowTime);
+
+	// if now is not the time to refresh, return directly.
+	if (lastSwitchTime + switchFrame > nowTime)
+		return curTexId;
+
+	// do refresh
+	switch (curDir)
+	{
+	case Direction::UP:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::PLAYER_UP_0: curTexId = TEXTURE_ASSET_ID::PLAYER_UP_1; break;
+		case TEXTURE_ASSET_ID::PLAYER_UP_1: curTexId = TEXTURE_ASSET_ID::PLAYER_UP_2; break;
+		case TEXTURE_ASSET_ID::PLAYER_UP_2: curTexId = TEXTURE_ASSET_ID::PLAYER_UP_3; break;
+		case TEXTURE_ASSET_ID::PLAYER_UP_3: curTexId = TEXTURE_ASSET_ID::PLAYER_UP_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::PLAYER_UP_0; break;
+		}
+		break;
+	case Direction::DOWN:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::PLAYER_DOWN_0: curTexId = TEXTURE_ASSET_ID::PLAYER_DOWN_1; break;
+		case TEXTURE_ASSET_ID::PLAYER_DOWN_1: curTexId = TEXTURE_ASSET_ID::PLAYER_DOWN_2; break;
+		case TEXTURE_ASSET_ID::PLAYER_DOWN_2: curTexId = TEXTURE_ASSET_ID::PLAYER_DOWN_3; break;
+		case TEXTURE_ASSET_ID::PLAYER_DOWN_3: curTexId = TEXTURE_ASSET_ID::PLAYER_DOWN_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::PLAYER_DOWN_0; break;
+		}
+		break;
+	case Direction::LEFT:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::PLAYER_LEFT_0: curTexId = TEXTURE_ASSET_ID::PLAYER_LEFT_1; break;
+		case TEXTURE_ASSET_ID::PLAYER_LEFT_1: curTexId = TEXTURE_ASSET_ID::PLAYER_LEFT_2; break;
+		case TEXTURE_ASSET_ID::PLAYER_LEFT_2: curTexId = TEXTURE_ASSET_ID::PLAYER_LEFT_3; break;
+		case TEXTURE_ASSET_ID::PLAYER_LEFT_3: curTexId = TEXTURE_ASSET_ID::PLAYER_LEFT_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::PLAYER_LEFT_0; break;
+		}
+		break;
+	case Direction::RIGHT:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::PLAYER_RIGHT_0: curTexId = TEXTURE_ASSET_ID::PLAYER_RIGHT_1; break;
+		case TEXTURE_ASSET_ID::PLAYER_RIGHT_1: curTexId = TEXTURE_ASSET_ID::PLAYER_RIGHT_2; break;
+		case TEXTURE_ASSET_ID::PLAYER_RIGHT_2: curTexId = TEXTURE_ASSET_ID::PLAYER_RIGHT_3; break;
+		case TEXTURE_ASSET_ID::PLAYER_RIGHT_3: curTexId = TEXTURE_ASSET_ID::PLAYER_RIGHT_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::PLAYER_RIGHT_0; break;
+		}
+		break;
+	}
+	lastSwitchTime = nowTime; // update frame time
+	return curTexId;
+}
+
+void Player::SwitchDirection(Direction dir, double nowTime)
+{
+	if (dir == curDir)
+		return;
+
+	lastSwitchTime = nowTime;
+	switch (dir)
+	{
+	case Direction::UP:
+		curTexId = TEXTURE_ASSET_ID::PLAYER_UP_0;
+		break;
+	case Direction::DOWN:
+		curTexId = TEXTURE_ASSET_ID::PLAYER_DOWN_0;
+		break;
+	case Direction::LEFT:
+		curTexId = TEXTURE_ASSET_ID::PLAYER_LEFT_0;
+		break;
+	case Direction::RIGHT:
+		curTexId = TEXTURE_ASSET_ID::PLAYER_RIGHT_0;
+		break;
+	}
+	curDir = dir;
+}
+
+void Deadly::SwitchDirection(Direction dir, double nowTime)
+{
+	if (dir == curDir)
+		return;
+
+	lastSwitchTime = nowTime;
+	switch (dir)
+	{
+	case Direction::UP:
+		curTexId = TEXTURE_ASSET_ID::GUARD_UP_0;
+		break;
+	case Direction::DOWN:
+		curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_0;
+		break;
+	case Direction::LEFT:
+		curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_0;
+		break;
+	case Direction::RIGHT:
+		curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_0;
+		break;
+	}
+	curDir = dir;
+}
+
+TEXTURE_ASSET_ID Deadly::GetTexId(double nowTime)
+{
+	//printf("%f + %f --- %f\n", lastSwitchTime, switchFrame, nowTime);
+	if (lastSwitchTime + switchFrame > nowTime)
+		return curTexId;
+
+	switch (curDir)
+	{
+	case Direction::UP:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::GUARD_UP_0: curTexId = TEXTURE_ASSET_ID::GUARD_UP_1; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_1: curTexId = TEXTURE_ASSET_ID::GUARD_UP_2; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_2: curTexId = TEXTURE_ASSET_ID::GUARD_UP_3; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_3: curTexId = TEXTURE_ASSET_ID::GUARD_UP_4; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_4: curTexId = TEXTURE_ASSET_ID::GUARD_UP_5; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_5: curTexId = TEXTURE_ASSET_ID::GUARD_UP_6; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_6: curTexId = TEXTURE_ASSET_ID::GUARD_UP_7; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_7: curTexId = TEXTURE_ASSET_ID::GUARD_UP_8; break;
+		case TEXTURE_ASSET_ID::GUARD_UP_8: curTexId = TEXTURE_ASSET_ID::GUARD_UP_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::GUARD_UP_0; break;
+		}
+		break;
+	case Direction::DOWN:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::GUARD_DOWN_0: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_1; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_1: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_2; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_2: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_3; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_3: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_4; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_4: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_5; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_5: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_6; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_6: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_7; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_7: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_8; break;
+		case TEXTURE_ASSET_ID::GUARD_DOWN_8: curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::GUARD_DOWN_0; break;
+		}
+		break;
+	case Direction::LEFT:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::GUARD_LEFT_0: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_1; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_1: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_2; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_2: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_3; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_3: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_4; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_4: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_5; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_5: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_6; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_6: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_7; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_7: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_8; break;
+		case TEXTURE_ASSET_ID::GUARD_LEFT_8: curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::GUARD_LEFT_0; break;
+		}
+		break;
+	case Direction::RIGHT:
+		switch (curTexId)
+		{
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_0: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_1; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_1: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_2; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_2: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_3; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_3: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_4; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_4: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_5; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_5: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_6; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_6: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_7; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_7: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_8; break;
+		case TEXTURE_ASSET_ID::GUARD_RIGHT_8: curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_0; break;
+		default:curTexId = TEXTURE_ASSET_ID::GUARD_RIGHT_0; break;
+		}
+		break;
+	}
+	lastSwitchTime = nowTime;
+	return curTexId;
+}
