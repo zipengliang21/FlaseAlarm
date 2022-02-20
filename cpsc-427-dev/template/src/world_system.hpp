@@ -71,6 +71,7 @@ private:
 	Mix_Chunk* chicken_eat_sound;
 	Mix_Chunk* wall_collision_sound;
 	Mix_Chunk* fire_alarm_sound;
+	Mix_Chunk* trap_sound;
 
 	// C++ random number generator
 	std::default_random_engine rng;
