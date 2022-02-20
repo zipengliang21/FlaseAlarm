@@ -19,6 +19,8 @@ const float CAMERA_BB_WEIGHT = 0.4f * 161.f;
 const float CAMERA_BB_HEIGHT = 0.4f * 140.f;
 const float LIGHT_BB_WEIGHT = 0.4f * 248.f;
 const float LIGHT_BB_HEIGHT = 0.4f * 252.f;
+const float TRAP_BB_WIDTH = 0.1f * 504.f;
+const float TRAP_BB_HEIGHT = 0.15f * 444.f;
 
 // the player
 Entity createStudent(RenderSystem* renderer, vec2 pos);
@@ -34,6 +36,8 @@ Entity createCamera(RenderSystem* renderer, vec2 position);
 Entity createLight(RenderSystem* renderer, vec2 position);
 // the textbox
 Entity createTextBox(RenderSystem* renderer, vec2 position);
+// the trap
+Entity createTrap(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 

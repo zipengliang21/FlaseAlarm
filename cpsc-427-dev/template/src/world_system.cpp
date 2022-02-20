@@ -112,6 +112,7 @@ GLFWwindow *WorldSystem::create_window() {
 	chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
 	wall_collision_sound = Mix_LoadWAV(audio_path("wall_collision.wav").c_str());
 	fire_alarm_sound = Mix_LoadWAV(audio_path("fire_alarm.wav").c_str());
+	trap_sound = Mix_LoadWAV(audio_path("trap.wav").c_str());
 
 	if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr || wall_collision_sound == nullptr || fire_alarm_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
@@ -119,7 +120,8 @@ GLFWwindow *WorldSystem::create_window() {
 			audio_path("chicken_dead.wav").c_str(),
 			audio_path("chicken_eat.wav").c_str(),
 			audio_path("wall_collision.wav").c_str(),
-			audio_path("fire_alarm.wav").c_str());
+			audio_path("fire_alarm.wav").c_str(),
+			audio_path("trap.wav").c_str());
 		return nullptr;
 	}
 
@@ -312,6 +314,9 @@ void WorldSystem::restart_game() {
 
 	// Create a camera
 	camera = createCamera(renderer, { bg_X - WALL_SIZE - 50, bg_Y - WALL_SIZE - 10 });
+	
+	// Create trap(s)
+	createTrap(renderer, { bg_X / 2, 2 * bg_Y / 3 + WALL_SIZE });
 
 	// Create walls 
 	float counter_X = 0;
@@ -483,7 +488,10 @@ void WorldSystem::handle_collisions() {
 				}
 				createTextBox(renderer, { bg_X / 2, bg_Y / 2 });
 			}
-
+			else if (registry.traps.has(entity_other)) {
+				Mix_PlayChannel(-1, trap_sound, 1);
+				registry.remove_all_components_of(entity_other);
+			}
 		}
 	}
 
