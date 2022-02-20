@@ -283,112 +283,24 @@ void WorldSystem::restart_game() {
 
 		// Create Level Selection
 		float paddingFactor = 10;
-		createTextBox(renderer, { bg_X / 2, 5* (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL1, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level1");
-		createTextBox(renderer, { bg_X / 2, 6 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL2, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level2");
-		createTextBox(renderer, { bg_X / 2, 7 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL3, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level3");
-		createTextBox(renderer, { bg_X / 2, 8 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL4, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level4");
-		createTextBox(renderer, { bg_X / 2, 9 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL5, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level5");
-		createTextBox(renderer, { bg_X / 2, 10 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::LEVEL6, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level6");
+		createTextBox(renderer, { bg_X / 2, 5* (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(1), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level1");
+		createTextBox(renderer, { bg_X / 2, 6 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(2), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level2");
+		createTextBox(renderer, { bg_X / 2, 7 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(3), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level3");
+		createTextBox(renderer, { bg_X / 2, 8 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(4), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level4");
+		createTextBox(renderer, { bg_X / 2, 9 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(5), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level5");
+		createTextBox(renderer, { bg_X / 2, 10 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(6), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level6");
 	}
-	else if (gameState->state == GameState::GAME_STATE::LEVEL1_SELECTED) {
+	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
 		// user selected level, display game component of that level
-
-		// TODO: select game level here
-		// Create a new student
-		player_student = createStudent(renderer, { bg_X / 2, bg_Y - 50 });
-
-		const float WALL_SIZE = 20.2f;
-		// Create a new exit
-		exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
-
-		// Create walls 
-		float counter_X = 0;
-		float counter_Y = 0;
-		while (counter_X < bg_X) {
-			createWall(renderer, { counter_X, counter_Y });
-			counter_X += WALL_SIZE;
+		if (gameState->gameLevel.currLevel == 1) {
+			showLevel1Content();
 		}
 
-		while (counter_Y < bg_Y) {
-			createWall(renderer, { counter_X, counter_Y });
-			counter_Y += WALL_SIZE;
-		}
-
-		while (counter_X > 0) {
-			createWall(renderer, { counter_X, counter_Y });
-			counter_X -= WALL_SIZE;
-		}
-
-		while (counter_Y > 0) {
-			createWall(renderer, { counter_X, counter_Y });
-			counter_Y -= WALL_SIZE;
-		}
-
-		float bl_X = bg_X * 3 / 8;
-		float bl_Y = bg_Y * 5 / 8;
-		while (bl_X > 0) {
-			if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X >(bg_X * 3 / 8 - 3 * WALL_SIZE)) {
-				createWall(renderer, { bl_X, bl_Y });
-			}
-			bl_X -= WALL_SIZE;
-		}
-
-		bl_X = bg_X * 3 / 8;
-		while (bl_Y < bg_Y) {
-			createWall(renderer, { bl_X, bl_Y });
-			bl_Y += WALL_SIZE;
-		}
-
-		float ul_X = bg_X * 3 / 8;
-		float ul_Y = bg_Y * 3 / 8;
-		while (ul_X > 0) {
-			createWall(renderer, { ul_X, ul_Y });
-			ul_X -= WALL_SIZE;
-		}
-
-		ul_X = bg_X * 3 / 8;
-		while (ul_Y > 0) {
-			if (ul_Y < (bg_Y * 3 / 8 - 10 * WALL_SIZE) || ul_Y >(bg_Y * 3 / 8 - 6 * WALL_SIZE)) {
-				createWall(renderer, { ul_X, ul_Y });
-			}
-			ul_Y -= WALL_SIZE;
-		}
-
-		float ur_X = bg_X * 5 / 8;
-		float ur_Y = bg_Y * 3 / 8;
-		while (ur_X < bg_X) {
-			if (ur_X < (bg_X * 5 / 8 + 5 * WALL_SIZE) || ur_X >(bg_X * 5 / 8 + 9 * WALL_SIZE)) {
-				createWall(renderer, { ur_X, ur_Y });
-			}
-			ur_X += WALL_SIZE;
-		}
-
-		ur_X = bg_X * 5 / 8;
-		while (ur_Y > 0) {
-			createWall(renderer, { ur_X, ur_Y });
-			ur_Y -= WALL_SIZE;
-		}
-
-		float ub_X = bg_X * 5 / 8;
-		float ub_Y = bg_Y * 5 / 8;
-		while (ub_X < bg_X) {
-			createWall(renderer, { ub_X, ub_Y });
-			ub_X += WALL_SIZE;
-		}
-
-		ub_X = bg_X * 5 / 8;
-		while (ub_Y < bg_Y) {
-			if (ub_Y < (bg_Y * 5 / 8 + 4 * WALL_SIZE) || ub_Y >(bg_Y * 5 / 8 + 8 * WALL_SIZE)) {
-				createWall(renderer, { ub_X, ub_Y });
-			}
-			ub_Y += WALL_SIZE;
-		}
-
-		registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
-
-		// Create security guard, TODO: make it a list of guard
-		guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
+		// TODO: select game level 2-6 and display correspouding content here
+		
 	}
+
+	
 
 	
 	//registry.motions.get(guard).position = { window_width_px - 100 , window_height_px / 2 };
@@ -406,6 +318,118 @@ void WorldSystem::restart_game() {
 		registry.colors.insert(egg, { brightness, brightness, brightness});
 	}
 	*/
+}
+
+TEXTURE_ASSET_ID WorldSystem::getTextureIDOfLevelButton(int level) {
+	int unlocked_id = 4 + (level - 1) * 2 + 1; // skip other texture + skip prev levels + current level
+	int locked_id = unlocked_id + 1;
+	TEXTURE_ASSET_ID texture_id;
+	if (gameState->gameLevel.unlockedLevel >= level) {
+		texture_id = static_cast<TEXTURE_ASSET_ID>(unlocked_id);
+	}
+	else {
+		texture_id = static_cast<TEXTURE_ASSET_ID>(locked_id);
+	}
+	return texture_id;
+
+}
+
+// called in restart_game, display game content for game level 1
+void WorldSystem::showLevel1Content() {
+	// Create a new student
+	player_student = createStudent(renderer, { bg_X / 2, bg_Y - 50 });
+
+	const float WALL_SIZE = 20.2f;
+	// Create a new exit
+	exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
+
+	// Create walls 
+	float counter_X = 0;
+	float counter_Y = 0;
+	while (counter_X < bg_X) {
+		createWall(renderer, { counter_X, counter_Y });
+		counter_X += WALL_SIZE;
+	}
+
+	while (counter_Y < bg_Y) {
+		createWall(renderer, { counter_X, counter_Y });
+		counter_Y += WALL_SIZE;
+	}
+
+	while (counter_X > 0) {
+		createWall(renderer, { counter_X, counter_Y });
+		counter_X -= WALL_SIZE;
+	}
+
+	while (counter_Y > 0) {
+		createWall(renderer, { counter_X, counter_Y });
+		counter_Y -= WALL_SIZE;
+	}
+
+	float bl_X = bg_X * 3 / 8;
+	float bl_Y = bg_Y * 5 / 8;
+	while (bl_X > 0) {
+		if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X >(bg_X * 3 / 8 - 3 * WALL_SIZE)) {
+			createWall(renderer, { bl_X, bl_Y });
+		}
+		bl_X -= WALL_SIZE;
+	}
+
+	bl_X = bg_X * 3 / 8;
+	while (bl_Y < bg_Y) {
+		createWall(renderer, { bl_X, bl_Y });
+		bl_Y += WALL_SIZE;
+	}
+
+	float ul_X = bg_X * 3 / 8;
+	float ul_Y = bg_Y * 3 / 8;
+	while (ul_X > 0) {
+		createWall(renderer, { ul_X, ul_Y });
+		ul_X -= WALL_SIZE;
+	}
+
+	ul_X = bg_X * 3 / 8;
+	while (ul_Y > 0) {
+		if (ul_Y < (bg_Y * 3 / 8 - 10 * WALL_SIZE) || ul_Y >(bg_Y * 3 / 8 - 6 * WALL_SIZE)) {
+			createWall(renderer, { ul_X, ul_Y });
+		}
+		ul_Y -= WALL_SIZE;
+	}
+
+	float ur_X = bg_X * 5 / 8;
+	float ur_Y = bg_Y * 3 / 8;
+	while (ur_X < bg_X) {
+		if (ur_X < (bg_X * 5 / 8 + 5 * WALL_SIZE) || ur_X >(bg_X * 5 / 8 + 9 * WALL_SIZE)) {
+			createWall(renderer, { ur_X, ur_Y });
+		}
+		ur_X += WALL_SIZE;
+	}
+
+	ur_X = bg_X * 5 / 8;
+	while (ur_Y > 0) {
+		createWall(renderer, { ur_X, ur_Y });
+		ur_Y -= WALL_SIZE;
+	}
+
+	float ub_X = bg_X * 5 / 8;
+	float ub_Y = bg_Y * 5 / 8;
+	while (ub_X < bg_X) {
+		createWall(renderer, { ub_X, ub_Y });
+		ub_X += WALL_SIZE;
+	}
+
+	ub_X = bg_X * 5 / 8;
+	while (ub_Y < bg_Y) {
+		if (ub_Y < (bg_Y * 5 / 8 + 4 * WALL_SIZE) || ub_Y >(bg_Y * 5 / 8 + 8 * WALL_SIZE)) {
+			createWall(renderer, { ub_X, ub_Y });
+		}
+		ub_Y += WALL_SIZE;
+	}
+
+	registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
+
+	// Create security guard, TODO: make it a list of guard
+	guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
 }
 
 // Compute collisions between entities
@@ -471,7 +495,7 @@ void WorldSystem::handle_collisions() {
 				if (!registry.wins.has(entity)) {
 					registry.wins.emplace(entity);
 				}
-				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT, NULL);
+				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT, "unlock new level");
 			}
 			
 		}
@@ -644,33 +668,40 @@ Clickable* findClickedButton() {
 	return NULL;
 }
 
+// return -1 if level unchanged
+// return the new level if success
 int WorldSystem::changeLevel(std::string buttonAction) {
 	int switchToLevel = -1;
 	if (buttonAction == "level1") {
 		switchToLevel = 1;
-		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
 	}
 	else if (buttonAction == "level2") {
 		switchToLevel = 2;
-		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
 	}
 	else if (buttonAction == "level3") {
 		switchToLevel = 3;
-		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
 	}
 	else if (buttonAction == "level4") {
 		switchToLevel = 4;
-		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
 	}
 	else if (buttonAction == "level5") {
 		switchToLevel = 5;
-		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
 	}
 	else if (buttonAction == "level6") {
 		switchToLevel = 6;
-		gameState->state = GameState::GAME_STATE::LEVEL1_SELECTED;
 	}
 
+	if (switchToLevel != -1) {
+		if (switchToLevel <= gameState->gameLevel.unlockedLevel) {
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTED;
+			gameState->gameLevel.currLevel = switchToLevel;
+		}
+		else {
+			std::cout << "Tried to access locked level, failed" << std::endl;
+			switchToLevel = -1;
+		}
+	}
+	
 	return switchToLevel;
 
 	// change level to switchToLevel
@@ -682,17 +713,36 @@ void WorldSystem::mouse_button_callback(int button, int action, int mods) {
 	std::cout << "IN mouse_button_callback" << std::endl;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
 		std::cout << "Left Button Released" << std::endl;
+
+		// clickable component that we clicked on
 		Clickable* clickedClickable = findClickedButton();
 		if (clickedClickable != NULL) {
-
+			// get button action
 			std::string buttonAction = clickedClickable->buttonAction;
+
 			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
 				// if we are on level selection page
+				std::cout << "Selecting Levls" << std::endl;
 				int new_level = changeLevel(buttonAction);
 				if (new_level != -1) {
 					std::cout << new_level << std::endl;
 					restart_game();
 					return; // we changed the level
+				}
+
+			}
+
+			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+				// currently in an game
+				std::cout << "Playing in level" << std::endl;
+				if (buttonAction == "unlock new level") {
+					// unlock the next level and go back to home page
+					if (gameState->gameLevel.unlockedLevel < MAX_LEVEL) {
+						gameState->gameLevel.unlockedLevel += 1;
+					}
+					gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+					restart_game();
+					
 				}
 			}
 			

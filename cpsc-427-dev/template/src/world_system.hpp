@@ -44,11 +44,17 @@ private:
 	void on_mouse_move(vec2 pos);
 	void mouse_button_callback(int button, int action, int mods);
 
+	// get texture id
+	TEXTURE_ASSET_ID getTextureIDOfLevelButton(int level);
+
 	// restart level
 	void restart_game();
 
 	// change level
 	int changeLevel(std::string buttonAction);
+
+	// display level content
+	void showLevel1Content();
 
 	// OpenGL window handle
 	GLFWwindow* window;
@@ -73,8 +79,6 @@ private:
 	Mix_Chunk* wall_collision_sound;
 	Mix_Chunk* fire_alarm_sound;
 
-	// button handlers
-	void level1ButtonHandler();
 
 	// C++ random number generator
 	std::default_random_engine rng;

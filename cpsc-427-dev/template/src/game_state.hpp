@@ -5,11 +5,15 @@
 // internal
 #include "physics_system.hpp"
 
+// maximum levels of game we are going to provide
+const int MAX_LEVEL = 6;
+
 class GameLevel
 {
 public:
 	int currLevel;
 	int unlockedLevel;
+	
 
 	GameLevel() {
 		unlockedLevel = 1;
@@ -42,8 +46,8 @@ public:
 	}
 	enum class GAME_STATE {
 		LEVEL_SELECTION = 0,
-		LEVEL1_SELECTED = 1,
-		GAME_STATE_COUNT = LEVEL1_SELECTED + 1
+		LEVEL_SELECTED = 1,
+		GAME_STATE_COUNT = LEVEL_SELECTED + 1
 	};
 
 	const int game_state_count = (int)GAME_STATE::GAME_STATE_COUNT;

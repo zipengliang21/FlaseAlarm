@@ -36,11 +36,17 @@ class RenderSystem {
 			textures_path("exit.png"),
 			textures_path("win.png"),
 			textures_path("level1.png"),
+			textures_path("level1_locked.png"),
 			textures_path("level2.png"),
+			textures_path("level2_locked.png"),
 			textures_path("level3.png"),
+			textures_path("level3_locked.png"),
 			textures_path("level4.png"),
+			textures_path("level4_locked.png"),
 			textures_path("level5.png"),
-			textures_path("level6.png")
+			textures_path("level5_locked.png"),
+			textures_path("level6.png"),
+			textures_path("level6_locked.png")
 	};
 
 	std::array<GLuint, effect_count> effects;
