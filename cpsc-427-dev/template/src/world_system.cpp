@@ -442,7 +442,10 @@ void WorldSystem::handle_collisions() {
 					// Scream, reset timer, and make the chicken sink
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, chicken_dead_sound, 0);
-
+					registry.motions.get(entity_other).velocity = { 0, 0 };
+					// Reset the trap effect
+					while (registry.trappables.entities.size() > 0)
+						registry.remove_all_components_of(registry.trappables.entities.back());
 					// !!! TODO A1: change the chicken orientation and color on death
 				}
 			}
@@ -491,6 +494,14 @@ void WorldSystem::handle_collisions() {
 			else if (registry.traps.has(entity_other)) {
 				Mix_PlayChannel(-1, trap_sound, 1);
 				registry.remove_all_components_of(entity_other);
+				registry.trappables.emplace(entity_other);
+
+				// Remove all the guards from the walkTimers component container since the player interact with a trap
+				// TODO: may not need to remove all the guards, just some of them
+				for (Entity entity : registry.walkTimers.entities) {
+					registry.walkTimers.remove(entity);
+					registry.motions.get(entity).velocity = { 0 , 0 };
+				}
 			}
 		}
 	}

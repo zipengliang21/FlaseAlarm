@@ -105,6 +105,9 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	// Initialize walk timer
 	registry.walkTimers.emplace(entity);
 
+	// Create and (empty) Guard component to be able to refer to all guards
+	registry.guards.emplace(entity);
+
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	// motion.angle = 0.f;

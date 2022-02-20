@@ -38,6 +38,11 @@ struct Player:public Character
 	void SwitchDirection(Direction dir, double nowTime);
 };
 
+struct Guard
+{
+
+};
+
 // Eagles have a hard shell
 struct Deadly:public Character
 {
