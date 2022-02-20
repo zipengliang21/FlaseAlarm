@@ -42,6 +42,9 @@ private:
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
 
+	// Interpolate
+	float approach(float goal_v, float cur_v, float dt);
+
 	// restart level
 	void restart_game();
 
