@@ -441,6 +441,7 @@ void WorldSystem::handle_collisions() {
 					registry.stopeds.emplace(entity);
 				}
 				vec2 velocity = registry.motions.get(entity).velocityGoal;
+				registry.motions.get(entity).velocityGoal = { 0, 0 };
 				registry.motions.get(entity).velocity = { 0, 0 };
 				vec2 position = registry.motions.get(entity).position;
 				Mix_PlayChannel(-1, wall_collision_sound, 0);
