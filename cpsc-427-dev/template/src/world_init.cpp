@@ -14,6 +14,7 @@ Entity createStudent(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
+	motion.velocityGoal = { 0.f, 0.f };
 	// motion.scale = mesh.original_size * 300.f;
 	// motion.scale.y *= -1; // point front to the right
 	motion.scale = vec2({ STUDENT_BB_WIDTH, STUDENT_BB_HEIGHT });
@@ -107,7 +108,7 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	// motion.angle = 0.f;
-	motion.velocity = { -100.f,0 };
+	motion.velocityGoal = { -100.f,0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way

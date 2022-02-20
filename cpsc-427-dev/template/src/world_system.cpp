@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "physics_system.hpp"
-
+#include <iostream>
 // Game configuration
 const size_t MAX_EAGLES = 15;
 const size_t MAX_BUG = 5;
@@ -145,6 +145,17 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
+	// update player velocity
+	Motion& player_motion = registry.motions.get(player_student);
+	Motion& guard_motion = registry.motions.get(guard);
+
+	player_motion.velocity.x = approach(player_motion.velocityGoal.x, player_motion.velocity.x, elapsed_ms_since_last_update/5);
+	player_motion.velocity.y = approach(player_motion.velocityGoal.y, player_motion.velocity.y, elapsed_ms_since_last_update/5);
+
+	guard_motion.velocity.x = approach(guard_motion.velocityGoal.x, guard_motion.velocity.x, elapsed_ms_since_last_update / 10);
+	guard_motion.velocity.y = approach(guard_motion.velocityGoal.y, guard_motion.velocity.y, elapsed_ms_since_last_update / 10);
+
+	
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
 		registry.remove_all_components_of(registry.debugComponents.entities.back());
@@ -229,7 +240,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (counter.counter_ms < 0) {
 			counter.counter_ms = 12000;
 			Motion &motion = registry.motions.get(entity);
-			motion.velocity = { -1 * motion.velocity[0] , motion.velocity[1] };
+			motion.velocityGoal = {-1 * motion.velocityGoal[0] , motion.velocityGoal[1] };
 
 			// if this is guard
 			if (entity == guard)
@@ -429,7 +440,7 @@ void WorldSystem::handle_collisions() {
 				if (!registry.stopeds.has(entity)) {
 					registry.stopeds.emplace(entity);
 				}
-				vec2 velocity = registry.motions.get(entity).velocity;
+				vec2 velocity = registry.motions.get(entity).velocityGoal;
 				registry.motions.get(entity).velocity = { 0, 0 };
 				vec2 position = registry.motions.get(entity).position;
 				Mix_PlayChannel(-1, wall_collision_sound, 0);
@@ -488,50 +499,50 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	if (key == GLFW_KEY_W) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-
-			motion.velocity = { 0,-PLAYER_SPEED };
+				
+			motion.velocityGoal = { 0,-PLAYER_SPEED };
 
 			// refresh player's direction
 			player.SwitchDirection(Player::Direction::UP,glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 	if (key == GLFW_KEY_S) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-			motion.velocity = { 0,PLAYER_SPEED };
+			motion.velocityGoal = { 0,PLAYER_SPEED };
 
 			// refresh player's direction
 			player.SwitchDirection(Player::Direction::DOWN, glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 	if (key == GLFW_KEY_A) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-			motion.velocity = { -PLAYER_SPEED,0 };
+			motion.velocityGoal = { -PLAYER_SPEED,0 };
 
 			// refresh player's direction
 			player.SwitchDirection(Player::Direction::LEFT, glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 	if (key == GLFW_KEY_D) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-			motion.velocity = { PLAYER_SPEED,0 };
+			motion.velocityGoal = { PLAYER_SPEED,0 };
 
 			// refresh player's direction
 			player.SwitchDirection(Player::Direction::RIGHT, glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 
@@ -602,3 +613,18 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
+
+float WorldSystem::approach(float goal_v, float cur_v, float dt)
+{
+	float diff = goal_v - cur_v;
+
+	if (diff > dt) {
+		return cur_v + dt;
+	}
+	if (diff < -dt) {
+		return cur_v - dt;
+	}
+
+	return goal_v;
+}
+
