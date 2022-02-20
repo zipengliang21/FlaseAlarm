@@ -1,12 +1,16 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <iostream>
+#include <fstream>
 
 // internal
 #include "physics_system.hpp"
 
 // maximum levels of game we are going to provide
 const int MAX_LEVEL = 6;
+// file path to save level information to
+const std::string UNLOCKED_LEVEL_FILE_PATH = text_path("unlockedLevel.txt");
 
 class GameLevel
 {
@@ -16,12 +20,14 @@ public:
 	
 
 	GameLevel() {
+		currLevel = -1;
 		unlockedLevel = 1;
 	}
 
 	GameLevel(bool loadFromPrevState) {
+		currLevel = -1;
 		if (loadFromPrevState) {
-			loadlLevelFromFile("this is fake for now"); // TODO: create a file that do this
+			loadlLevelFromFile(); // TODO: create a file that do this
 		}
 		else {
 			unlockedLevel = 1; // level uses 1-based index
@@ -29,11 +35,11 @@ public:
 	}
 	vec2 character_position; // TODO: for the future, maybe save character position
 	// load level from file
-	void loadlLevelFromFile(const char* file);
+	void loadlLevelFromFile();
 	// save level to file
-	void saveLevelToFile(const char* file);
+	void saveLevelToFile();
 	// reset level
-	void resetToInitialLevel(const char* file);
+	void resetToInitialLevel();
 };
 
 

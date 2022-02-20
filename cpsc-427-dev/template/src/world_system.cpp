@@ -275,6 +275,10 @@ void WorldSystem::restart_game() {
 	// Create new game state if we don't already have a game state
 	if (gameState == NULL) {
 		gameState = createGameState();
+		// Load Level From File
+		// gameState->gameLevel.saveLevelToFile(); // TODO: delete this later
+		gameState->gameLevel.loadlLevelFromFile();
+		//gameState->gameLevel.saveLevelToFile();
 	}
 
 	// TODO: depend on current gameState, we either display menu or the game of a specific level
@@ -737,8 +741,12 @@ void WorldSystem::mouse_button_callback(int button, int action, int mods) {
 				std::cout << "Playing in level" << std::endl;
 				if (buttonAction == "unlock new level") {
 					// unlock the next level and go back to home page
-					if (gameState->gameLevel.unlockedLevel < MAX_LEVEL) {
+
+					// check if we are not at maximum level + we are playing the last unlocked level
+					if (gameState->gameLevel.unlockedLevel < MAX_LEVEL && gameState->gameLevel.unlockedLevel == gameState->gameLevel.currLevel) {
+					
 						gameState->gameLevel.unlockedLevel += 1;
+						gameState->gameLevel.saveLevelToFile();
 					}
 					gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
 					restart_game();
