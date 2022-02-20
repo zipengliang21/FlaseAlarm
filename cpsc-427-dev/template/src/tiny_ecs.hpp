@@ -103,6 +103,7 @@ public:
 			components.pop_back();
 			entities.pop_back();
 			// Note, one could mark the id for re-use
+
 		}
 	};
 
