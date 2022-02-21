@@ -49,12 +49,14 @@ private:
 
 	// restart level
 	void restart_game();
+	
 
 	// change level
 	int changeLevel(std::string buttonAction);
 
-	// display level content
+	// display content for different pages
 	void showLevel1Content();
+	void showTutorial();
 
 	// OpenGL window handle
 	GLFWwindow* window;

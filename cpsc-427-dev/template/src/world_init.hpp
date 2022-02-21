@@ -18,6 +18,8 @@ const float WIN_BB_WIDTH = 0.4f * 512.f;
 const float WIN_BB_HEIGHT = 0.4f * 512.f;
 const float BUTTON_BB_WIDTH = 0.4f * 512.f;
 const float BUTTON_BB_HEIGHT = 0.15f * 512.f;
+const float TUTORIAL_BB_WIDTH = 2.67f * 512.f;
+const float TUTORIAL_BB_HEIGHT = 1.5f * 512.f;
 
 // the player
 Entity createStudent(RenderSystem* renderer, vec2 pos);

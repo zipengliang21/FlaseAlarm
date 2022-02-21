@@ -199,6 +199,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		if (counter.counter_ms < 0) {
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
+			// go back to menu when restarting the game
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
             restart_game();
 			return true;
 		}
@@ -287,12 +289,16 @@ void WorldSystem::restart_game() {
 
 		// Create Level Selection
 		float paddingFactor = 10;
+		createTextBox(renderer, { bg_X / 2, 4 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::TUTORIAL_BUTTON, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "show tutorial");
 		createTextBox(renderer, { bg_X / 2, 5* (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(1), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level1");
 		createTextBox(renderer, { bg_X / 2, 6 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(2), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level2");
 		createTextBox(renderer, { bg_X / 2, 7 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(3), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level3");
 		createTextBox(renderer, { bg_X / 2, 8 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(4), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level4");
 		createTextBox(renderer, { bg_X / 2, 9 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(5), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level5");
 		createTextBox(renderer, { bg_X / 2, 10 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(6), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level6");
+	}
+	else if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
+		showTutorial();
 	}
 	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
 		// user selected level, display game component of that level
@@ -455,6 +461,11 @@ void WorldSystem::showLevel1Content() {
 	guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
 }
 
+// display tutorial image
+void WorldSystem::showTutorial() {
+	createTextBox(renderer, {bg_X / 2, 2*bg_Y / 3}, TEXTURE_ASSET_ID::TUTORIAL_CONTENT, TUTORIAL_BB_WIDTH, TUTORIAL_BB_HEIGHT, "none");
+}
+
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
@@ -513,7 +524,7 @@ void WorldSystem::handle_collisions() {
 				//registry.motions.get(entity).position = { position.x, position.y };
 			}
 			else if (registry.wins.has(entity_other)) {
-				Mix_PlayChannel(-1, fire_alarm_sound, 5);
+				Mix_PlayChannel(-1, fire_alarm_sound, 2);
 				++points;
 				if (!registry.wins.has(entity)) {
 					registry.wins.emplace(entity);
@@ -539,105 +550,118 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Motion& motion = registry.motions.get(player_student);
 
-	mat3 currPosition = renderer->translationMatrix;
-
-	if (registry.wins.has(player_student)) {
-		return;
+	if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
+		std::cout << "On key for tutorial page is pressed" << std::endl;
+		if (key == GLFW_KEY_M && action == GLFW_RELEASE) {
+			// go back to menu
+			std::cout << "M key pressed and released" << std::endl;
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+			restart_game();
+		}
 	}
+	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+		Motion& motion = registry.motions.get(player_student);
 
+		mat3 currPosition = renderer->translationMatrix;
+
+		if (registry.wins.has(player_student)) {
+			return;
+		}
+
+
+		if (key == GLFW_KEY_W) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+
+				motion.velocity = { 0,-PLAYER_SPEED };
+
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocity = { 0,0 };
+			}
+		}
+		if (key == GLFW_KEY_S) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+				motion.velocity = { 0,PLAYER_SPEED };
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocity = { 0,0 };
+			}
+		}
+		if (key == GLFW_KEY_A) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+				motion.velocity = { -PLAYER_SPEED,0 };
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocity = { 0,0 };
+			}
+		}
+		if (key == GLFW_KEY_D) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+				motion.velocity = { PLAYER_SPEED,0 };
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocity = { 0,0 };
+			}
+		}
+
+
+		/// .----------------------------------------
+		if (key == GLFW_KEY_UP) {
+			if (action == GLFW_PRESS && currPosition[1].y > -0.950) {
+				renderer->translationMatrix[1].y = currPosition[1].y - 0.05;
+			}
+		}
+		if (key == GLFW_KEY_DOWN) {
+			if (action == GLFW_PRESS && currPosition[1].y < 0.950) {
+				renderer->translationMatrix[1].y = currPosition[1].y + 0.050;
+			}
+		}
+		if (key == GLFW_KEY_RIGHT) {
+			if (action == GLFW_PRESS && currPosition[0].x > -0.950) {
+				renderer->translationMatrix[0].x = currPosition[0].x - 0.050;
+			}
+		}
+		if (key == GLFW_KEY_LEFT) {
+			if (action == GLFW_PRESS && currPosition[0].x < 0.950) {
+				renderer->translationMatrix[0].x = currPosition[0].x + 0.05;
+			}
+		}
+
+
+
+		// Resetting game
+		if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+
+			restart_game();
+		}
+
+		//// Debugging
+		//if (key == GLFW_KEY_D) {
+		//	if (action == GLFW_RELEASE)
+		//		debugging.in_debug_mode = false;
+		//	else
+		//		debugging.in_debug_mode = true;
+		//}
+
+		// Control the current speed with `<` `>`
+		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
+			current_speed -= 0.1f;
+			printf("Current speed = %f\n", current_speed);
+		}
+		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
+			current_speed += 0.1f;
+			printf("Current speed = %f\n", current_speed);
+		}
+		current_speed = fmax(0.f, current_speed);
+	}
 	
-	if (key == GLFW_KEY_W) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-				
-			motion.velocity = { 0,-PLAYER_SPEED };
-
-		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
-		}
-	}
-	if (key == GLFW_KEY_S) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-			motion.velocity = { 0,PLAYER_SPEED };
-		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
-		}
-	}
-	if (key == GLFW_KEY_A) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-			motion.velocity = { -PLAYER_SPEED,0 };
-		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
-		}
-	}
-	if (key == GLFW_KEY_D) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-			motion.velocity = { PLAYER_SPEED,0 };
-		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
-		}
-	}
-	
-
-	/// .----------------------------------------
-	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_PRESS && currPosition[1].y > -0.950) {
-			renderer->translationMatrix[1].y = currPosition[1].y -0.05;
-		}
-	}
-	if (key == GLFW_KEY_DOWN) {
-		if (action == GLFW_PRESS && currPosition[1].y <0.950) {
-			renderer->translationMatrix[1].y = currPosition[1].y + 0.050;
-		}
-	}
-	if (key == GLFW_KEY_RIGHT) {
-		if (action == GLFW_PRESS && currPosition[0].x > -0.950) {
-			renderer->translationMatrix[0].x = currPosition[0].x - 0.050;
-		}
-	}
-	if (key == GLFW_KEY_LEFT) {
-		if (action == GLFW_PRESS && currPosition[0].x < 0.950) {
-			renderer->translationMatrix[0].x = currPosition[0].x + 0.05;
-		}
-	}
-
-	
-
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-		restart_game();
-	}
-
-	//// Debugging
-	//if (key == GLFW_KEY_D) {
-	//	if (action == GLFW_RELEASE)
-	//		debugging.in_debug_mode = false;
-	//	else
-	//		debugging.in_debug_mode = true;
-	//}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -746,34 +770,42 @@ void WorldSystem::mouse_button_callback(int button, int action, int mods) {
 			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
 				// if we are on level selection page
 				std::cout << "Selecting Levls" << std::endl;
+
+				// check if user clicked on the level selection button
 				int new_level = changeLevel(buttonAction);
 				if (new_level != -1) {
-					std::cout << new_level << std::endl;
+					std::cout << "new_level is: " << new_level << std::endl;
 					restart_game();
 					return; // we changed the level
 				}
 
-			}
-
-			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
-				// currently in an game
-				std::cout << "Playing in level" << std::endl;
-				if (buttonAction == "unlock new level") {
-					// unlock the next level and go back to home page
-
-					// check if we are not at maximum level + we are playing the last unlocked level
-					if (gameState->gameLevel.unlockedLevel < MAX_LEVEL && gameState->gameLevel.unlockedLevel == gameState->gameLevel.currLevel) {
-					
-						gameState->gameLevel.unlockedLevel += 1;
-						gameState->gameLevel.saveLevelToFile();
-					}
-					gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+				// check if user clicked tutorial button
+				if (buttonAction == "show tutorial") {
+					gameState->state = GameState::GAME_STATE::TUTORIAL_PAGE;
 					restart_game();
-					
 				}
+
 			}
+
 			
 			
+			
+		}
+
+		// go back to menu if winned the game
+		if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED && registry.wins.has(player_student)) {
+			// currently in an game
+			std::cout << "Playing in level finished a level and go back to menu" << std::endl;
+			// unlock the next level and go back to home page
+
+			// check if we are not at maximum level + we are playing the last unlocked level
+			if (gameState->gameLevel.unlockedLevel < MAX_LEVEL && gameState->gameLevel.unlockedLevel == gameState->gameLevel.currLevel) {
+			
+				gameState->gameLevel.unlockedLevel += 1;
+				gameState->gameLevel.saveLevelToFile();
+			}
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+			restart_game();
 		}
 	}
 }
