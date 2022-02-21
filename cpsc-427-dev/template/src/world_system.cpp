@@ -348,7 +348,26 @@ void WorldSystem::showLevel1Content() {
 	exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
 
 	// Create walls 
-	float counter_X = 0;
+	std::ifstream in(level_map_path("level_1.txt"));
+	std::string map_row;
+	std::vector<std::vector<char>> level_map;
+
+
+	while (std::getline(in, map_row)) {
+		std::vector<char> charVector(map_row.begin(), map_row.end());
+		level_map.push_back(charVector);
+	}
+
+
+	for (int row = 0; row < level_map.size(); row++) {
+		for (int col = 0; col < level_map[row].size(); col++) {
+			if (level_map[row][col] == '#') {
+				createWall(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+		}
+	}
+
+	/*float counter_X = 0;
 	float counter_Y = 0;
 	while (counter_X < bg_X) {
 		createWall(renderer, { counter_X, counter_Y });
@@ -428,7 +447,7 @@ void WorldSystem::showLevel1Content() {
 			createWall(renderer, { ub_X, ub_Y });
 		}
 		ub_Y += WALL_SIZE;
-	}
+	}*/
 
 	registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
 
