@@ -35,6 +35,8 @@ class RenderSystem {
 			textures_path("wall.png"),
 			textures_path("exit.png"),
 			textures_path("win.png"),
+			textures_path("camera.png"),
+			textures_path("light.png"),
 			textures_path("player/player_01.png"),
 			textures_path("player/player_02.png"),
 			textures_path("player/player_03.png"),

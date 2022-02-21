@@ -257,6 +257,16 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	for (Entity entity : registry.rotateTimers.entities) {
+		RotateTimer& counter = registry.rotateTimers.get(entity);
+		counter.counter_ms -= elapsed_ms_since_last_update;
+		if (counter.counter_ms < 0) {
+			counter.counter_ms = 3000;
+			Motion& motion = registry.motions.get(entity);
+			motion.velocity.x = -motion.velocity.x;
+		}
+	}
+
 	// update guard's appearance
 	registry.renderRequests.get(guard).used_texture = guardObj.GetTexId(glfwGetTime());
 
@@ -296,6 +306,12 @@ void WorldSystem::restart_game() {
 	const float WALL_SIZE = 20.2f;
 	// Create a new exit
 	exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
+
+	// Create light
+	camera = createLight(renderer, { bg_X - WALL_SIZE - 65, bg_Y - WALL_SIZE - 35 });
+
+	// Create a camera
+	camera = createCamera(renderer, { bg_X - WALL_SIZE - 50, bg_Y - WALL_SIZE - 10 });
 
 	// Create walls 
 	float counter_X = 0;
