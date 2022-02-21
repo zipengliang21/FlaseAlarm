@@ -1,3 +1,4 @@
 .vs*
 cpsc-427-dev/template/out/build/*
 cpsc-427-dev/template/ext/*
+cpsc-427-dev/template/ext/project_path.hpp
