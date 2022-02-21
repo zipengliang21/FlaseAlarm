@@ -33,6 +33,9 @@ public:
 	ComponentContainer<Camera> cameras;
 	ComponentContainer<Light> lights;
 	ComponentContainer<RotateTimer> rotateTimers;
+	ComponentContainer<Trap> traps;
+	ComponentContainer<Trappable> trappables;
+	ComponentContainer<Guard> guards;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -60,6 +63,9 @@ public:
 		registry_list.push_back(&cameras);
 		registry_list.push_back(&lights);
 		registry_list.push_back(&rotateTimers);
+		registry_list.push_back(&traps);
+		registry_list.push_back(&trappables);
+		registry_list.push_back(&guards);
 	}
 
 	void clear_all_components() {

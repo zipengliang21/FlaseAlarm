@@ -38,6 +38,11 @@ struct Player:public Character
 	void SwitchDirection(Direction dir, double nowTime);
 };
 
+struct Guard
+{
+
+};
+
 // Eagles have a hard shell
 struct Deadly:public Character
 {
@@ -75,6 +80,11 @@ struct Camera
 };
 
 struct Light
+{
+
+};
+
+struct Trappable
 {
 
 };
@@ -175,6 +185,11 @@ struct WinTimer
 	float counter_ms = 3000;
 };
 
+struct Trap
+{
+
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -259,7 +274,8 @@ enum class TEXTURE_ASSET_ID {
 	GUARD_RIGHT_6 = GUARD_RIGHT_5 + 1,
 	GUARD_RIGHT_7 = GUARD_RIGHT_6 + 1,
 	GUARD_RIGHT_8 = GUARD_RIGHT_7 + 1,
-	TEXTURE_COUNT = GUARD_RIGHT_8 + 1
+	TRAP = GUARD_RIGHT_8 + 1,
+	TEXTURE_COUNT = TRAP + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

@@ -112,6 +112,7 @@ GLFWwindow *WorldSystem::create_window() {
 	chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
 	wall_collision_sound = Mix_LoadWAV(audio_path("wall_collision.wav").c_str());
 	fire_alarm_sound = Mix_LoadWAV(audio_path("fire_alarm.wav").c_str());
+	trap_sound = Mix_LoadWAV(audio_path("trap.wav").c_str());
 
 	if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr || wall_collision_sound == nullptr || fire_alarm_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
@@ -119,7 +120,8 @@ GLFWwindow *WorldSystem::create_window() {
 			audio_path("chicken_dead.wav").c_str(),
 			audio_path("chicken_eat.wav").c_str(),
 			audio_path("wall_collision.wav").c_str(),
-			audio_path("fire_alarm.wav").c_str());
+			audio_path("fire_alarm.wav").c_str(),
+			audio_path("trap.wav").c_str());
 		return nullptr;
 	}
 
@@ -236,25 +238,37 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.walkTimers.entities) {
 		WalkTimer &counter = registry.walkTimers.get(entity);
+		Motion& motion = registry.motions.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 		if (counter.counter_ms < 0) {
 			counter.counter_ms = 12000;
-			Motion &motion = registry.motions.get(entity);
+			
 			motion.velocityGoal = {-1 * motion.velocityGoal[0] , motion.velocityGoal[1] };
 
 			// if this is guard
 			if (entity == guard)
 			{
 				Character::Direction dir;
-				if (motion.velocityGoal.x > 0) // now the guard is moving right
-					dir = Character::Direction::RIGHT;
-				else
-					dir = Character::Direction::LEFT;
+				if (abs(motion.velocityGoal.x) >= abs(motion.velocityGoal.y)) {
+					if (motion.velocityGoal.x >= 0) // now the guard is moving right
+						dir = Character::Direction::RIGHT;
+					else
+						dir = Character::Direction::LEFT;
+				}
+				else {
+					std::cout << "shitfuxk";
+					if (motion.velocityGoal.y >= 0) // now the guard is moving right
+						dir = Character::Direction::DOWN;
+					else
+						dir = Character::Direction::UP;
+				}
+
 
 				// switch its direction
 				guardObj.SwitchDirection(dir, glfwGetTime());
 			}
 		}
+
 	}
 
 	for (Entity entity : registry.rotateTimers.entities) {
@@ -312,6 +326,9 @@ void WorldSystem::restart_game() {
 
 	// Create a camera
 	camera = createCamera(renderer, { bg_X - WALL_SIZE - 50, bg_Y - WALL_SIZE - 10 });
+	
+	// Create trap(s)
+	createTrap(renderer, { bg_X / 2, 2 * bg_Y / 3 + WALL_SIZE });
 
 	// Create walls 
 	float counter_X = 0;
@@ -437,7 +454,10 @@ void WorldSystem::handle_collisions() {
 					// Scream, reset timer, and make the chicken sink
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, chicken_dead_sound, 0);
-
+					registry.motions.get(entity_other).velocity = { 0, 0 };
+					// Reset the trap effect
+					while (registry.trappables.entities.size() > 0)
+						registry.remove_all_components_of(registry.trappables.entities.back());
 					// !!! TODO A1: change the chicken orientation and color on death
 				}
 			}
@@ -483,7 +503,18 @@ void WorldSystem::handle_collisions() {
 				}
 				createTextBox(renderer, { bg_X / 2, bg_Y / 2 });
 			}
+			else if (registry.traps.has(entity_other)) {
+				Mix_PlayChannel(-1, trap_sound, 1);
+				registry.remove_all_components_of(entity_other);
+				registry.trappables.emplace(entity_other);
 
+				// Remove all the guards from the walkTimers component container since the player interact with a trap
+				// TODO: may not need to remove all the guards, just some of them
+				for (Entity entity : registry.walkTimers.entities) {
+					registry.walkTimers.remove(entity);
+					registry.motions.get(entity).velocity = { 0 , 0 };
+				}
+			}
 		}
 	}
 
