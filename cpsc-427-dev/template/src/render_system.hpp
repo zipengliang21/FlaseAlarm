@@ -88,7 +88,7 @@ class RenderSystem {
 			textures_path("guard/guard_33.png"),
 			textures_path("guard/guard_34.png"),
 			textures_path("guard/guard_35.png"),
-			textures_path("guard/guard_36.png")
+			textures_path("guard/guard_36.png"),
 			textures_path("paper_trap.png")
 	};
 

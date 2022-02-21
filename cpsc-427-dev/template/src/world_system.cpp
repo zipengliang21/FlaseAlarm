@@ -238,25 +238,37 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
 	for (Entity entity : registry.walkTimers.entities) {
 		WalkTimer &counter = registry.walkTimers.get(entity);
+		Motion& motion = registry.motions.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 		if (counter.counter_ms < 0) {
 			counter.counter_ms = 12000;
-			Motion &motion = registry.motions.get(entity);
+			
 			motion.velocityGoal = {-1 * motion.velocityGoal[0] , motion.velocityGoal[1] };
 
 			// if this is guard
 			if (entity == guard)
 			{
 				Character::Direction dir;
-				if (motion.velocityGoal.x > 0) // now the guard is moving right
-					dir = Character::Direction::RIGHT;
-				else
-					dir = Character::Direction::LEFT;
+				if (abs(motion.velocityGoal.x) >= abs(motion.velocityGoal.y)) {
+					if (motion.velocityGoal.x >= 0) // now the guard is moving right
+						dir = Character::Direction::RIGHT;
+					else
+						dir = Character::Direction::LEFT;
+				}
+				else {
+					std::cout << "shitfuxk";
+					if (motion.velocityGoal.y >= 0) // now the guard is moving right
+						dir = Character::Direction::DOWN;
+					else
+						dir = Character::Direction::UP;
+				}
+
 
 				// switch its direction
 				guardObj.SwitchDirection(dir, glfwGetTime());
 			}
 		}
+
 	}
 
 	for (Entity entity : registry.rotateTimers.entities) {
