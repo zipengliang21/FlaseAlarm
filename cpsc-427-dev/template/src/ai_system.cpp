@@ -28,9 +28,31 @@ void AISystem::step(float elapsed_ms)
 			vec2 positionDifference = player_motion.position - guard_motion.position;
 			vec2 vector_chase = positionDifference / sqrt(dot(positionDifference, positionDifference));
 
+			Character::Direction dir;
+			auto& guardObj = registry.deadlys.get(guard);
+			if (abs(positionDifference.x) > abs(positionDifference.y)) {
+				if (positionDifference.x > 0) {
+					dir = Character::Direction::RIGHT;
+				}
+				else {
+					dir = Character::Direction::LEFT;
+				}
+			}
+			else {
+				if (positionDifference.y > 0) {
+					dir = Character::Direction::DOWN;
+				}
+				else {
+					dir = Character::Direction::UP;
+				}
+			}
+			
+
+			guardObj.SwitchDirection(dir, glfwGetTime());
+
 			// update the velocity and angle of guard
-			guard_motion.angle = atan2(vector_chase.y, vector_chase.x);
-			guard_motion.velocity = vector_chase * GUARD_VELOCITY;
+			//guard_motion.angle = atan2(vector_chase.y, vector_chase.x);
+			guard_motion.velocityGoal = vector_chase * GUARD_VELOCITY;
 
 		}
 		refresh_timer++;
