@@ -13,7 +13,7 @@ const size_t MAX_EAGLES = 15;
 const size_t MAX_BUG = 5;
 const size_t EAGLE_DELAY_MS = 2000 * 3;
 const size_t BUG_DELAY_MS = 5000 * 3;
-const float PLAYER_SPEED = 400;
+const float PLAYER_SPEED = 200;
 
 // Background size
 float bg_X = window_width_px * 1.5;
@@ -246,7 +246,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 			if (entity == guard)
 			{
 				Character::Direction dir;
-				if (motion.velocity.x > 0) // now the guard is moving right
+				if (motion.velocityGoal.x > 0) // now the guard is moving right
 					dir = Character::Direction::RIGHT;
 				else
 					dir = Character::Direction::LEFT;
