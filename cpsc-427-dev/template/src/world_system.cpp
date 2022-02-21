@@ -308,7 +308,7 @@ void WorldSystem::restart_game() {
 	exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
 
 	// Create light
-	camera = createLight(renderer, { bg_X - WALL_SIZE - 65, bg_Y - WALL_SIZE - 35 });
+	camera = createLight(renderer, { bg_X - WALL_SIZE - 65, bg_Y - WALL_SIZE - 20 });
 
 	// Create a camera
 	camera = createCamera(renderer, { bg_X - WALL_SIZE - 50, bg_Y - WALL_SIZE - 10 });

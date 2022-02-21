@@ -17,7 +17,7 @@ const float WIN_BB_WIDTH = 0.4f * 512.f;
 const float WIN_BB_HEIGHT = 0.4f * 512.f;
 const float CAMERA_BB_WEIGHT = 0.4f * 161.f;
 const float CAMERA_BB_HEIGHT = 0.4f * 140.f;
-const float LIGHT_BB_WEIGHT = 0.4f * 248.f;
+const float LIGHT_BB_WEIGHT = 0.4f * 278.f;
 const float LIGHT_BB_HEIGHT = 0.4f * 252.f;
 
 // the player

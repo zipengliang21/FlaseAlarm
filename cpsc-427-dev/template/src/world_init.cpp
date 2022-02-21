@@ -164,7 +164,6 @@ Entity createLight(RenderSystem* renderer, vec2 position)
 
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
-	//motion.angle = 0.f;
 	motion.velocity = { -0.5f, 0 };
 	motion.position = position;
 
