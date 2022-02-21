@@ -5,6 +5,8 @@
 // stlib
 #include <cassert>
 #include <sstream>
+#include <string>
+#include <iostream>
 
 #include "physics_system.hpp"
 #include <iostream>
@@ -18,6 +20,10 @@ const float PLAYER_SPEED = 200;
 // Background size
 float bg_X = window_width_px * 1.5;
 float bg_Y = window_height_px * 1.5;
+
+// global variable to remember cursor position
+float cursorX;
+float cursorY;
 
 // Create the bug world
 WorldSystem::WorldSystem()
@@ -91,10 +97,12 @@ GLFWwindow *WorldSystem::create_window() {
 	// Input is handled using GLFW, for more info see
 	// http://www.glfw.org/docs/latest/input_guide.html
 	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3) { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1) { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto cursor_button_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->mouse_button_callback( _0, _1, _2 ); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
+	glfwSetMouseButtonCallback(window, cursor_button_redirect);
 
 	//////////////////////////////////////
 	// Loading music and sounds with SDL
@@ -148,144 +156,159 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// update player velocity
-	Motion& player_motion = registry.motions.get(player_student);
-	Motion& guard_motion = registry.motions.get(guard);
+	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+		Motion& player_motion = registry.motions.get(player_student);
+		Motion& guard_motion = registry.motions.get(guard);
 
-	player_motion.velocity.x = approach(player_motion.velocityGoal.x, player_motion.velocity.x, elapsed_ms_since_last_update/5);
-	player_motion.velocity.y = approach(player_motion.velocityGoal.y, player_motion.velocity.y, elapsed_ms_since_last_update/5);
+		player_motion.velocity.x = approach(player_motion.velocityGoal.x, player_motion.velocity.x, elapsed_ms_since_last_update / 5);
+		player_motion.velocity.y = approach(player_motion.velocityGoal.y, player_motion.velocity.y, elapsed_ms_since_last_update / 5);
 
-	guard_motion.velocity.x = approach(guard_motion.velocityGoal.x, guard_motion.velocity.x, elapsed_ms_since_last_update / 10);
-	guard_motion.velocity.y = approach(guard_motion.velocityGoal.y, guard_motion.velocity.y, elapsed_ms_since_last_update / 10);
-
-	
-	// Remove debug info from the last step
-	while (registry.debugComponents.entities.size() > 0)
-		registry.remove_all_components_of(registry.debugComponents.entities.back());
-
-	// Removing out of screen entities
-	auto &motions_registry = registry.motions;
-
-	// Remove entities that leave the screen on the left side
-	// Iterate backwards to be able to remove without unterfering with the next object to visit
-	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
-		Motion &motion = motions_registry.components[i];
-		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
-				registry.remove_all_components_of(motions_registry.entities[i]);
-		}
-	}
-
-	// Spawning new bug
-	next_bug_spawn -= elapsed_ms_since_last_update * current_speed;
-	if (registry.eatables.components.size() <= MAX_BUG && next_bug_spawn < 0.f) {
-		// !!!  TODO A1: Create new bug with createBug({0,0}), as for the Eagles above
-	}
-
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	// TODO A3: HANDLE EGG SPAWN HERE
-	// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
-	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-
-	// Processing the chicken state
-	assert(registry.screenStates.components.size() <= 1);
-	ScreenState &screen = registry.screenStates.components[0];
-
-	float min_counter_ms = 3000.f;
-	for (Entity entity : registry.deathTimers.entities) {
-		// progress timer
-		DeathTimer &counter = registry.deathTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
-			min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.deathTimers.remove(entity);
-			screen.darken_screen_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
-	// reduce window brightness if any of the present chickens is dying
-	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
-
-	for (Entity entity : registry.winTimers.entities) {
-		WinTimer &counter = registry.winTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < min_counter_ms) {
-			min_counter_ms = counter.counter_ms;
-		}
-
-		// restart the game once the death timer expired
-		if (counter.counter_ms < 0) {
-			registry.winTimers.remove(entity);
-			screen.greener_screen_factor = 0;
-			restart_game();
-			return true;
-		}
-	}
-
-	// turn screen to grren
-	screen.greener_screen_factor = 1 - min_counter_ms / 3000;
-
-	// get the guard instance
-	auto &guardObj = registry.deadlys.get(guard);
-	//auto &mo = registry.motions.get(guard);
-	//printf("%f,%f\n", mo.position.x, mo.position.y);
-
-	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
-	for (Entity entity : registry.walkTimers.entities) {
-		WalkTimer &counter = registry.walkTimers.get(entity);
-		Motion& motion = registry.motions.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < 0) {
-			counter.counter_ms = 12000;
-			
-			motion.velocityGoal = {-1 * motion.velocityGoal[0] , motion.velocityGoal[1] };
-
-			// if this is guard
-			if (entity == guard)
-			{
-				Character::Direction dir;
-				if (abs(motion.velocityGoal.x) >= abs(motion.velocityGoal.y)) {
-					if (motion.velocityGoal.x >= 0) // now the guard is moving right
-						dir = Character::Direction::RIGHT;
-					else
-						dir = Character::Direction::LEFT;
-				}
-				else {
-					std::cout << "shitfuxk";
-					if (motion.velocityGoal.y >= 0) // now the guard is moving right
-						dir = Character::Direction::DOWN;
-					else
-						dir = Character::Direction::UP;
-				}
+		guard_motion.velocity.x = approach(guard_motion.velocityGoal.x, guard_motion.velocity.x, elapsed_ms_since_last_update / 10);
+		guard_motion.velocity.y = approach(guard_motion.velocityGoal.y, guard_motion.velocity.y, elapsed_ms_since_last_update / 10);
 
 
-				// switch its direction
-				guardObj.SwitchDirection(dir, glfwGetTime());
+		// Remove debug info from the last step
+		while (registry.debugComponents.entities.size() > 0)
+			registry.remove_all_components_of(registry.debugComponents.entities.back());
+
+		// Removing out of screen entities
+		auto& motions_registry = registry.motions;
+
+		// Remove entities that leave the screen on the left side
+		// Iterate backwards to be able to remove without unterfering with the next object to visit
+		// (the containers exchange the last element with the current)
+		for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+			Motion& motion = motions_registry.components[i];
+			if (motion.position.x + abs(motion.scale.x) < 0.f) {
+				if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
+					registry.remove_all_components_of(motions_registry.entities[i]);
 			}
 		}
 
-	}
-
-	for (Entity entity : registry.rotateTimers.entities) {
-		RotateTimer& counter = registry.rotateTimers.get(entity);
-		counter.counter_ms -= elapsed_ms_since_last_update;
-		if (counter.counter_ms < 0) {
-			counter.counter_ms = 3000;
-			Motion& motion = registry.motions.get(entity);
-			motion.velocity.x = -motion.velocity.x;
+		// Spawning new bug
+		next_bug_spawn -= elapsed_ms_since_last_update * current_speed;
+		if (registry.eatables.components.size() <= MAX_BUG && next_bug_spawn < 0.f) {
+			// !!!  TODO A1: Create new bug with createBug({0,0}), as for the Eagles above
 		}
-	}
 
-	// update guard's appearance
-	registry.renderRequests.get(guard).used_texture = guardObj.GetTexId(glfwGetTime());
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+		// TODO A3: HANDLE EGG SPAWN HERE
+		// DON'T WORRY ABOUT THIS UNTIL ASSIGNMENT 3
+		// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+		// Processing the chicken state
+		assert(registry.screenStates.components.size() <= 1);
+		ScreenState& screen = registry.screenStates.components[0];
+
+		float min_counter_ms = 3000.f;
+		for (Entity entity : registry.deathTimers.entities) {
+			// progress timer
+			DeathTimer& counter = registry.deathTimers.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			if (counter.counter_ms < min_counter_ms) {
+				min_counter_ms = counter.counter_ms;
+			}
+
+			// restart the game once the death timer expired
+			if (counter.counter_ms < 0) {
+				registry.deathTimers.remove(entity);
+				screen.darken_screen_factor = 0;
+				// go back to menu when restarting the game
+				gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+				restart_game();
+				return true;
+			}
+		}
+		// reduce window brightness if any of the present chickens is dying
+		screen.darken_screen_factor = 1 - min_counter_ms / 3000;
+
+		for (Entity entity : registry.winTimers.entities) {
+			WinTimer& counter = registry.winTimers.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			if (counter.counter_ms < min_counter_ms) {
+				min_counter_ms = counter.counter_ms;
+			}
+
+			// restart the game once the death timer expired
+			if (counter.counter_ms < 0) {
+				registry.winTimers.remove(entity);
+				screen.greener_screen_factor = 0;
+				restart_game();
+				return true;
+			}
+		}
+
+		// turn screen to grren
+		screen.greener_screen_factor = 1 - min_counter_ms / 3000;
+
+		// get the guard instance
+		auto& guardObj = registry.deadlys.get(guard);
+		//auto &mo = registry.motions.get(guard);
+		//printf("%f,%f\n", mo.position.x, mo.position.y);
+
+		// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
+		for (Entity entity : registry.walkTimers.entities) {
+			WalkTimer& counter = registry.walkTimers.get(entity);
+			Motion& motion = registry.motions.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			if (counter.counter_ms < 0) {
+				counter.counter_ms = 12000;
+
+				motion.velocityGoal = { -1 * motion.velocityGoal[0] , motion.velocityGoal[1] };
+
+				// if this is guard
+				if (entity == guard)
+				{
+					Character::Direction dir;
+					if (abs(motion.velocityGoal.x) >= abs(motion.velocityGoal.y)) {
+						if (motion.velocityGoal.x >= 0) // now the guard is moving right
+							dir = Character::Direction::RIGHT;
+						else
+							dir = Character::Direction::LEFT;
+					}
+					else {
+						std::cout << "shitfuxk";
+						if (motion.velocityGoal.y >= 0) // now the guard is moving right
+							dir = Character::Direction::DOWN;
+						else
+							dir = Character::Direction::UP;
+					}
+
+
+					// switch its direction
+					guardObj.SwitchDirection(dir, glfwGetTime());
+				}
+			}
+
+		}
+
+		for (Entity entity : registry.rotateTimers.entities) {
+			RotateTimer& counter = registry.rotateTimers.get(entity);
+			counter.counter_ms -= elapsed_ms_since_last_update;
+			if (counter.counter_ms < 0) {
+				counter.counter_ms = 3000;
+				Motion& motion = registry.motions.get(entity);
+				motion.velocity.x = -motion.velocity.x;
+			}
+		}
+
+		// update guard's appearance
+		registry.renderRequests.get(guard).used_texture = guardObj.GetTexId(glfwGetTime());
+	}
 
 	return true;
 }
+
+// button handlers for level selections
+// void WorldSystem::level1ButtonHandler() {
+// 	if (1 <= gameState->gameLevel.unlockedLevel) {
+// 		gameState->gameLevel.currLevel = 1;
+// 	}
+// 	// TODO: display something different when the user can't access a certain level
+// }
+
+
+
 
 // Reset the world state to its initial state
 void WorldSystem::restart_game() {
@@ -309,13 +332,80 @@ void WorldSystem::restart_game() {
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
-	// Create a new chicken
+	// Create new game state if we don't already have a game state
+	if (gameState == NULL) {
+		gameState = createGameState();
+		// Load Level From File
+		// gameState->gameLevel.saveLevelToFile(); // TODO: delete this later
+		gameState->gameLevel.loadlLevelFromFile();
+		//gameState->gameLevel.saveLevelToFile();
+	}
+
+	// TODO: depend on current gameState, we either display menu or the game of a specific level
+	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+		// if we are in level selection menu
+
+		// Create Level Selection
+		float paddingFactor = 10;
+		createTextBox(renderer, { bg_X / 2, 4 * (bg_Y - 50) / paddingFactor }, TEXTURE_ASSET_ID::TUTORIAL_BUTTON, BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "show tutorial");
+		createTextBox(renderer, { bg_X / 2, 5* (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(1), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level1");
+		createTextBox(renderer, { bg_X / 2, 6 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(2), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level2");
+		createTextBox(renderer, { bg_X / 2, 7 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(3), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level3");
+		createTextBox(renderer, { bg_X / 2, 8 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(4), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level4");
+		createTextBox(renderer, { bg_X / 2, 9 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(5), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level5");
+		createTextBox(renderer, { bg_X / 2, 10 * (bg_Y - 50) / paddingFactor }, getTextureIDOfLevelButton(6), BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT, "level6");
+	}
+	else if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
+		showTutorial();
+	}
+	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+		// user selected level, display game component of that level
+		if (gameState->gameLevel.currLevel == 1) {
+			showLevel1Content();
+		}
+
+		// TODO: select game level 2-6 and display correspouding content here
+		
+	}
+
+	
+
+	
+	//registry.motions.get(guard).position = { window_width_px - 100 , window_height_px / 2 };
+	//registry.motions.get(guard).velocity = { -100.f , 0 };
+	// !! TODO A3: Enable static eggs on the ground
+	// Create eggs on the floor for reference
+	/*
+	for (uint i = 0; i < 20; i++) {
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
+		Entity egg = createEgg({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
+			         { radius, radius });
+		float brightness = uniform_dist(rng) * 0.5 + 0.5;
+		registry.colors.insert(egg, { brightness, brightness, brightness});
+	}
+	*/
+}
+
+TEXTURE_ASSET_ID WorldSystem::getTextureIDOfLevelButton(int level) {
+	int unlocked_id = 59 + (level - 1) * 2 + 1; // skip other texture + skip prev levels + current level
+	int locked_id = unlocked_id + 1;
+	TEXTURE_ASSET_ID texture_id;
+	if (gameState->gameLevel.unlockedLevel >= level) {
+		texture_id = static_cast<TEXTURE_ASSET_ID>(unlocked_id);
+	}
+	else {
+		texture_id = static_cast<TEXTURE_ASSET_ID>(locked_id);
+	}
+	return texture_id;
+
+}
+
+// called in restart_game, display game content for game level 1
+void WorldSystem::showLevel1Content() {
+	// Create a new student
 	player_student = createStudent(renderer, { bg_X / 2, bg_Y - 50 });
-
-	// Create textbox
-	auto student_pos = registry.motions.get(player_student).position;
-	//createTextBox(renderer, { student_pos.x + 100, student_pos.y - 100 });
-
 
 	const float WALL_SIZE = 20.2f;
 	// Create a new exit
@@ -331,7 +421,26 @@ void WorldSystem::restart_game() {
 	createTrap(renderer, { bg_X / 2, 2 * bg_Y / 3 + WALL_SIZE });
 
 	// Create walls 
-	float counter_X = 0;
+	std::ifstream in(level_map_path("level_1.txt"));
+	std::string map_row;
+	std::vector<std::vector<char>> level_map;
+
+
+	while (std::getline(in, map_row)) {
+		std::vector<char> charVector(map_row.begin(), map_row.end());
+		level_map.push_back(charVector);
+	}
+
+
+	for (int row = 0; row < level_map.size(); row++) {
+		for (int col = 0; col < level_map[row].size(); col++) {
+			if (level_map[row][col] == '#') {
+				createWall(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+		}
+	}
+
+	/*float counter_X = 0;
 	float counter_Y = 0;
 	while (counter_X < bg_X) {
 		createWall(renderer, { counter_X, counter_Y });
@@ -411,27 +520,17 @@ void WorldSystem::restart_game() {
 			createWall(renderer, { ub_X, ub_Y });
 		}
 		ub_Y += WALL_SIZE;
-	}
+	}*/
 
 	registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
 
 	// Create security guard, TODO: make it a list of guard
 	guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
-	//registry.motions.get(guard).position = { window_width_px - 100 , window_height_px / 2 };
-	//registry.motions.get(guard).velocity = { -100.f , 0 };
-	// !! TODO A3: Enable static eggs on the ground
-	// Create eggs on the floor for reference
-	/*
-	for (uint i = 0; i < 20; i++) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
-		Entity egg = createEgg({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-					 { radius, radius });
-		float brightness = uniform_dist(rng) * 0.5 + 0.5;
-		registry.colors.insert(egg, { brightness, brightness, brightness});
-	}
-	*/
+}
+
+// display tutorial image
+void WorldSystem::showTutorial() {
+	createTextBox(renderer, {bg_X / 2, 2*bg_Y / 3}, TEXTURE_ASSET_ID::TUTORIAL_CONTENT, TUTORIAL_BB_WIDTH, TUTORIAL_BB_HEIGHT, "none");
 }
 
 // Compute collisions between entities
@@ -496,12 +595,12 @@ void WorldSystem::handle_collisions() {
 				//registry.motions.get(entity).position = { position.x, position.y };
 			}
 			else if (registry.wins.has(entity_other)) {
-				Mix_PlayChannel(-1, fire_alarm_sound, 5);
+				Mix_PlayChannel(-1, fire_alarm_sound, 2);
 				++points;
 				if (!registry.wins.has(entity)) {
 					registry.wins.emplace(entity);
 				}
-				createTextBox(renderer, { bg_X / 2, bg_Y / 2 });
+				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT, "unlock new level");
 			}
 			else if (registry.traps.has(entity_other)) {
 				Mix_PlayChannel(-1, trap_sound, 1);
@@ -533,123 +632,136 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Motion &motion = registry.motions.get(player_student);
 
-	mat3 currPosition = renderer->translationMatrix;
-
-	if (registry.wins.has(player_student)) {
-		return;
-	}
-
-	// get player instance's reference
-	auto &player = registry.players.get(player_student);
-
-	if (key == GLFW_KEY_W) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-				
-			motion.velocityGoal = { 0,-PLAYER_SPEED };
-
-			// refresh player's direction
-			player.SwitchDirection(Player::Direction::UP,glfwGetTime());
-		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocityGoal = { 0,0 };
+	if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
+		std::cout << "On key for tutorial page is pressed" << std::endl;
+		if (key == GLFW_KEY_M && action == GLFW_RELEASE) {
+			// go back to menu
+			std::cout << "M key pressed and released" << std::endl;
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+			restart_game();
 		}
 	}
-	if (key == GLFW_KEY_S) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-			motion.velocityGoal = { 0,PLAYER_SPEED };
+	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+		Motion& motion = registry.motions.get(player_student);
 
-			// refresh player's direction
-			player.SwitchDirection(Player::Direction::DOWN, glfwGetTime());
+		mat3 currPosition = renderer->translationMatrix;
+
+		if (registry.wins.has(player_student)) {
+			return;
 		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocityGoal = { 0,0 };
+
+
+		// get player instance's reference
+		auto& player = registry.players.get(player_student);
+
+		if (key == GLFW_KEY_W) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+
+				motion.velocityGoal = { 0,-PLAYER_SPEED };
+
+				// refresh player's direction
+				player.SwitchDirection(Player::Direction::UP, glfwGetTime());
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocityGoal = { 0,0 };
+			}
 		}
-	}
-	if (key == GLFW_KEY_A) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-			motion.velocityGoal = { -PLAYER_SPEED,0 };
+		if (key == GLFW_KEY_S) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+				motion.velocityGoal = { 0,PLAYER_SPEED };
 
-			// refresh player's direction
-			player.SwitchDirection(Player::Direction::LEFT, glfwGetTime());
+				// refresh player's direction
+				player.SwitchDirection(Player::Direction::DOWN, glfwGetTime());
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocityGoal = { 0,0 };
+			}
 		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocityGoal = { 0,0 };
+		if (key == GLFW_KEY_A) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+				motion.velocityGoal = { -PLAYER_SPEED,0 };
+
+				// refresh player's direction
+				player.SwitchDirection(Player::Direction::LEFT, glfwGetTime());
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocityGoal = { 0,0 };
+			}
 		}
-	}
-	if (key == GLFW_KEY_D) {
-		registry.stopeds.remove(player_student);
-		if (action == GLFW_PRESS) {
-			motion.velocityGoal = { PLAYER_SPEED,0 };
+		if (key == GLFW_KEY_D) {
+			registry.stopeds.remove(player_student);
+			if (action == GLFW_PRESS) {
+				motion.velocityGoal = { PLAYER_SPEED,0 };
 
-			// refresh player's direction
-			player.SwitchDirection(Player::Direction::RIGHT, glfwGetTime());
+				// refresh player's direction
+				player.SwitchDirection(Player::Direction::RIGHT, glfwGetTime());
+			}
+			else if (action == GLFW_RELEASE) {
+				motion.velocityGoal = { 0,0 };
+			}
 		}
-		else if (action == GLFW_RELEASE) {
-			motion.velocityGoal = { 0,0 };
+
+		// get the reference of the texture id that player is using
+		auto& playerUsedTex = registry.renderRequests.get(player_student).used_texture;
+
+		// update player's appearance
+		playerUsedTex = player.GetTexId(glfwGetTime());
+
+		/// .----------------------------------------
+		if (key == GLFW_KEY_UP) {
+			if (action == GLFW_PRESS && currPosition[1].y > -0.950) {
+				renderer->translationMatrix[1].y = currPosition[1].y - 0.05;
+			}
 		}
-	}
-
-	// get the reference of the texture id that player is using
-	auto &playerUsedTex = registry.renderRequests.get(player_student).used_texture;
-
-	// update player's appearance
-	playerUsedTex = player.GetTexId(glfwGetTime());
-
-	/// .----------------------------------------
-	if (key == GLFW_KEY_UP) {
-		if (action == GLFW_PRESS && currPosition[1].y > -0.950) {
-			renderer->translationMatrix[1].y = currPosition[1].y - 0.05;
+		if (key == GLFW_KEY_DOWN) {
+			if (action == GLFW_PRESS && currPosition[1].y < 0.950) {
+				renderer->translationMatrix[1].y = currPosition[1].y + 0.050;
+			}
 		}
-	}
-	if (key == GLFW_KEY_DOWN) {
-		if (action == GLFW_PRESS && currPosition[1].y < 0.950) {
-			renderer->translationMatrix[1].y = currPosition[1].y + 0.050;
+		if (key == GLFW_KEY_RIGHT) {
+			if (action == GLFW_PRESS && currPosition[0].x > -0.950) {
+				renderer->translationMatrix[0].x = currPosition[0].x - 0.050;
+			}
 		}
-	}
-	if (key == GLFW_KEY_RIGHT) {
-		if (action == GLFW_PRESS && currPosition[0].x > -0.950) {
-			renderer->translationMatrix[0].x = currPosition[0].x - 0.050;
+		if (key == GLFW_KEY_LEFT) {
+			if (action == GLFW_PRESS && currPosition[0].x < 0.950) {
+				renderer->translationMatrix[0].x = currPosition[0].x + 0.05;
+			}
 		}
-	}
-	if (key == GLFW_KEY_LEFT) {
-		if (action == GLFW_PRESS && currPosition[0].x < 0.950) {
-			renderer->translationMatrix[0].x = currPosition[0].x + 0.05;
+
+
+		// Resetting game
+		if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+			int w, h;
+			glfwGetWindowSize(window, &w, &h);
+
+			restart_game();
 		}
+
+		//// Debugging
+		//if (key == GLFW_KEY_D) {
+		//	if (action == GLFW_RELEASE)
+		//		debugging.in_debug_mode = false;
+		//	else
+		//		debugging.in_debug_mode = true;
+		//}
+
+		// Control the current speed with `<` `>`
+		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
+			current_speed -= 0.1f;
+			printf("Current speed = %f\n", current_speed);
+		}
+		if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
+			current_speed += 0.1f;
+			printf("Current speed = %f\n", current_speed);
+		}
+		current_speed = fmax(0.f, current_speed);
 	}
-
-
-
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-		restart_game();
-	}
-
-	//// Debugging
-	//if (key == GLFW_KEY_D) {
-	//	if (action == GLFW_RELEASE)
-	//		debugging.in_debug_mode = false;
-	//	else
-	//		debugging.in_debug_mode = true;
-	//}
-
-	// Control the current speed with `<` `>`
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_COMMA) {
-		current_speed -= 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	if (action == GLFW_RELEASE && (mod & GLFW_MOD_SHIFT) && key == GLFW_KEY_PERIOD) {
-		current_speed += 0.1f;
-		printf("Current speed = %f\n", current_speed);
-	}
-	current_speed = fmax(0.f, current_speed);
+	
 }
 
 void WorldSystem::on_mouse_move(vec2 mouse_position) {
@@ -659,9 +771,144 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	// default facing direction is (1, 0)
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	(vec2)mouse_position; // dummy to avoid compiler warning
+	//(vec2)mouse_position; // dummy to avoid compiler warning
+
+	cursorX = mouse_position[0];
+	cursorY = mouse_position[1];
+	//std::cout << cursorX << " " << cursorY << std::endl;
+	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+	}
 }
 
+bool inRange(vec2 buttonPos, int buttonWidth, int buttonHeight) {
+	float buttonLeft = buttonPos.x - (buttonWidth / 2);
+	float buttonRight = buttonPos.x + (buttonWidth / 2);
+	float buttonTop = buttonPos.y - (buttonHeight / 2);
+	float buttonBot = buttonPos.y + (buttonHeight / 2);
+	float normalizedCursorX = cursorX * 1.5; // TODO: this is related to background size
+	float normalizedCursorY = cursorY + (550 - 160);
+	bool xInRange = (buttonLeft <= normalizedCursorX) && (buttonRight >= normalizedCursorX);
+	bool yInRange = (buttonTop <= normalizedCursorY) && (buttonBot >= normalizedCursorY);
+	std::cout << "buttonPos " << buttonPos[0] << " " << buttonPos[1] << std::endl;
+	std::cout << "buttonWidth " << buttonWidth << std::endl;
+	std::cout << "buttonHeight " << buttonHeight << std::endl;
+	std::cout << "normalizedCursorX " << normalizedCursorX << std::endl;
+	std::cout << "normalizedCursorY " << normalizedCursorY << std::endl;
+	std::cout << "buttonTop " << buttonTop << std::endl;
+	std::cout << "buttonBot " << buttonBot << std::endl;
+	std::cout << "xInRange " << xInRange << std::endl;
+	std::cout << "yInRange " << yInRange << std::endl;
+	return xInRange && yInRange;
+}
+
+
+Clickable* findClickedButton() {
+	// uses cursorX and cursorY to see if it is in range of any button
+	std::cout << "findClickedButton" << std::endl;
+	for (auto &c : registry.clickables.components) {
+		std::cout << "----check button range ----" << std::endl;
+		if (inRange(c.position, c.width, c.height)) {
+			std::cout << "Found Clicked Button" << std::endl;
+			return &c; // TODO: does this work?
+		}
+	}
+	return NULL;
+}
+
+// return -1 if level unchanged
+// return the new level if success
+int WorldSystem::changeLevel(std::string buttonAction) {
+	int switchToLevel = -1;
+	if (buttonAction == "level1") {
+		switchToLevel = 1;
+	}
+	else if (buttonAction == "level2") {
+		switchToLevel = 2;
+	}
+	else if (buttonAction == "level3") {
+		switchToLevel = 3;
+	}
+	else if (buttonAction == "level4") {
+		switchToLevel = 4;
+	}
+	else if (buttonAction == "level5") {
+		switchToLevel = 5;
+	}
+	else if (buttonAction == "level6") {
+		switchToLevel = 6;
+	}
+
+	if (switchToLevel != -1) {
+		if (switchToLevel <= gameState->gameLevel.unlockedLevel) {
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTED;
+			gameState->gameLevel.currLevel = switchToLevel;
+		}
+		else {
+			std::cout << "Tried to access locked level, failed" << std::endl;
+			switchToLevel = -1;
+		}
+	}
+	
+	return switchToLevel;
+
+	// change level to switchToLevel
+
+}
+
+
+void WorldSystem::mouse_button_callback(int button, int action, int mods) {
+	std::cout << "IN mouse_button_callback" << std::endl;
+	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
+		std::cout << "Left Button Released" << std::endl;
+
+		// clickable component that we clicked on
+		Clickable* clickedClickable = findClickedButton();
+		if (clickedClickable != NULL) {
+			// get button action
+			std::string buttonAction = clickedClickable->buttonAction;
+
+			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
+				// if we are on level selection page
+				std::cout << "Selecting Levls" << std::endl;
+
+				// check if user clicked on the level selection button
+				int new_level = changeLevel(buttonAction);
+				if (new_level != -1) {
+					std::cout << "new_level is: " << new_level << std::endl;
+					restart_game();
+					return; // we changed the level
+				}
+
+				// check if user clicked tutorial button
+				if (buttonAction == "show tutorial") {
+					gameState->state = GameState::GAME_STATE::TUTORIAL_PAGE;
+					restart_game();
+				}
+
+			}
+
+			
+			
+			
+		}
+
+		// go back to menu if winned the game
+		if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED && registry.wins.has(player_student)) {
+			// currently in an game
+			std::cout << "Playing in level finished a level and go back to menu" << std::endl;
+			// unlock the next level and go back to home page
+
+			// check if we are not at maximum level + we are playing the last unlocked level
+			if (gameState->gameLevel.unlockedLevel < MAX_LEVEL && gameState->gameLevel.unlockedLevel == gameState->gameLevel.currLevel) {
+			
+				gameState->gameLevel.unlockedLevel += 1;
+				gameState->gameLevel.saveLevelToFile();
+			}
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+			restart_game();
+		}
+	}
+}
 float WorldSystem::approach(float goal_v, float cur_v, float dt)
 {
 	float diff = goal_v - cur_v;

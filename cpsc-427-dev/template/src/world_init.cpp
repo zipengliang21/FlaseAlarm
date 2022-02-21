@@ -1,5 +1,6 @@
 #include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
+#include <string>
 
 Entity createStudent(RenderSystem* renderer, vec2 pos)
 {
@@ -128,6 +129,7 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
+
 Entity createCamera(RenderSystem* renderer, vec2 position)
 {
 	auto entity = Entity();
@@ -187,7 +189,7 @@ Entity createLight(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createTextBox(RenderSystem* renderer, vec2 position) {
+Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction)  {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
@@ -201,12 +203,15 @@ Entity createTextBox(RenderSystem* renderer, vec2 position) {
 	motion.velocity = { 0,0 };
 	motion.position = position;
 
+	// Initialize Clickable component with position, size and hanlder
+	auto& clickable = registry.clickables.emplace(entity, position, width, height, buttonAction);
+
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({ WIN_BB_WIDTH, WIN_BB_HEIGHT }); // TODO
+	motion.scale = vec2({ width, height }); // TODO
 
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::WIN, // TODO: general text box as input
+		{ textureAssetId, // TEXTURE_ASSET_ID
 		 EFFECT_ASSET_ID::TEXTURED,
 		 GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -261,4 +266,9 @@ Entity createLine(vec2 position, vec2 scale)
 
 	registry.debugComponents.emplace(entity);
 	return entity;
+}
+
+// Reload game state from file, create game state
+GameState* createGameState() {
+	return new GameState();
 }

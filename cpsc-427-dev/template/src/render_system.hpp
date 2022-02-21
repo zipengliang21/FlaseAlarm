@@ -89,7 +89,21 @@ class RenderSystem {
 			textures_path("guard/guard_34.png"),
 			textures_path("guard/guard_35.png"),
 			textures_path("guard/guard_36.png"),
-			textures_path("paper_trap.png")
+			textures_path("paper_trap.png"),
+			textures_path("level1.png"),
+			textures_path("level1_locked.png"),
+			textures_path("level2.png"),
+			textures_path("level2_locked.png"),
+			textures_path("level3.png"),
+			textures_path("level3_locked.png"),
+			textures_path("level4.png"),
+			textures_path("level4_locked.png"),
+			textures_path("level5.png"),
+			textures_path("level5_locked.png"),
+			textures_path("level6.png"),
+			textures_path("level6_locked.png"),
+			textures_path("tutorial_button.png"),
+			textures_path("tutorial_content.jpg")
 	};
 
 	std::array<GLuint, effect_count> effects;

@@ -12,6 +12,7 @@
 #include <SDL_mixer.h>
 
 #include "render_system.hpp"
+#include "world_init.hpp"
 
 // Container for all our entities and game logic. Individual rendering / update is
 // deferred to the relative update() methods
@@ -41,12 +42,24 @@ private:
 	// Input callback functions
 	void on_key(int key, int, int action, int mod);
 	void on_mouse_move(vec2 pos);
+	void mouse_button_callback(int button, int action, int mods);
+
+	// get texture id
+	TEXTURE_ASSET_ID getTextureIDOfLevelButton(int level);
 
 	// Interpolate
 	float approach(float goal_v, float cur_v, float dt);
 
 	// restart level
 	void restart_game();
+	
+
+	// change level
+	int changeLevel(std::string buttonAction);
+
+	// display content for different pages
+	void showLevel1Content();
+	void showTutorial();
 
 	// OpenGL window handle
 	GLFWwindow* window;
@@ -62,6 +75,7 @@ private:
 	Entity player_student;
 	Entity guard;
 	Entity exit;
+	GameState* gameState = NULL;
 	Entity camera;
 	Entity light;
 
@@ -72,6 +86,7 @@ private:
 	Mix_Chunk* wall_collision_sound;
 	Mix_Chunk* fire_alarm_sound;
 	Mix_Chunk* trap_sound;
+
 
 	// C++ random number generator
 	std::default_random_engine rng;

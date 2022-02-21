@@ -185,6 +185,21 @@ struct WinTimer
 	float counter_ms = 3000;
 };
 
+struct Clickable
+{
+	Clickable(vec2 p, float w, float h, std::string ba) {
+		position = p;
+		width = w;
+		height = h;
+		buttonAction = ba;
+	}
+
+	vec2 position;
+	float width;
+	float height;
+	std::string buttonAction;
+	// void (*handler) ();
+};
 struct Trap
 {
 
@@ -275,7 +290,21 @@ enum class TEXTURE_ASSET_ID {
 	GUARD_RIGHT_7 = GUARD_RIGHT_6 + 1,
 	GUARD_RIGHT_8 = GUARD_RIGHT_7 + 1,
 	TRAP = GUARD_RIGHT_8 + 1,
-	TEXTURE_COUNT = TRAP + 1
+	LEVEL1 = TRAP + 1,
+	LEVEL1_LOCKED = LEVEL1 + 1,
+	LEVEL2 = LEVEL1_LOCKED + 1,
+	LEVEL2_LOCKED = LEVEL2 + 1,
+	LEVEL3 = LEVEL2_LOCKED + 1,
+	LEVEL3_LOCKED = LEVEL3 + 1,
+	LEVEL4 = LEVEL3_LOCKED + 1,
+	LEVEL4_LOCKED = LEVEL4 + 1,
+	LEVEL5 = LEVEL4_LOCKED + 1,
+	LEVEL5_LOCKED = LEVEL5 + 1,
+	LEVEL6 = LEVEL5_LOCKED + 1,
+	LEVEL6_LOCKED = LEVEL6 + 1,
+	TUTORIAL_BUTTON = LEVEL6_LOCKED + 1,
+	TUTORIAL_CONTENT = TUTORIAL_BUTTON + 1,
+	TEXTURE_COUNT = TUTORIAL_CONTENT + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

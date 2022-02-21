@@ -1,6 +1,7 @@
 
 #define GL3W_IMPLEMENTATION
 #include <gl3w.h>
+#include <Windows.h>
 
 // stlib
 #include <chrono>
@@ -12,6 +13,13 @@
 #include "world_system.hpp"
 
 using Clock = std::chrono::high_resolution_clock;
+
+// welcome menu functions
+void welcome_menu() {
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+}
+
 
 // Entry point
 int main()

@@ -3,6 +3,7 @@
 #include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
+#include "game_state.hpp"
 
 // These are ahrd coded to the dimensions of the entity texture
 const float STUDENT_BB_WIDTH = 0.3f * 165.f;
@@ -15,6 +16,10 @@ const float EXIT_BB_WIDTH = 0.1f * 900.f;
 const float EXIT_BB_HEIGHT = 0.1f * 1000.f;
 const float WIN_BB_WIDTH = 0.4f * 512.f;
 const float WIN_BB_HEIGHT = 0.4f * 512.f;
+const float BUTTON_BB_WIDTH = 0.4f * 512.f;
+const float BUTTON_BB_HEIGHT = 0.15f * 512.f;
+const float TUTORIAL_BB_WIDTH = 2.67f * 512.f;
+const float TUTORIAL_BB_HEIGHT = 1.5f * 512.f;
 const float CAMERA_BB_WEIGHT = 0.4f * 161.f;
 const float CAMERA_BB_HEIGHT = 0.4f * 140.f;
 const float LIGHT_BB_WEIGHT = 0.4f * 278.f;
@@ -30,6 +35,8 @@ Entity createGuard(RenderSystem* renderer, vec2 position);
 Entity createWall(RenderSystem* renderer, vec2 position);
 // the exit
 Entity createExit(RenderSystem* renderer, vec2 position);
+// the textbox,  or button, display an image asset as a box
+Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction);
 // the camera
 Entity createCamera(RenderSystem* renderer, vec2 position);
 // the light
@@ -40,5 +47,7 @@ Entity createTextBox(RenderSystem* renderer, vec2 position);
 Entity createTrap(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
+// create game state
+GameState* createGameState();
 
 
