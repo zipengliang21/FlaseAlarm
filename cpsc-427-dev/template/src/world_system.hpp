@@ -47,6 +47,9 @@ private:
 	// get texture id
 	TEXTURE_ASSET_ID getTextureIDOfLevelButton(int level);
 
+	// Interpolate
+	float approach(float goal_v, float cur_v, float dt);
+
 	// restart level
 	void restart_game();
 	
@@ -73,6 +76,8 @@ private:
 	Entity guard;
 	Entity exit;
 	GameState* gameState = NULL;
+	Entity camera;
+	Entity light;
 
 	// music references
 	Mix_Music* background_music;
@@ -80,6 +85,7 @@ private:
 	Mix_Chunk* chicken_eat_sound;
 	Mix_Chunk* wall_collision_sound;
 	Mix_Chunk* fire_alarm_sound;
+	Mix_Chunk* trap_sound;
 
 
 	// C++ random number generator

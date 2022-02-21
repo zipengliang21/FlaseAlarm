@@ -40,12 +40,14 @@ void PhysicsSystem::step(float elapsed_ms)
 		
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		if (!registry.stopeds.has(entity) && !registry.wins.has(entity)) {
+		if (registry.lights.has(entity)) {
+			float step_seconds = elapsed_ms / 1000.f;
+			motion.angle += motion.velocity.x * step_seconds;
+		} else if (!registry.stopeds.has(entity) && !registry.wins.has(entity)) {
 			float step_seconds = elapsed_ms / 1000.f;
 			motion.position.x += motion.velocity.x * step_seconds;
 			motion.position.y += motion.velocity.y * step_seconds;
 		}
-
 	}
 
 	// Check for collisions between all moving entities

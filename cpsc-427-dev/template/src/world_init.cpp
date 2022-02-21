@@ -15,15 +15,16 @@ Entity createStudent(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
+	motion.velocityGoal = { 0.f, 0.f };
 	// motion.scale = mesh.original_size * 300.f;
 	// motion.scale.y *= -1; // point front to the right
-	motion.scale = vec2({ -STUDENT_BB_WIDTH, STUDENT_BB_HEIGHT });
+	motion.scale = vec2({ STUDENT_BB_WIDTH, STUDENT_BB_HEIGHT });
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BUG, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::PLAYER_UP_0, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -105,14 +106,17 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	// Initialize walk timer
 	registry.walkTimers.emplace(entity);
 
+	// Create and (empty) Guard component to be able to refer to all guards
+	registry.guards.emplace(entity);
+
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	// motion.angle = 0.f;
-	motion.velocity = { -100.f,0 };
+	motion.velocityGoal = { -100.f,0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({ -GUARD_BB_WIDTH, GUARD_BB_HEIGHT });
+	motion.scale = vec2({ GUARD_BB_WIDTH, GUARD_BB_HEIGHT });
 
 	// Create and (empty) Eagle component to be able to refer to all eagles
 	registry.deadlys.emplace(entity);
@@ -125,7 +129,67 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction) {
+
+Entity createCamera(RenderSystem* renderer, vec2 position)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.position = position;
+
+	// Setting initial values, scale is negative to make it face the opposite way
+	motion.scale = vec2({ CAMERA_BB_WEIGHT, CAMERA_BB_HEIGHT });
+
+	// Create and (empty) Eagle component to be able to refer to all eagles
+	registry.cameras.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::CAMERA,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createLight(RenderSystem* renderer, vec2 position)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize rotate timer
+	registry.rotateTimers.emplace(entity);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = { -0.5f, 0 };
+	motion.position = position;
+
+	// Setting initial values, scale is negative to make it face the opposite way
+	//motion.scale = mesh.original_size * 2.f;
+	//motion.scale.x *= -1;
+	motion.scale = vec2({ -LIGHT_BB_WEIGHT, LIGHT_BB_HEIGHT });
+
+	// Create and (empty) Eagle component to be able to refer to all eagles
+	registry.lights.emplace(entity);
+	registry.deadlys.emplace(entity);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::LIGHT,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction)  {
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
@@ -153,6 +217,35 @@ Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_I
 
 	return entity;
 }
+
+Entity createTrap(RenderSystem* renderer, vec2 position) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	auto& trap = registry.traps.emplace(entity);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	// motion.angle = 0.f;
+	motion.velocity = { 0,0 };
+	motion.position = position;
+
+	// Setting initial values, scale is negative to make it face the opposite way
+	motion.scale = vec2({ TRAP_BB_WIDTH, TRAP_BB_HEIGHT }); // TODO
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TRAP, 
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
 Entity createLine(vec2 position, vec2 scale)
 {
 	Entity entity = Entity();
