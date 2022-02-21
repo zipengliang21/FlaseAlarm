@@ -4,16 +4,53 @@
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
 
-// Player component
-struct Player
-{
+enum class TEXTURE_ASSET_ID;
 
+// the generic character that can show 4-direction's appearance
+struct Character
+{
+	enum class Direction { UP, LEFT, DOWN, RIGHT };
+	Character() :lastSwitchTime(0) {}
+	Character &operator=(const Character &other) {
+		curDir = other.curDir; curTexId = other.curTexId; lastSwitchTime = other.lastSwitchTime;
+		return *this;
+	}
+
+	// return the texture id and refresh status. every frame should call it once.
+	virtual TEXTURE_ASSET_ID GetTexId(double nowTime)=0;// pure-virtual function
+
+	// switch direction
+	virtual void SwitchDirection(Direction dir, double nowTime)=0;
+protected:
+	Direction curDir;
+	TEXTURE_ASSET_ID curTexId;
+	const double switchFrame = 0.1; // while running, every duration of "switchFrame" switch an apperance
+	double lastSwitchTime;
+};
+
+// Player component
+struct Player:public Character
+{
+	// return the texture id and refresh status. every frame should call it once.
+	virtual TEXTURE_ASSET_ID GetTexId(double nowTime);
+
+	// switch direction
+	void SwitchDirection(Direction dir, double nowTime);
 };
 
 // Eagles have a hard shell
-struct Deadly
+struct Deadly:public Character
 {
+	// set the default direction
+	Deadly() {
+		curDir = Character::Direction::LEFT;
+	}
 
+	// return the texture id and refresh status. every frame should call it once.
+	virtual TEXTURE_ASSET_ID GetTexId(double nowTime);
+
+	// switch direction
+	void SwitchDirection(Direction dir, double nowTime);
 };
 
 // Bug and Chicken have a soft shell
@@ -46,8 +83,9 @@ struct Light
 struct Motion {
 	vec2 position = { 0, 0 };
 	float angle = 0;
-	vec2 velocity = { 0, 0 };
+	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 10, 10 };
+	vec2 velocityGoal = { 0.f, 0.f };
 };
 
 // Stucture to store collision information
@@ -169,7 +207,59 @@ enum class TEXTURE_ASSET_ID {
 	WIN = EXIT + 1,
 	CAMERA = WIN + 1,
 	LIGHT = CAMERA + 1,
-	TEXTURE_COUNT = LIGHT + 1
+	PLAYER_DOWN_0 = WIN + 1,
+	PLAYER_DOWN_1 = PLAYER_DOWN_0 + 1,
+	PLAYER_DOWN_2 = PLAYER_DOWN_1 + 1,
+	PLAYER_DOWN_3 = PLAYER_DOWN_2 + 1,
+	PLAYER_UP_0 = PLAYER_DOWN_3 + 1,
+	PLAYER_UP_1 = PLAYER_UP_0 + 1,
+	PLAYER_UP_2 = PLAYER_UP_1 + 1,
+	PLAYER_UP_3 = PLAYER_UP_2 + 1,
+	PLAYER_LEFT_0 = PLAYER_UP_3 + 1,
+	PLAYER_LEFT_1 = PLAYER_LEFT_0 + 1,
+	PLAYER_LEFT_2 = PLAYER_LEFT_1 + 1,
+	PLAYER_LEFT_3 = PLAYER_LEFT_2 + 1,
+	PLAYER_RIGHT_0 = PLAYER_LEFT_3 + 1,
+	PLAYER_RIGHT_1 = PLAYER_RIGHT_0 + 1,
+	PLAYER_RIGHT_2 = PLAYER_RIGHT_1 + 1,
+	PLAYER_RIGHT_3 = PLAYER_RIGHT_2 + 1,
+	GUARD_UP_0 = PLAYER_RIGHT_3 + 1,
+	GUARD_UP_1 = GUARD_UP_0 + 1,
+	GUARD_UP_2 = GUARD_UP_1 + 1,
+	GUARD_UP_3 = GUARD_UP_2 + 1,
+	GUARD_UP_4 = GUARD_UP_3 + 1,
+	GUARD_UP_5 = GUARD_UP_4 + 1,
+	GUARD_UP_6 = GUARD_UP_5 + 1,
+	GUARD_UP_7 = GUARD_UP_6 + 1,
+	GUARD_UP_8 = GUARD_UP_7 + 1,
+	GUARD_LEFT_0 = GUARD_UP_8 + 1,
+	GUARD_LEFT_1 = GUARD_LEFT_0 + 1,
+	GUARD_LEFT_2 = GUARD_LEFT_1 + 1,
+	GUARD_LEFT_3 = GUARD_LEFT_2 + 1,
+	GUARD_LEFT_4 = GUARD_LEFT_3 + 1,
+	GUARD_LEFT_5 = GUARD_LEFT_4 + 1,
+	GUARD_LEFT_6 = GUARD_LEFT_5 + 1,
+	GUARD_LEFT_7 = GUARD_LEFT_6 + 1,
+	GUARD_LEFT_8 = GUARD_LEFT_7 + 1,
+	GUARD_DOWN_0 = GUARD_LEFT_8 + 1,
+	GUARD_DOWN_1 = GUARD_DOWN_0 + 1,
+	GUARD_DOWN_2 = GUARD_DOWN_1 + 1,
+	GUARD_DOWN_3 = GUARD_DOWN_2 + 1,
+	GUARD_DOWN_4 = GUARD_DOWN_3 + 1,
+	GUARD_DOWN_5 = GUARD_DOWN_4 + 1,
+	GUARD_DOWN_6 = GUARD_DOWN_5 + 1,
+	GUARD_DOWN_7 = GUARD_DOWN_6 + 1,
+	GUARD_DOWN_8 = GUARD_DOWN_7 + 1,
+	GUARD_RIGHT_0 = GUARD_DOWN_8 + 1,
+	GUARD_RIGHT_1 = GUARD_RIGHT_0 + 1,
+	GUARD_RIGHT_2 = GUARD_RIGHT_1 + 1,
+	GUARD_RIGHT_3 = GUARD_RIGHT_2 + 1,
+	GUARD_RIGHT_4 = GUARD_RIGHT_3 + 1,
+	GUARD_RIGHT_5 = GUARD_RIGHT_4 + 1,
+	GUARD_RIGHT_6 = GUARD_RIGHT_5 + 1,
+	GUARD_RIGHT_7 = GUARD_RIGHT_6 + 1,
+	GUARD_RIGHT_8 = GUARD_RIGHT_7 + 1,
+	TEXTURE_COUNT = GUARD_RIGHT_8 + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

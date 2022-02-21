@@ -7,7 +7,7 @@
 #include <sstream>
 
 #include "physics_system.hpp"
-
+#include <iostream>
 // Game configuration
 const size_t MAX_EAGLES = 15;
 const size_t MAX_BUG = 5;
@@ -58,7 +58,7 @@ namespace {
 
 // World initialization
 // Note, this has a lot of OpenGL specific things, could be moved to the renderer
-GLFWwindow* WorldSystem::create_window() {
+GLFWwindow *WorldSystem::create_window() {
 	///////////////////////////////////////
 	// Initialize GLFW
 	glfwSetErrorCallback(glfw_err_cb);
@@ -91,8 +91,8 @@ GLFWwindow* WorldSystem::create_window() {
 	// Input is handled using GLFW, for more info see
 	// http://www.glfw.org/docs/latest/input_guide.html
 	glfwSetWindowUserPointer(window, this);
-	auto key_redirect = [](GLFWwindow* wnd, int _0, int _1, int _2, int _3) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
-	auto cursor_pos_redirect = [](GLFWwindow* wnd, double _0, double _1) { ((WorldSystem*)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
+	auto key_redirect = [](GLFWwindow *wnd, int _0, int _1, int _2, int _3) { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_key(_0, _1, _2, _3); };
+	auto cursor_pos_redirect = [](GLFWwindow *wnd, double _0, double _1) { ((WorldSystem *)glfwGetWindowUserPointer(wnd))->on_mouse_move({ _0, _1 }); };
 	glfwSetKeyCallback(window, key_redirect);
 	glfwSetCursorPosCallback(window, cursor_pos_redirect);
 
@@ -126,14 +126,14 @@ GLFWwindow* WorldSystem::create_window() {
 	return window;
 }
 
-void WorldSystem::init(RenderSystem* renderer_arg) {
+void WorldSystem::init(RenderSystem *renderer_arg) {
 	this->renderer = renderer_arg;
 	// Playing background music indefinitely
 	Mix_PlayMusic(background_music, -1);
 	fprintf(stderr, "Loaded music\n");
 
 	// Set all states to default
-    restart_game();
+	restart_game();
 }
 
 // Update our game world
@@ -145,20 +145,31 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
+	// update player velocity
+	Motion& player_motion = registry.motions.get(player_student);
+	Motion& guard_motion = registry.motions.get(guard);
+
+	player_motion.velocity.x = approach(player_motion.velocityGoal.x, player_motion.velocity.x, elapsed_ms_since_last_update/5);
+	player_motion.velocity.y = approach(player_motion.velocityGoal.y, player_motion.velocity.y, elapsed_ms_since_last_update/5);
+
+	guard_motion.velocity.x = approach(guard_motion.velocityGoal.x, guard_motion.velocity.x, elapsed_ms_since_last_update / 10);
+	guard_motion.velocity.y = approach(guard_motion.velocityGoal.y, guard_motion.velocity.y, elapsed_ms_since_last_update / 10);
+
+	
 	// Remove debug info from the last step
 	while (registry.debugComponents.entities.size() > 0)
-	    registry.remove_all_components_of(registry.debugComponents.entities.back());
+		registry.remove_all_components_of(registry.debugComponents.entities.back());
 
 	// Removing out of screen entities
-	auto& motions_registry = registry.motions;
+	auto &motions_registry = registry.motions;
 
 	// Remove entities that leave the screen on the left side
 	// Iterate backwards to be able to remove without unterfering with the next object to visit
 	// (the containers exchange the last element with the current)
-	for (int i = (int)motions_registry.components.size()-1; i>=0; --i) {
-	    Motion& motion = motions_registry.components[i];
+	for (int i = (int)motions_registry.components.size() - 1; i >= 0; --i) {
+		Motion &motion = motions_registry.components[i];
 		if (motion.position.x + abs(motion.scale.x) < 0.f) {
-			if(!registry.players.has(motions_registry.entities[i])) // don't remove the player
+			if (!registry.players.has(motions_registry.entities[i])) // don't remove the player
 				registry.remove_all_components_of(motions_registry.entities[i]);
 		}
 	}
@@ -176,22 +187,22 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 
 	// Processing the chicken state
 	assert(registry.screenStates.components.size() <= 1);
-    ScreenState &screen = registry.screenStates.components[0];
+	ScreenState &screen = registry.screenStates.components[0];
 
-    float min_counter_ms = 3000.f;
+	float min_counter_ms = 3000.f;
 	for (Entity entity : registry.deathTimers.entities) {
 		// progress timer
-		DeathTimer& counter = registry.deathTimers.get(entity);
+		DeathTimer &counter = registry.deathTimers.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
-		if(counter.counter_ms < min_counter_ms){
-		    min_counter_ms = counter.counter_ms;
+		if (counter.counter_ms < min_counter_ms) {
+			min_counter_ms = counter.counter_ms;
 		}
 
 		// restart the game once the death timer expired
 		if (counter.counter_ms < 0) {
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
-            restart_game();
+			restart_game();
 			return true;
 		}
 	}
@@ -199,7 +210,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	screen.darken_screen_factor = 1 - min_counter_ms / 3000;
 
 	for (Entity entity : registry.winTimers.entities) {
-		WinTimer& counter = registry.winTimers.get(entity);
+		WinTimer &counter = registry.winTimers.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 		if (counter.counter_ms < min_counter_ms) {
 			min_counter_ms = counter.counter_ms;
@@ -217,15 +228,32 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	// turn screen to grren
 	screen.greener_screen_factor = 1 - min_counter_ms / 3000;
 
+	// get the guard instance
+	auto &guardObj = registry.deadlys.get(guard);
+	//auto &mo = registry.motions.get(guard);
+	//printf("%f,%f\n", mo.position.x, mo.position.y);
 
 	// !!! TODO A1: update LightUp timers and remove if time drops below zero, similar to the death counter
-	for (Entity entity: registry.walkTimers.entities) {
-		WalkTimer& counter = registry.walkTimers.get(entity);
+	for (Entity entity : registry.walkTimers.entities) {
+		WalkTimer &counter = registry.walkTimers.get(entity);
 		counter.counter_ms -= elapsed_ms_since_last_update;
 		if (counter.counter_ms < 0) {
 			counter.counter_ms = 12000;
-			Motion& motion = registry.motions.get(entity);
-			motion.velocity = {-1*motion.velocity[0] , motion.velocity[1]};
+			Motion &motion = registry.motions.get(entity);
+			motion.velocityGoal = {-1 * motion.velocityGoal[0] , motion.velocityGoal[1] };
+
+			// if this is guard
+			if (entity == guard)
+			{
+				Character::Direction dir;
+				if (motion.velocity.x > 0) // now the guard is moving right
+					dir = Character::Direction::RIGHT;
+				else
+					dir = Character::Direction::LEFT;
+
+				// switch its direction
+				guardObj.SwitchDirection(dir, glfwGetTime());
+			}
 		}
 	}
 
@@ -239,6 +267,9 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 		}
 	}
 
+	// update guard's appearance
+	registry.renderRequests.get(guard).used_texture = guardObj.GetTexId(glfwGetTime());
+
 	return true;
 }
 
@@ -251,7 +282,7 @@ void WorldSystem::restart_game() {
 	// Reset Camera
 	renderer->translationMatrix = { {-0.5f, 0.f, 0.f}, {0.f, 1.0f, 0.f}, {0.f, 0.f, 0.f} };
 
-	
+
 
 	// Reset the game speed
 	current_speed = 1.f;
@@ -259,13 +290,13 @@ void WorldSystem::restart_game() {
 	// Remove all entities that we created
 	// All that have a motion, we could also iterate over all bug, eagles, ... but that would be more cumbersome
 	while (registry.motions.entities.size() > 0)
-	    registry.remove_all_components_of(registry.motions.entities.back());
+		registry.remove_all_components_of(registry.motions.entities.back());
 
 	// Debugging for memory/component leaks
 	registry.list_all_components();
 
 	// Create a new chicken
-	player_student = createStudent(renderer, { bg_X /2, bg_Y - 50 });
+	player_student = createStudent(renderer, { bg_X / 2, bg_Y - 50 });
 
 	// Create textbox
 	auto student_pos = registry.motions.get(player_student).position;
@@ -289,7 +320,7 @@ void WorldSystem::restart_game() {
 		createWall(renderer, { counter_X, counter_Y });
 		counter_X += WALL_SIZE;
 	}
-	
+
 	while (counter_Y < bg_Y) {
 		createWall(renderer, { counter_X, counter_Y });
 		counter_Y += WALL_SIZE;
@@ -307,8 +338,8 @@ void WorldSystem::restart_game() {
 
 	float bl_X = bg_X * 3 / 8;
 	float bl_Y = bg_Y * 5 / 8;
-	while(bl_X > 0) {
-		if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X > (bg_X * 3 / 8 - 3 * WALL_SIZE)) {
+	while (bl_X > 0) {
+		if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X >(bg_X * 3 / 8 - 3 * WALL_SIZE)) {
 			createWall(renderer, { bl_X, bl_Y });
 		}
 		bl_X -= WALL_SIZE;
@@ -365,10 +396,10 @@ void WorldSystem::restart_game() {
 		ub_Y += WALL_SIZE;
 	}
 
-	registry.colors.insert(player_student, {1, 0.8f, 0.8f});
+	registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
 
 	// Create security guard, TODO: make it a list of guard
-	guard = createGuard(renderer, vec2(bg_X - 100 , bg_Y /2));
+	guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
 	//registry.motions.get(guard).position = { window_width_px - 100 , window_height_px / 2 };
 	//registry.motions.get(guard).velocity = { -100.f , 0 };
 	// !! TODO A3: Enable static eggs on the ground
@@ -379,7 +410,7 @@ void WorldSystem::restart_game() {
 		glfwGetWindowSize(window, &w, &h);
 		float radius = 30 * (uniform_dist(rng) + 0.3f); // range 0.3 .. 1.3
 		Entity egg = createEgg({ uniform_dist(rng) * w, h - uniform_dist(rng) * 20 },
-			         { radius, radius });
+					 { radius, radius });
 		float brightness = uniform_dist(rng) * 0.5 + 0.5;
 		registry.colors.insert(egg, { brightness, brightness, brightness});
 	}
@@ -389,7 +420,7 @@ void WorldSystem::restart_game() {
 // Compute collisions between entities
 void WorldSystem::handle_collisions() {
 	// Loop over all collisions detected by the physics system
-	auto& collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
+	auto &collisionsRegistry = registry.collisions; // TODO: @Tim, is the reference here needed?
 	for (uint i = 0; i < collisionsRegistry.components.size(); i++) {
 		// The entity and its collider
 		Entity entity = collisionsRegistry.entities[i];
@@ -425,12 +456,13 @@ void WorldSystem::handle_collisions() {
 				if (!registry.stopeds.has(entity)) {
 					registry.stopeds.emplace(entity);
 				}
-				vec2 velocity = registry.motions.get(entity).velocity;
+				vec2 velocity = registry.motions.get(entity).velocityGoal;
+				registry.motions.get(entity).velocityGoal = { 0, 0 };
 				registry.motions.get(entity).velocity = { 0, 0 };
 				vec2 position = registry.motions.get(entity).position;
 				Mix_PlayChannel(-1, wall_collision_sound, 0);
 				if (velocity.x > 0) {
-					registry.motions.get(entity).position = { position.x - 30.f, position.y};
+					registry.motions.get(entity).position = { position.x - 30.f, position.y };
 				}
 				if (velocity.x < 0) {
 					registry.motions.get(entity).position = { position.x + 30.f, position.y };
@@ -439,7 +471,7 @@ void WorldSystem::handle_collisions() {
 					registry.motions.get(entity).position = { position.x, position.y - 30.f };
 				}
 				if (velocity.y < 0) {
-					registry.motions.get(entity).position = { position.x, position.y + 30.f};
+					registry.motions.get(entity).position = { position.x, position.y + 30.f };
 				}
 				//registry.motions.get(entity).position = { position.x, position.y };
 			}
@@ -451,7 +483,7 @@ void WorldSystem::handle_collisions() {
 				}
 				createTextBox(renderer, { bg_X / 2, bg_Y / 2 });
 			}
-			
+
 		}
 	}
 
@@ -470,7 +502,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
-	Motion& motion = registry.motions.get(player_student);
+	Motion &motion = registry.motions.get(player_student);
 
 	mat3 currPosition = renderer->translationMatrix;
 
@@ -478,55 +510,73 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		return;
 	}
 
-	
+	// get player instance's reference
+	auto &player = registry.players.get(player_student);
+
 	if (key == GLFW_KEY_W) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
 				
-			motion.velocity = { 0,-PLAYER_SPEED };
+			motion.velocityGoal = { 0,-PLAYER_SPEED };
 
+			// refresh player's direction
+			player.SwitchDirection(Player::Direction::UP,glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 	if (key == GLFW_KEY_S) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-			motion.velocity = { 0,PLAYER_SPEED };
+			motion.velocityGoal = { 0,PLAYER_SPEED };
+
+			// refresh player's direction
+			player.SwitchDirection(Player::Direction::DOWN, glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 	if (key == GLFW_KEY_A) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-			motion.velocity = { -PLAYER_SPEED,0 };
+			motion.velocityGoal = { -PLAYER_SPEED,0 };
+
+			// refresh player's direction
+			player.SwitchDirection(Player::Direction::LEFT, glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
 	if (key == GLFW_KEY_D) {
 		registry.stopeds.remove(player_student);
 		if (action == GLFW_PRESS) {
-			motion.velocity = { PLAYER_SPEED,0 };
+			motion.velocityGoal = { PLAYER_SPEED,0 };
+
+			// refresh player's direction
+			player.SwitchDirection(Player::Direction::RIGHT, glfwGetTime());
 		}
 		else if (action == GLFW_RELEASE) {
-			motion.velocity = { 0,0 };
+			motion.velocityGoal = { 0,0 };
 		}
 	}
-	
+
+	// get the reference of the texture id that player is using
+	auto &playerUsedTex = registry.renderRequests.get(player_student).used_texture;
+
+	// update player's appearance
+	playerUsedTex = player.GetTexId(glfwGetTime());
 
 	/// .----------------------------------------
 	if (key == GLFW_KEY_UP) {
 		if (action == GLFW_PRESS && currPosition[1].y > -0.950) {
-			renderer->translationMatrix[1].y = currPosition[1].y -0.05;
+			renderer->translationMatrix[1].y = currPosition[1].y - 0.05;
 		}
 	}
 	if (key == GLFW_KEY_DOWN) {
-		if (action == GLFW_PRESS && currPosition[1].y <0.950) {
+		if (action == GLFW_PRESS && currPosition[1].y < 0.950) {
 			renderer->translationMatrix[1].y = currPosition[1].y + 0.050;
 		}
 	}
@@ -541,7 +591,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 		}
 	}
 
-	
+
 
 	// Resetting game
 	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
@@ -580,3 +630,18 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 
 	(vec2)mouse_position; // dummy to avoid compiler warning
 }
+
+float WorldSystem::approach(float goal_v, float cur_v, float dt)
+{
+	float diff = goal_v - cur_v;
+
+	if (diff > dt) {
+		return cur_v + dt;
+	}
+	if (diff < -dt) {
+		return cur_v - dt;
+	}
+
+	return goal_v;
+}
+

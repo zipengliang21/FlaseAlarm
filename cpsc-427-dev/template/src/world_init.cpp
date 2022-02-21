@@ -14,15 +14,16 @@ Entity createStudent(RenderSystem* renderer, vec2 pos)
 	motion.position = pos;
 	motion.angle = 0.f;
 	motion.velocity = { 0.f, 0.f };
+	motion.velocityGoal = { 0.f, 0.f };
 	// motion.scale = mesh.original_size * 300.f;
 	// motion.scale.y *= -1; // point front to the right
-	motion.scale = vec2({ -STUDENT_BB_WIDTH, STUDENT_BB_HEIGHT });
+	motion.scale = vec2({ STUDENT_BB_WIDTH, STUDENT_BB_HEIGHT });
 
 	// Create and (empty) Chicken component to be able to refer to all eagles
 	registry.players.emplace(entity);
 	registry.renderRequests.insert(
 		entity,
-		{ TEXTURE_ASSET_ID::BUG, // TEXTURE_COUNT indicates that no txture is needed
+		{ TEXTURE_ASSET_ID::PLAYER_UP_0, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
 			GEOMETRY_BUFFER_ID::SPRITE });
 
@@ -107,11 +108,11 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	// motion.angle = 0.f;
-	motion.velocity = { -100.f,0 };
+	motion.velocityGoal = { -100.f,0.f };
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({ -GUARD_BB_WIDTH, GUARD_BB_HEIGHT });
+	motion.scale = vec2({ GUARD_BB_WIDTH, GUARD_BB_HEIGHT });
 
 	// Create and (empty) Eagle component to be able to refer to all eagles
 	registry.deadlys.emplace(entity);
