@@ -58,7 +58,7 @@ private:
 	int changeLevel(std::string buttonAction);
 
 	// display content for different pages
-	void showLevel1Content();
+	void showLevelContent(int level);
 	void showTutorial();
 
 	// OpenGL window handle

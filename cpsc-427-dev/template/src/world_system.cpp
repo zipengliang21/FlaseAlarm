@@ -360,9 +360,8 @@ void WorldSystem::restart_game() {
 	}
 	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
 		// user selected level, display game component of that level
-		if (gameState->gameLevel.currLevel == 1) {
-			showLevel1Content();
-		}
+		showLevelContent(gameState->gameLevel.currLevel);
+		
 
 		// TODO: select game level 2-6 and display correspouding content here
 		
@@ -403,27 +402,11 @@ TEXTURE_ASSET_ID WorldSystem::getTextureIDOfLevelButton(int level) {
 }
 
 // called in restart_game, display game content for game level 1
-void WorldSystem::showLevel1Content() {
-	// Create a new student
-	player_student = createStudent(renderer, { bg_X / 2, bg_Y - 50 });
-
-	const float WALL_SIZE = 20.2f;
-	// Create a new exit
-	exit = createExit(renderer, { bg_X - 100, 50 + WALL_SIZE });
-
-	// Create light
-	camera = createLight(renderer, { bg_X - WALL_SIZE - 65, bg_Y - WALL_SIZE - 20 });
-
-	// Create a camera
-	camera = createCamera(renderer, { bg_X - WALL_SIZE - 50, bg_Y - WALL_SIZE - 10 });
-	
-	// Create trap(s)
-	createTrap(renderer, { bg_X / 2, 2 * bg_Y / 3 + WALL_SIZE });
-
-	// Create walls 
-	std::ifstream in(level_map_path("level_1.txt"));
+void WorldSystem::showLevelContent(int level) {
+	std::ifstream in(level_map_path("level" + std::to_string(level) + ".txt"));
 	std::string map_row;
 	std::vector<std::vector<char>> level_map;
+	const float WALL_SIZE = 20.2f;
 
 
 	while (std::getline(in, map_row)) {
@@ -431,101 +414,33 @@ void WorldSystem::showLevel1Content() {
 		level_map.push_back(charVector);
 	}
 
-
 	for (int row = 0; row < level_map.size(); row++) {
 		for (int col = 0; col < level_map[row].size(); col++) {
-			if (level_map[row][col] == '#') {
+			if (level_map[row][col] == 'W') {
 				createWall(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+			else if (level_map[row][col] == 'T') {
+				createTrap(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+			else if (level_map[row][col] == 'E') {
+				exit = createExit(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+			else if (level_map[row][col] == 'S') {
+				player_student = createStudent(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+			else if (level_map[row][col] == 'G') {
+				guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+			else if (level_map[row][col] == 'C') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+			}
+			else if (level_map[row][col] == 'L') {
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE });
 			}
 		}
 	}
 
-	/*float counter_X = 0;
-	float counter_Y = 0;
-	while (counter_X < bg_X) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_X += WALL_SIZE;
-	}
-
-	while (counter_Y < bg_Y) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_Y += WALL_SIZE;
-	}
-
-	while (counter_X > 0) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_X -= WALL_SIZE;
-	}
-
-	while (counter_Y > 0) {
-		createWall(renderer, { counter_X, counter_Y });
-		counter_Y -= WALL_SIZE;
-	}
-
-	float bl_X = bg_X * 3 / 8;
-	float bl_Y = bg_Y * 5 / 8;
-	while (bl_X > 0) {
-		if (bl_X < (bg_X * 3 / 8 - 7 * WALL_SIZE) || bl_X >(bg_X * 3 / 8 - 3 * WALL_SIZE)) {
-			createWall(renderer, { bl_X, bl_Y });
-		}
-		bl_X -= WALL_SIZE;
-	}
-
-	bl_X = bg_X * 3 / 8;
-	while (bl_Y < bg_Y) {
-		createWall(renderer, { bl_X, bl_Y });
-		bl_Y += WALL_SIZE;
-	}
-
-	float ul_X = bg_X * 3 / 8;
-	float ul_Y = bg_Y * 3 / 8;
-	while (ul_X > 0) {
-		createWall(renderer, { ul_X, ul_Y });
-		ul_X -= WALL_SIZE;
-	}
-
-	ul_X = bg_X * 3 / 8;
-	while (ul_Y > 0) {
-		if (ul_Y < (bg_Y * 3 / 8 - 10 * WALL_SIZE) || ul_Y >(bg_Y * 3 / 8 - 6 * WALL_SIZE)) {
-			createWall(renderer, { ul_X, ul_Y });
-		}
-		ul_Y -= WALL_SIZE;
-	}
-
-	float ur_X = bg_X * 5 / 8;
-	float ur_Y = bg_Y * 3 / 8;
-	while (ur_X < bg_X) {
-		if (ur_X < (bg_X * 5 / 8 + 5 * WALL_SIZE) || ur_X >(bg_X * 5 / 8 + 9 * WALL_SIZE)) {
-			createWall(renderer, { ur_X, ur_Y });
-		}
-		ur_X += WALL_SIZE;
-	}
-
-	ur_X = bg_X * 5 / 8;
-	while (ur_Y > 0) {
-		createWall(renderer, { ur_X, ur_Y });
-		ur_Y -= WALL_SIZE;
-	}
-
-	float ub_X = bg_X * 5 / 8;
-	float ub_Y = bg_Y * 5 / 8;
-	while (ub_X < bg_X) {
-		createWall(renderer, { ub_X, ub_Y });
-		ub_X += WALL_SIZE;
-	}
-
-	ub_X = bg_X * 5 / 8;
-	while (ub_Y < bg_Y) {
-		if (ub_Y < (bg_Y * 5 / 8 + 4 * WALL_SIZE) || ub_Y >(bg_Y * 5 / 8 + 8 * WALL_SIZE)) {
-			createWall(renderer, { ub_X, ub_Y });
-		}
-		ub_Y += WALL_SIZE;
-	}*/
-
 	registry.colors.insert(player_student, { 1, 0.8f, 0.8f });
-
-	// Create security guard, TODO: make it a list of guard
-	guard = createGuard(renderer, vec2(bg_X - 100, bg_Y / 2));
 }
 
 // display tutorial image
