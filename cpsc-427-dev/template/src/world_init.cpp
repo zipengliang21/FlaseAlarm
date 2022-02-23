@@ -272,3 +272,36 @@ Entity createLine(vec2 position, vec2 scale)
 GameState* createGameState() {
 	return new GameState();
 }
+
+// Create NPC that talk to the users
+Entity createNPC(RenderSystem* renderer, vec2 position)
+{
+	Entity entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.velocity = { 0.f, 0.f };
+	motion.position = position;
+
+	// Setting initial values, scale is negative to make it face the opposite way
+	//motion.scale = mesh.original_size * 2.f;
+	//motion.scale.x *= -1;
+	motion.scale = vec2({ -NPC_BB_WIDTH, NPC_BB_HEIGHT });
+
+	// Intilize conversation component of this NPC
+	Entity textBox = createTextBox(renderer, {position.x - 10, position.y - 100}, TEXTURE_ASSET_ID::NPC_NO_CONVERSATION, CONVERSATION_BB_WIDTH, CONVERSATION_BB_HEIGHT, "none");
+	registry.conversations.emplace(entity, textBox);
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::NPC_STUDENT,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+
+}

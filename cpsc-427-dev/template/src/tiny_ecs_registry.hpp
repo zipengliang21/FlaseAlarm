@@ -37,6 +37,7 @@ public:
 	ComponentContainer<Trap> traps;
 	ComponentContainer<Trappable> trappables;
 	ComponentContainer<Guard> guards;
+	ComponentContainer<Conversation> conversations;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -68,6 +69,7 @@ public:
 		registry_list.push_back(&traps);
 		registry_list.push_back(&trappables);
 		registry_list.push_back(&guards);
+		registry_list.push_back(&conversations);
 	}
 
 	void clear_all_components() {
