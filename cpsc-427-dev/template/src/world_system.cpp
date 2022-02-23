@@ -437,6 +437,9 @@ void WorldSystem::showLevelContent(int level) {
 			else if (level_map[row][col] == 'L') {
 				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE });
 			}
+			else if (level_map[row][col] == 'L') {
+				createNPC(renderer,  { col * WALL_SIZE, row * WALL_SIZE });
+			}
 		}
 	}
 
@@ -529,6 +532,20 @@ void WorldSystem::handle_collisions() {
 					registry.motions.get(entity).velocity = { 0 , 0 };
 				}
 			}
+			// check if the user collided with an NPC with conversation
+			else if (registry.conversations.has(entity_other)) {
+				Conversation& conversation = registry.conversations.get(entity_other);
+				if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::CRIME_DETECTED) {
+					std::cout << "already talked, crime detected" << std::endl;
+				} else if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::NO_CRIME_DETECTED) {
+					std::cout << "already talked, nocrime detected" << std::endl;
+				} else if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::NO_CONVERSATION_YET) {
+					// first time meeting student, change photo rendered
+					RenderRequest& renderRequest = registry.renderRequests.get(entity_other);
+					conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::DURING_CONVERSATION;
+					renderRequest.used_texture = TEXTURE_ASSET_ID::NPC_DURING_CONVERSATION;
+				}
+			}
 		}
 	}
 
@@ -566,6 +583,20 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 			return;
 		}
 
+		// detect NPC conversation changes
+		for (auto& npc: registry.conversations.entities) {
+			auto& conversation = registry.conversations.get(npc);
+			if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::DURING_CONVERSATION) {
+				RenderRequest& renderRequest = registry.renderRequests.get(npc);
+				if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
+					conversation.conversationState.setState(ConversationState::CONVERSATION_STATE::NO_CRIME_DETECTED);
+					renderRequest.used_texture = TEXTURE_ASSET_ID::NPC_NO_CRIME_DETECTED;
+				} else if  (key == GLFW_KEY_B && action == GLFW_RELEASE) {
+					conversation.conversationState.setState(ConversationState::CONVERSATION_STATE::CRIME_DETECTED);
+					renderRequest.used_texture = TEXTURE_ASSET_ID::NPC_CRIME_DETECTED;
+				}
+			}
+		}
 
 		// get player instance's reference
 		auto& player = registry.players.get(player_student);

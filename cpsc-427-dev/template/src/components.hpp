@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"
+#include "conversation_state.hpp"
 
 enum class TEXTURE_ASSET_ID;
 
@@ -204,6 +205,15 @@ struct Trap
 {
 
 };
+struct Conversation
+{
+	Conversation(Entity tb) {
+		conversationState = ConversationState();
+		textBox = tb;
+	}
+	ConversationState conversationState;
+	Entity textBox;
+};
 
 /**
  * The following enumerators represent global identifiers refering to graphic
@@ -304,7 +314,12 @@ enum class TEXTURE_ASSET_ID {
 	LEVEL6_LOCKED = LEVEL6 + 1,
 	TUTORIAL_BUTTON = LEVEL6_LOCKED + 1,
 	TUTORIAL_CONTENT = TUTORIAL_BUTTON + 1,
-	TEXTURE_COUNT = TUTORIAL_CONTENT + 1
+	NPC_STUDENT = TUTORIAL_CONTENT + 1,
+	NPC_NO_CONVERSATION = NPC_STUDENT + 1,
+	NPC_DURING_CONVERSATION = NPC_NO_CONVERSATION + 1,
+	NPC_CRIME_DETECTED = NPC_DURING_CONVERSATION + 1,
+	NPC_NO_CRIME_DETECTED = NPC_CRIME_DETECTED + 1,
+	TEXTURE_COUNT = NPC_NO_CRIME_DETECTED + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -332,5 +347,9 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+
+	void changeTexture(TEXTURE_ASSET_ID newTexture) {
+		used_texture = newTexture;
+	}
 };
 

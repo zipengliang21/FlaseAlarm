@@ -4,12 +4,15 @@
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
 #include "game_state.hpp"
+#include "conversation_state.hpp
 
 // These are ahrd coded to the dimensions of the entity texture
 const float STUDENT_BB_WIDTH = 0.3f * 165.f;
 const float STUDENT_BB_HEIGHT = 0.3f * 165.f;
 const float GUARD_BB_WIDTH = 0.2f * 512.f;
 const float GUARD_BB_HEIGHT = 0.2f * 512.f;
+const float NPC_BB_WIDTH = 0.2f * 512.f;
+const float NPC_BB_HEIGHT = 0.2f * 512.f;
 const float WALL_BB_WIDTH = 0.1f * 202.f;
 const float WALL_BB_HEIGHT = 0.1f * 202.f;
 const float EXIT_BB_WIDTH = 0.1f * 900.f;
@@ -49,5 +52,7 @@ Entity createTrap(RenderSystem* renderer, vec2 position);
 Entity createLine(vec2 position, vec2 size);
 // create game state
 GameState* createGameState();
+// create NPC
+Entity createNPC(RenderSystem* renderer, vec2 position);
 
 
