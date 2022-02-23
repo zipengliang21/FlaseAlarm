@@ -294,7 +294,8 @@ Entity createNPC(RenderSystem* renderer, vec2 position)
 	motion.scale = vec2({ -NPC_BB_WIDTH, NPC_BB_HEIGHT });
 
 	// Intilize conversation component of this NPC
-	registry.conversations.emplace(entity);
+	Entity textBox = createTextBox(renderer, {position.x - 10, position.y - 100}, TEXTURE_ASSET_ID::NPC_NO_CONVERSATION, CONVERSATION_BB_WIDTH, CONVERSATION_BB_HEIGHT, "none");
+	registry.conversations.emplace(entity, textBox);
 	registry.renderRequests.insert(
 		entity,
 		{ TEXTURE_ASSET_ID::NPC_STUDENT,

@@ -437,7 +437,7 @@ void WorldSystem::showLevelContent(int level) {
 			else if (level_map[row][col] == 'L') {
 				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE });
 			}
-			else if (level_map[row][col] == 'L') {
+			else if (level_map[row][col] == 'N') {
 				createNPC(renderer,  { col * WALL_SIZE, row * WALL_SIZE });
 			}
 		}
@@ -541,8 +541,8 @@ void WorldSystem::handle_collisions() {
 					std::cout << "already talked, nocrime detected" << std::endl;
 				} else if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::NO_CONVERSATION_YET) {
 					// first time meeting student, change photo rendered
-					RenderRequest& renderRequest = registry.renderRequests.get(entity_other);
-					conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::DURING_CONVERSATION;
+					RenderRequest& renderRequest = registry.renderRequests.get(conversation.textBox);
+					conversation.conversationState.setState(ConversationState::CONVERSATION_STATE::DURING_CONVERSATION);
 					renderRequest.used_texture = TEXTURE_ASSET_ID::NPC_DURING_CONVERSATION;
 				}
 			}
@@ -585,15 +585,19 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 
 		// detect NPC conversation changes
 		for (auto& npc: registry.conversations.entities) {
+			std::cout << "conversation checking..." << std::endl;
 			auto& conversation = registry.conversations.get(npc);
 			if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::DURING_CONVERSATION) {
-				RenderRequest& renderRequest = registry.renderRequests.get(npc);
-				if (key == GLFW_KEY_A && action == GLFW_RELEASE) {
+				std::cout << "during conversation" << std::endl;
+				RenderRequest& renderRequest = registry.renderRequests.get(conversation.textBox);
+				if (key == GLFW_KEY_Z && action == GLFW_RELEASE) {
 					conversation.conversationState.setState(ConversationState::CONVERSATION_STATE::NO_CRIME_DETECTED);
 					renderRequest.used_texture = TEXTURE_ASSET_ID::NPC_NO_CRIME_DETECTED;
-				} else if  (key == GLFW_KEY_B && action == GLFW_RELEASE) {
+					std::cout << "Z released" << std::endl;
+				} else if  (key == GLFW_KEY_X && action == GLFW_RELEASE) {
 					conversation.conversationState.setState(ConversationState::CONVERSATION_STATE::CRIME_DETECTED);
 					renderRequest.used_texture = TEXTURE_ASSET_ID::NPC_CRIME_DETECTED;
+					std::cout << "X released" << std::endl;
 				}
 			}
 		}
