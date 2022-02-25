@@ -1,0 +1,43 @@
+We have successfully accomplished basic enemy Ai, sprite animation, finished three levels design, and control menu for level selection according to our proposal. We have decide to exclude the puzzle game to advance to next level but to increase the game difficulties for each level. We also need to move the lighting reflection/shadowing to the next milestone. 
+
+Updated proposal for further milestone:
+ 
+Playability
+Week 1 March 4
+* Design usage of game items
+* Start working on  Lighting reflection/shadowing
+* Handle unexpected user input
+* Check resolution for and aspect ratio consistency
+* Start implement game items
+* Improve player/enemy animation to be more smooth 
+Week 2 March 11
+* Implement search algorithm for security guards to chase the player
+* More game levels complete
+* Time-stepping based physical simulations for jagger waves
+* Finish implements game items 
+* Implement more complex geometry in game items/light to detect collision 
+Week 3 March 18
+* Test memory usage and efficiency
+* Locate runtime bottlenecks and resolve lags
+* Save game state for user
+* Game items implementation are bug free
+* Support continuing execution and graceful termination
+* Lighting reflection/shadowing done 
+ 
+Final Game
+Week 1 March 25
+* Finalize different background music and sound effects of interaction 
+* FIx all bugs identified in prior milestones
+* Support continuing execution and graceful termination, test unexpected behavior
+* Add additional levels, new maps and bonus animations
+* Add tutorial option in the menu 
+Week 2 April 1
+* Finish all game levels
+* User testing and make changes based on feedbacks
+* Integrate with external libraries to improve gaming experience
+* Implement advanced 2D dynamic shadows 
+Week 3 April 8
+* Make trailer video for the game
+* Implement advanced gameplay, when the character make noise, securities will chase the character in an optimal path base on search algorithm
+* Add audio feedback, for example alarm when securities notice the character, and more intense background music when the user are closer to their destination 
+
