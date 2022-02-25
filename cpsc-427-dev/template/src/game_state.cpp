@@ -1,6 +1,13 @@
 // internal
 #include "game_state.hpp"
 
+#include "common.hpp"
+
+// maximum levels of game we are going to provide
+const int MAX_LEVEL = 6;
+// file path to save level information to
+const std::string UNLOCKED_LEVEL_FILE_PATH = text_path("unlockedLevel.txt");
+
 // load level from file
 void GameLevel::loadlLevelFromFile() {
 	std::string filename(UNLOCKED_LEVEL_FILE_PATH);

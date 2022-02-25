@@ -1,6 +1,7 @@
 // Header
 #include "world_system.hpp"
 #include "world_init.hpp"
+#include "physics_system.hpp"
 
 // stlib
 #include <cassert>
@@ -8,8 +9,8 @@
 #include <string>
 #include <iostream>
 
-#include "physics_system.hpp"
-#include <iostream>
+using namespace std;
+
 // Game configuration
 const size_t MAX_EAGLES = 15;
 const size_t MAX_BUG = 5;
@@ -156,7 +157,8 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 	glfwSetWindowTitle(window, title_ss.str().c_str());
 
 	// update player velocity
-	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
+	GameState& gameState = registry.gameStates.get(gameStateEntity);
+	if (gameState.state == GameState::GAME_STATE::LEVEL_SELECTED) {
 		Motion& player_motion = registry.motions.get(player_student);
 		Motion& guard_motion = registry.motions.get(guard);
 
@@ -214,7 +216,7 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 				registry.deathTimers.remove(entity);
 				screen.darken_screen_factor = 0;
 				// go back to menu when restarting the game
-				gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+				gameState.state = GameState::GAME_STATE::LEVEL_SELECTION;
 				restart_game();
 				return true;
 			}
@@ -333,14 +335,17 @@ void WorldSystem::restart_game() {
 	registry.list_all_components();
 
 	// Create new game state if we don't already have a game state
-	if (gameState == NULL) {
-		gameState = createGameState();
+	GameState* gameState = NULL;
+	if (registry.gameStates.size() == 0) {
+		gameStateEntity = createGameState();
+		gameState = &registry.gameStates.get(gameStateEntity);
 		// Load Level From File
 		// gameState->gameLevel.saveLevelToFile(); // TODO: delete this later
 		gameState->gameLevel.loadlLevelFromFile();
 		//gameState->gameLevel.saveLevelToFile();
 	}
 
+	gameState = &registry.gameStates.get(gameStateEntity);
 	// TODO: depend on current gameState, we either display menu or the game of a specific level
 	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
 		// if we are in level selection menu
@@ -360,7 +365,7 @@ void WorldSystem::restart_game() {
 	}
 	else if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED) {
 		// user selected level, display game component of that level
-		showLevelContent(gameState->gameLevel.currLevel);
+		showLevelContent(gameState->gameLevel, gameState->gameLevel.currLevel);
 		
 
 		// TODO: select game level 2-6 and display correspouding content here
@@ -391,6 +396,7 @@ TEXTURE_ASSET_ID WorldSystem::getTextureIDOfLevelButton(int level) {
 	int unlocked_id = 59 + (level - 1) * 2 + 1; // skip other texture + skip prev levels + current level
 	int locked_id = unlocked_id + 1;
 	TEXTURE_ASSET_ID texture_id;
+	GameState* gameState = &registry.gameStates.get(gameStateEntity);
 	if (gameState->gameLevel.unlockedLevel >= level) {
 		texture_id = static_cast<TEXTURE_ASSET_ID>(unlocked_id);
 	}
@@ -402,11 +408,11 @@ TEXTURE_ASSET_ID WorldSystem::getTextureIDOfLevelButton(int level) {
 }
 
 // called in restart_game, display game content for game level 1
-void WorldSystem::showLevelContent(int level) {
-	std::ifstream in(level_map_path("level" + std::to_string(level) + ".txt"));
+void WorldSystem::showLevelContent(GameLevel& level, int levelIndex) {
+	std::ifstream in(level_map_path("level" + std::to_string(levelIndex) + ".txt"));
 	std::string map_row;
-	std::vector<std::vector<char>> level_map;
-	const float WALL_SIZE = 20.2f;
+	level.levelMap.clear();
+	std::vector<std::vector<char>>& level_map = level.levelMap;
 
 
 	while (std::getline(in, map_row)) {
@@ -460,6 +466,16 @@ void WorldSystem::handle_collisions() {
 		Entity entity = collisionsRegistry.entities[i];
 		Entity entity_other = collisionsRegistry.components[i].other;
 
+		// if the guard is in collisions with the wall
+		if (registry.guards.has(entity) && registry.walls.has(entity_other))
+		{
+			//cout << "collision" << endl;
+			auto & v = registry.motions.get(guard).velocity;
+			auto & vGoal = registry.motions.get(guard).velocityGoal;
+			//v = vec2(0);
+			//vGoal = -vGoal;
+		}
+
 		// For now, we are only interested in collisions that involve the chicken
 		if (registry.players.has(entity)) {
 			//Player& player = registry.players.get(entity);
@@ -489,6 +505,8 @@ void WorldSystem::handle_collisions() {
 					// !!! TODO A1: create a new struct called LightUp in components.hpp and add an instance to the chicken entity by modifying the ECS registry
 				}
 			}
+
+			// wall
 			else if (registry.stopables.has(entity_other)) {
 				if (!registry.stopeds.has(entity)) {
 					registry.stopeds.emplace(entity);
@@ -565,6 +583,7 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	GameState* gameState = &registry.gameStates.get(gameStateEntity);
 	if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
 		std::cout << "On key for tutorial page is pressed" << std::endl;
 		if (key == GLFW_KEY_M && action == GLFW_RELEASE) {
@@ -726,6 +745,7 @@ void WorldSystem::on_mouse_move(vec2 mouse_position) {
 	cursorX = mouse_position[0];
 	cursorY = mouse_position[1];
 	//std::cout << cursorX << " " << cursorY << std::endl;
+	GameState* gameState = &registry.gameStates.get(gameStateEntity);
 	if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
 	}
 }
@@ -789,6 +809,7 @@ int WorldSystem::changeLevel(std::string buttonAction) {
 	}
 
 	if (switchToLevel != -1) {
+		GameState* gameState = &registry.gameStates.get(gameStateEntity);
 		if (switchToLevel <= gameState->gameLevel.unlockedLevel) {
 			gameState->state = GameState::GAME_STATE::LEVEL_SELECTED;
 			gameState->gameLevel.currLevel = switchToLevel;
@@ -812,6 +833,7 @@ void WorldSystem::mouse_button_callback(int button, int action, int mods) {
 		std::cout << "Left Button Released" << std::endl;
 
 		// clickable component that we clicked on
+		GameState* gameState = &registry.gameStates.get(gameStateEntity);
 		Clickable* clickedClickable = findClickedButton();
 		if (clickedClickable != NULL) {
 			// get button action

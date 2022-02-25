@@ -269,8 +269,11 @@ Entity createLine(vec2 position, vec2 scale)
 }
 
 // Reload game state from file, create game state
-GameState* createGameState() {
-	return new GameState();
+Entity createGameState() {
+	Entity entity = Entity();
+	
+	GameState & gameState = registry.gameStates.emplace(entity);
+	return entity;
 }
 
 // Create NPC that talk to the users

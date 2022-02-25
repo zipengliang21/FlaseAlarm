@@ -7,11 +7,11 @@
 #include <queue>
 
 const float GUARD_VELOCITY = 100.f;
-const float CALC_INTERVAL = 0.5f; // Calculate the shortest-path every 0.5 seconds
+const float CALC_INTERVAL = 0.5f; // every 0.5 seconds, calculating the shortest-path once
 
 using namespace std;
 
-// return validity of an index position
+// return an index position is whether valid
 inline bool PosIsValid(ivec2 pos, int rows, int cols)
 {
 	return 0 <= pos.y && pos.y < rows && 0 <= pos.x && pos.x < cols;
