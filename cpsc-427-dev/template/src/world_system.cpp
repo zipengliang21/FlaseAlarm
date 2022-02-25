@@ -435,7 +435,12 @@ void WorldSystem::showLevelContent(GameLevel& level, int levelIndex) {
 				player_student = createStudent(renderer, { col * WALL_SIZE, row * WALL_SIZE });
 			}
 			else if (level_map[row][col] == 'G') {
-				guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+				if (levelIndex == 3) {
+					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { 0.f, 0.f });
+				}
+				else {
+					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { -100.f, 0.f });
+				}
 			}
 			else if (level_map[row][col] == 'C') {
 				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE });

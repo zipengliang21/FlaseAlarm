@@ -10,8 +10,8 @@ const float STUDENT_BB_WIDTH = 0.3f * 165.f;
 const float STUDENT_BB_HEIGHT = 0.3f * 165.f;
 const float GUARD_BB_WIDTH = 0.2f * 512.f;
 const float GUARD_BB_HEIGHT = 0.2f * 512.f;
-const float NPC_BB_WIDTH = 0.15f * 512.f;
-const float NPC_BB_HEIGHT = 0.18f * 512.f;
+const float NPC_BB_WIDTH = 0.3f * 165.f;
+const float NPC_BB_HEIGHT = 0.3f * 165.f;
 const float WALL_BB_WIDTH = 0.1f * 202.f;
 const float WALL_BB_HEIGHT = 0.1f * 202.f;
 const float EXIT_BB_WIDTH = 0.1f * 900.f;
@@ -35,7 +35,7 @@ const float WALL_SIZE = 20.2f;
 // the player
 Entity createStudent(RenderSystem* renderer, vec2 pos);
 // the guard
-Entity createGuard(RenderSystem* renderer, vec2 position);
+Entity createGuard(RenderSystem* renderer, vec2 position, vec2 v);
 // the wall
 Entity createWall(RenderSystem* renderer, vec2 position);
 // the exit

@@ -95,7 +95,7 @@ Entity createExit(RenderSystem* renderer, vec2 position)
 	return entity;
 }
 
-Entity createGuard(RenderSystem* renderer, vec2 position)
+Entity createGuard(RenderSystem* renderer, vec2 position, vec2 v)
 {
 	auto entity = Entity();
 
@@ -112,7 +112,7 @@ Entity createGuard(RenderSystem* renderer, vec2 position)
 	// Initialize the motion
 	auto& motion = registry.motions.emplace(entity);
 	// motion.angle = 0.f;
-	motion.velocityGoal = { -100.f,0.f };
+	motion.velocityGoal = v;
 	motion.position = position;
 
 	// Setting initial values, scale is negative to make it face the opposite way
