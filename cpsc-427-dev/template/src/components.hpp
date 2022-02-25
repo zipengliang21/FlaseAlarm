@@ -1,5 +1,6 @@
 #pragma once
 #include "common.hpp"
+#include "game_state.hpp"
 #include <vector>
 #include <unordered_map>
 #include "../ext/stb_image/stb_image.h"

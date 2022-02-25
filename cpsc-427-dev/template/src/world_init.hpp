@@ -3,7 +3,6 @@
 #include "common.hpp"
 #include "tiny_ecs.hpp"
 #include "render_system.hpp"
-#include "game_state.hpp"
 #include "conversation_state.hpp"
 
 // These are ahrd coded to the dimensions of the entity texture
@@ -31,6 +30,7 @@ const float LIGHT_BB_WEIGHT = 0.4f * 278.f;
 const float LIGHT_BB_HEIGHT = 0.4f * 252.f;
 const float TRAP_BB_WIDTH = 0.1f * 504.f;
 const float TRAP_BB_HEIGHT = 0.15f * 444.f;
+const float WALL_SIZE = 20.2f;
 
 // the player
 Entity createStudent(RenderSystem* renderer, vec2 pos);
@@ -53,7 +53,7 @@ Entity createTrap(RenderSystem* renderer, vec2 position);
 // a red line for debugging purposes
 Entity createLine(vec2 position, vec2 size);
 // create game state
-GameState* createGameState();
+Entity createGameState();
 // create NPC
 Entity createNPC(RenderSystem* renderer, vec2 position);
 

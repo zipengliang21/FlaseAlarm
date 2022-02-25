@@ -58,7 +58,7 @@ private:
 	int changeLevel(std::string buttonAction);
 
 	// display content for different pages
-	void showLevelContent(int level);
+	void showLevelContent(GameLevel& level, int levelIndex);
 	void showTutorial();
 
 	// OpenGL window handle
@@ -75,7 +75,7 @@ private:
 	Entity player_student;
 	Entity guard;
 	Entity exit;
-	GameState* gameState = NULL;
+	Entity gameStateEntity;
 	Entity camera;
 	Entity light;
 
