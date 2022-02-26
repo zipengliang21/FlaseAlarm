@@ -324,7 +324,9 @@ void WorldSystem::restart_game() {
 	// Reset Camera
 	renderer->translationMatrix = { {-0.5f, 0.f, 0.f}, {0.f, 1.0f, 0.f}, {0.f, 0.f, 0.f} };
 
-
+	// Reset the trap effect
+	while (registry.trappables.entities.size() > 0)
+		registry.remove_all_components_of(registry.trappables.entities.back());
 
 	// Reset the game speed
 	current_speed = 1.f;
@@ -496,9 +498,6 @@ void WorldSystem::handle_collisions() {
 					registry.deathTimers.emplace(entity);
 					Mix_PlayChannel(-1, chicken_dead_sound, 0);
 					registry.motions.get(entity_other).velocity = { 0, 0 };
-					// Reset the trap effect
-					while (registry.trappables.entities.size() > 0)
-						registry.remove_all_components_of(registry.trappables.entities.back());
 					// !!! TODO A1: change the chicken orientation and color on death
 				}
 			}
