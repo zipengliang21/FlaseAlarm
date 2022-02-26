@@ -26,6 +26,10 @@ float bg_Y = window_height_px * 1.5;
 float cursorX;
 float cursorY;
 
+
+int bot_to_top = 0;
+int left_to_right = 0;
+
 // Create the bug world
 WorldSystem::WorldSystem()
 	: points(0)
@@ -269,7 +273,6 @@ bool WorldSystem::step(float elapsed_ms_since_last_update) {
 							dir = Character::Direction::LEFT;
 					}
 					else {
-						std::cout << "shitfuxk";
 						if (motion.velocityGoal.y >= 0) // now the guard is moving right
 							dir = Character::Direction::DOWN;
 						else
@@ -517,30 +520,65 @@ void WorldSystem::handle_collisions() {
 					registry.stopeds.emplace(entity);
 				}
 				vec2 velocity = registry.motions.get(entity).velocityGoal;
-				registry.motions.get(entity).velocityGoal = { 0, 0 };
-				registry.motions.get(entity).velocity = { 0, 0 };
+				
 				vec2 position = registry.motions.get(entity).position;
+				//vec2 position = registry.motions.get(entity_other).position;
 				Mix_PlayChannel(-1, wall_collision_sound, 0);
-				if (velocity.x > 0) {
-					registry.motions.get(entity).position = { position.x - 30.f, position.y };
+				if (abs(velocity.x) > abs(velocity.y) || abs(registry.motions.get(entity).velocity.x) > abs(registry.motions.get(entity).velocity.y)) {
+					if (velocity.x > 0 || registry.motions.get(entity).velocity.x >0) {
+						left_to_right = 1;
+						registry.motions.get(entity).velocityGoal = { 0, 0 };
+						registry.motions.get(entity).velocity = { 0, 0 };
+						registry.motions.get(entity).position = { position.x - 30.f, position.y };
+					}
+					else if (velocity.x < 0 || registry.motions.get(entity).velocity.x <0) {
+						left_to_right = 0;
+						registry.motions.get(entity).velocityGoal = { 0, 0 };
+						registry.motions.get(entity).velocity = { 0, 0 };
+						registry.motions.get(entity).position = { position.x + 30.f, position.y };
+					}
+					else {
+						if (left_to_right) {
+							registry.motions.get(entity).position = { position.x - 30.f, position.y };
+						}
+						else {
+							registry.motions.get(entity).position = { position.x + 30.f, position.y };
+						}
+					}
 				}
-				if (velocity.x < 0) {
-					registry.motions.get(entity).position = { position.x + 30.f, position.y };
+				else if (abs(velocity.x) <= abs(velocity.y) || abs(registry.motions.get(entity).velocity.x) <= abs(registry.motions.get(entity).velocity.y)) {
+					if (velocity.y > 0 || registry.motions.get(entity).velocity.y>0) {
+						bot_to_top = 0;
+						registry.motions.get(entity).velocityGoal = { 0, 0 };
+						registry.motions.get(entity).velocity = { 0, 0 };
+						registry.motions.get(entity).position = { position.x, position.y - 30.f };
+					}
+					else if (velocity.y < 0 || registry.motions.get(entity).velocity.y<0) {
+						bot_to_top = 1;
+						registry.motions.get(entity).velocityGoal = { 0, 0 };
+						registry.motions.get(entity).velocity = { 0, 0 };
+						registry.motions.get(entity).position = { position.x, position.y + 30.f };
+					}
+					else {
+						if (bot_to_top) {
+							
+							registry.motions.get(entity).position = { position.x, position.y + 30.f };
+						}
+						else {
+							registry.motions.get(entity).position = { position.x, position.y - 30.f };
+						}
+						
+					}
 				}
-				if (velocity.y > 0) {
-					registry.motions.get(entity).position = { position.x, position.y - 30.f };
-				}
-				if (velocity.y < 0) {
-					registry.motions.get(entity).position = { position.x, position.y + 30.f };
-				}
+
 				//registry.motions.get(entity).position = { position.x, position.y };
 			}
 			else if (registry.wins.has(entity_other)) {
 				Mix_PlayChannel(-1, fire_alarm_sound, 2);
-				++points;
 				if (!registry.wins.has(entity)) {
 					registry.wins.emplace(entity);
 				}
+				//registry.clear_all_components();
 				createTextBox(renderer, { bg_X / 2, bg_Y / 2 }, TEXTURE_ASSET_ID::WIN, WIN_BB_WIDTH, WIN_BB_HEIGHT, "unlock new level");
 			}
 			else if (registry.traps.has(entity_other)) {
@@ -764,26 +802,26 @@ bool inRange(vec2 buttonPos, int buttonWidth, int buttonHeight) {
 	float normalizedCursorY = cursorY + (550 - 160);
 	bool xInRange = (buttonLeft <= normalizedCursorX) && (buttonRight >= normalizedCursorX);
 	bool yInRange = (buttonTop <= normalizedCursorY) && (buttonBot >= normalizedCursorY);
-	std::cout << "buttonPos " << buttonPos[0] << " " << buttonPos[1] << std::endl;
-	std::cout << "buttonWidth " << buttonWidth << std::endl;
-	std::cout << "buttonHeight " << buttonHeight << std::endl;
-	std::cout << "normalizedCursorX " << normalizedCursorX << std::endl;
-	std::cout << "normalizedCursorY " << normalizedCursorY << std::endl;
-	std::cout << "buttonTop " << buttonTop << std::endl;
-	std::cout << "buttonBot " << buttonBot << std::endl;
-	std::cout << "xInRange " << xInRange << std::endl;
-	std::cout << "yInRange " << yInRange << std::endl;
+	//std::cout << "buttonPos " << buttonPos[0] << " " << buttonPos[1] << std::endl;
+	//std::cout << "buttonWidth " << buttonWidth << std::endl;
+	//std::cout << "buttonHeight " << buttonHeight << std::endl;
+	//std::cout << "normalizedCursorX " << normalizedCursorX << std::endl;
+	//std::cout << "normalizedCursorY " << normalizedCursorY << std::endl;
+	//std::cout << "buttonTop " << buttonTop << std::endl;
+	//std::cout << "buttonBot " << buttonBot << std::endl;
+	//std::cout << "xInRange " << xInRange << std::endl;
+	//std::cout << "yInRange " << yInRange << std::endl;
 	return xInRange && yInRange;
 }
 
 
 Clickable* findClickedButton() {
 	// uses cursorX and cursorY to see if it is in range of any button
-	std::cout << "findClickedButton" << std::endl;
+	//std::cout << "findClickedButton" << std::endl;
 	for (auto &c : registry.clickables.components) {
-		std::cout << "----check button range ----" << std::endl;
+		//std::cout << "----check button range ----" << std::endl;
 		if (inRange(c.position, c.width, c.height)) {
-			std::cout << "Found Clicked Button" << std::endl;
+			//std::cout << "Found Clicked Button" << std::endl;
 			return &c; // TODO: does this work?
 		}
 	}
@@ -820,7 +858,7 @@ int WorldSystem::changeLevel(std::string buttonAction) {
 			gameState->gameLevel.currLevel = switchToLevel;
 		}
 		else {
-			std::cout << "Tried to access locked level, failed" << std::endl;
+			//std::cout << "Tried to access locked level, failed" << std::endl;
 			switchToLevel = -1;
 		}
 	}
@@ -833,9 +871,8 @@ int WorldSystem::changeLevel(std::string buttonAction) {
 
 
 void WorldSystem::mouse_button_callback(int button, int action, int mods) {
-	std::cout << "IN mouse_button_callback" << std::endl;
 	if (button == GLFW_MOUSE_BUTTON_LEFT && action == GLFW_RELEASE) {
-		std::cout << "Left Button Released" << std::endl;
+		//std::cout << "Left Button Released" << std::endl;
 
 		// clickable component that we clicked on
 		GameState* gameState = &registry.gameStates.get(gameStateEntity);
@@ -846,12 +883,12 @@ void WorldSystem::mouse_button_callback(int button, int action, int mods) {
 
 			if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTION) {
 				// if we are on level selection page
-				std::cout << "Selecting Levls" << std::endl;
+				//std::cout << "Selecting Levls" << std::endl;
 
 				// check if user clicked on the level selection button
 				int new_level = changeLevel(buttonAction);
 				if (new_level != -1) {
-					std::cout << "new_level is: " << new_level << std::endl;
+					//std::cout << "new_level is: " << new_level << std::endl;
 					restart_game();
 					return; // we changed the level
 				}
@@ -872,7 +909,7 @@ void WorldSystem::mouse_button_callback(int button, int action, int mods) {
 		// go back to menu if winned the game
 		if (gameState->state == GameState::GAME_STATE::LEVEL_SELECTED && registry.wins.has(player_student)) {
 			// currently in an game
-			std::cout << "Playing in level finished a level and go back to menu" << std::endl;
+			//std::cout << "Playing in level finished a level and go back to menu" << std::endl;
 			// unlock the next level and go back to home page
 
 			// check if we are not at maximum level + we are playing the last unlocked level
