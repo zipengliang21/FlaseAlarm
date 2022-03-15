@@ -1,5 +1,6 @@
 #include "components.hpp"
 #include "render_system.hpp" // for gl_has_errors
+#include "world_init.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "../ext/stb_image/stb_image.h"
@@ -8,12 +9,14 @@
 #include <iostream>
 #include <sstream>
 
+using namespace std;
+
 Debug debugging;
 float death_timer_counter_ms = 3000;
 
 // Very, VERY simple OBJ loader from https://github.com/opengl-tutorials/ogl tutorial 7
 // (modified to also read vertex color and omit uv and normals)
-bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out_vertices, std::vector<uint16_t>& out_vertex_indices, vec2& out_size)
+bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex> &out_vertices, std::vector<uint16_t> &out_vertex_indices, vec2 &out_size)
 {
 	// disable warnings about fscanf and fopen on Windows
 #ifdef _MSC_VER
@@ -26,7 +29,7 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 	std::vector<glm::vec2> out_uvs;
 	std::vector<glm::vec3> out_normals;
 
-	FILE* file = fopen(obj_path.c_str(), "r");
+	FILE *file = fopen(obj_path.c_str(), "r");
 	if (file == NULL) {
 		printf("Impossible to open the file ! Are you in the right path ? See Tutorial 1 for details\n");
 		getchar();
@@ -102,19 +105,19 @@ bool Mesh::loadFromOBJFile(std::string obj_path, std::vector<ColoredVertex>& out
 	// Compute bounds of the mesh
 	vec3 max_position = { -99999,-99999,-99999 };
 	vec3 min_position = { 99999,99999,99999 };
-	for (ColoredVertex& pos : out_vertices)
+	for (ColoredVertex &pos : out_vertices)
 	{
 		max_position = glm::max(max_position, pos.position);
 		min_position = glm::min(min_position, pos.position);
 	}
-	if(abs(max_position.z - min_position.z)<0.001)
-		max_position.z = min_position.z+1; // don't scale z direction when everythin is on one plane
+	if (abs(max_position.z - min_position.z) < 0.001)
+		max_position.z = min_position.z + 1; // don't scale z direction when everythin is on one plane
 
 	vec3 size3d = max_position - min_position;
 	out_size = size3d;
 
 	// Normalize mesh to range -0.5 ... 0.5
-	for (ColoredVertex& pos : out_vertices)
+	for (ColoredVertex &pos : out_vertices)
 		pos.position = ((pos.position - min_position) / size3d) - vec3(0.5f, 0.5f, 0.5f);
 
 	return true;
@@ -295,4 +298,104 @@ TEXTURE_ASSET_ID Deadly::GetTexId(double nowTime)
 	}
 	lastSwitchTime = nowTime;
 	return curTexId;
+}
+
+Movie::Movie(std::vector<TEXTURE_ASSET_ID> textures, double frameInterval) :
+	curTexIndex(0), textures(textures), frameInterval(frameInterval), lastSwitchTime(0)
+{
+}
+
+void Movie::SetTextures(std::vector<TEXTURE_ASSET_ID> textures)
+{
+	assert(textures.size() > 0);
+	this->textures = textures;
+	curTexIndex = 0;
+}
+
+TEXTURE_ASSET_ID Movie::GetTexId(double nowTime)
+{
+	if (nowTime > lastSwitchTime + frameInterval) // should switch texture
+	{
+		// do switch 
+
+		curTexIndex++;
+		if (curTexIndex == textures.size())
+			curTexIndex = 0;
+		lastSwitchTime = nowTime;
+	}
+
+	return textures[curTexIndex];
+}
+
+Tool::Tool(ToolType type) :type(type), movie({})
+{
+	switch (type)
+	{
+	case ToolType::SANDGLASS:
+		movie.SetTextures({ TEXTURE_ASSET_ID::SANDGLASS }); // if you want the tool's apperance to be animated, just add more texture to this
+		break;
+	case ToolType::REMOTE_CONTROL:
+		movie.SetTextures({ TEXTURE_ASSET_ID::REMOTE_CONTROL });
+		break;
+	case ToolType::HAMMER:
+		movie.SetTextures({ TEXTURE_ASSET_ID::HAMMER });
+		break;
+	}
+}
+
+TEXTURE_ASSET_ID Tool::GetTexId(double nowTime)
+{
+	return movie.GetTexId(nowTime);
+}
+
+vec2 Tool::GetUIPosition() const
+{
+	vec2 pos;
+	switch (type)
+	{
+	case ToolType::SANDGLASS:
+		pos={ window_width_px*0.8,window_height_px*0.1 };
+		break;
+	case ToolType::REMOTE_CONTROL:
+		pos = { window_width_px * 0.865,window_height_px * 0.1 };
+		break;
+	case ToolType::HAMMER:
+		pos = { window_width_px * 0.93,window_height_px * 0.1 };
+		break;
+	}
+	return pos;
+}
+
+vec2 Tool::GetUISize() const
+{
+	return { TOOL_UI_SIZE,TOOL_UI_SIZE };
+}
+
+char Tool::GetCommandChar() const
+{
+	char c;
+	switch (type)
+	{
+	case ToolType::SANDGLASS:
+		c = SANDGLASS_CHAR;
+		break;
+	case ToolType::REMOTE_CONTROL:
+		c = REMOTE_CONTROL_CHAR;
+		break;
+	case ToolType::HAMMER:
+		c = HAMMER_CHAR;
+		break;
+	}
+	return c;
+}
+
+bool TurnTimer::UpdateAndCheckIsTimeout(float elapsed_ms)
+{
+	counter_ms -= elapsed_ms;
+	if (counter_ms < 0)
+	{
+		counter_ms = turnTime;
+		return true;
+	}
+	return false;
 }

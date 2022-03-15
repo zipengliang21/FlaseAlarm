@@ -28,7 +28,7 @@ endif()
 configure_file("${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp.in" "${CMAKE_CURRENT_SOURCE_DIR}/ext/project_path.hpp")
 
 # You can switch to use the file GLOB for simplicity but at your own risk
-file(GLOB SOURCE_FILES src/*.cpp src/*.hpp)
+file(GLOB SOURCE_FILES src/*.cpp src/*.hpp src/GameLevel/*.cpp src/GameLevel/*.h)
 
 #set(SOURCE_FILES
 #	src/main.cpp
@@ -58,7 +58,7 @@ if (IS_OS_MAC)
   link_directories(/usr/local/lib)
 endif()
 
-add_executable(${PROJECT_NAME} ${SOURCE_FILES} "src/text.cpp" "src/game_state.cpp")
+add_executable(${PROJECT_NAME} ${SOURCE_FILES})
 target_include_directories(${PROJECT_NAME} PUBLIC src/)
 
 # Added this so policy CMP0065 doesn't scream

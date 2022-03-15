@@ -6,72 +6,41 @@
 #include <iostream>
 #include <fstream>
 #include <vector>
+#include <map>
+#include <set>
 
 // internal
 
 // maximum levels of game we are going to provide
 extern const int MAX_LEVEL;
-// file path to save level information to
-extern const std::string UNLOCKED_LEVEL_FILE_PATH;
-
-class GameLevel
-{
-public:
-	int currLevel;
-	int unlockedLevel;
-	
-	std::vector<std::vector<char>> levelMap; // the map of this level
-
-	GameLevel() {
-		currLevel = -1;
-		unlockedLevel = 1;
-	}
-
-	GameLevel(bool loadFromPrevState) {
-		currLevel = -1;
-		if (loadFromPrevState) {
-			loadlLevelFromFile(); // TODO: create a file that do this
-		}
-		else {
-			unlockedLevel = 1; // level uses 1-based index
-		}
-	}
-	glm::vec2 character_position; // TODO: for the future, maybe save character position
-	// load level from file
-	void loadlLevelFromFile();
-	// save level to file
-	void saveLevelToFile();
-	// reset level
-	void resetToInitialLevel();
-};
-
 
 class GameState
 {
 public:
-	GameState() {
-		state = GAME_STATE::LEVEL_SELECTION;
-		gameLevel = GameLevel(false); // TODO: change to true after save/load is implemented
-	}
+	using GameMap = std::vector<std::vector<char>>;
 
-	GameState & operator=(const GameState & other)
-	{
-		//game_state_count = other.game_state_count;
-		state = other.state;
-		gameLevel = other.gameLevel;
-		return *this;
-	}
+	// load all the level files and unlocked level list when create
+	GameState();
 
-	enum class GAME_STATE {
-		LEVEL_SELECTION = 0,
-		LEVEL_SELECTED = 1,
-		TUTORIAL_PAGE = 2,
-		GAME_STATE_COUNT = TUTORIAL_PAGE + 1
-	};
+	// returns the current map
+	const GameMap &GetCurrentMap()const;
 
-	const int game_state_count = (int)GAME_STATE::GAME_STATE_COUNT;
+	int GetUnlockedLevel() const;
 
-	GAME_STATE state;
+	void WinAtLevel(int winLevelIndex);
 
-	GameLevel gameLevel;
+	int GetCurrentLevelIndex() const;
+
+	void SetCurrentLevelIndex(int index);
+
+private:
+	int currLevelIndex;
+	int unlockedLevel;
+	std::map<int, GameMap> levelMaps; // key = level index; value = level map;
+
+	void LoadLevel(int levelIndex);
+
+	void LoadUnlockedLevel();
+
+	void SaveUnlockedLevel();
 };

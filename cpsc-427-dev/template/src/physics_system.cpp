@@ -2,6 +2,8 @@
 #include "physics_system.hpp"
 #include "world_init.hpp"
 
+using namespace std;
+
 // Returns the local bounding coordinates scaled by the current size of the entity
 vec2 get_bounding_box(const Motion& motion)
 {
@@ -20,7 +22,7 @@ bool collides(const Motion& motion1, const Motion& motion2)
 	const float other_r_squared = dot(other_bonding_box, other_bonding_box);
 	const vec2 my_bonding_box = get_bounding_box(motion2) / 2.f;
 	const float my_r_squared = dot(my_bonding_box, my_bonding_box);
-	const float r_squared = max(other_r_squared, my_r_squared);
+	const float r_squared = glm::max(other_r_squared, my_r_squared);
 	if (dist_squared < r_squared)
 		return true;
 	return false;
@@ -40,14 +42,39 @@ void PhysicsSystem::step(float elapsed_ms)
 		
 		Motion& motion = motion_registry.components[i];
 		Entity entity = motion_registry.entities[i];
-		if (registry.lights.has(entity)) {
+
+		if (registry.lights.has(entity)) 
+		{
+			// light
 			float step_seconds = elapsed_ms / 1000.f;
 			motion.angle += motion.velocity.x * step_seconds;
-		} else if (!registry.stopeds.has(entity) && !registry.wins.has(entity)) {
+		} 
+		else if (!registry.stopeds.has(entity) && !registry.wins.has(entity))  // not stopeds and wins
+		{
 			float step_seconds = elapsed_ms / 1000.f;
 			motion.position.x += motion.velocity.x * step_seconds;
 			motion.position.y += motion.velocity.y * step_seconds;
 		}
+
+	}
+	
+	// calc all the explodeds 's life and erase dead instance
+	for (auto &e: registry.explodeds.entities)
+	{
+		Exploded &inst = registry.explodeds.get(e);
+		inst.life -= elapsed_ms;
+		if (inst.life <= 0)
+		{
+			registry.remove_all_components_of(e);
+			continue;
+		}
+
+		// rotate it
+		auto &motion = registry.motions.get(e);
+		motion.angle += 0.1 * elapsed_ms;
+
+		float lifeCoef = inst.life / inst.initLife; // [0,1], 0 for dead; 1 for born
+		motion.scale = inst.initSize * lifeCoef;
 	}
 
 	// Check for collisions between all moving entities
@@ -72,9 +99,6 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 		// TODO: iterate through all entities with Wall component, check collision with special wall collision algorithm
 	}
-
-	// you may need the following quantities to compute wall positions
-	(float)window_width_px; (float)window_height_px;
 
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)

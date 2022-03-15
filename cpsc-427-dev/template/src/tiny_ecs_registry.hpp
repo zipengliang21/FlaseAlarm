@@ -24,7 +24,7 @@ public:
 	ComponentContainer<DebugComponent> debugComponents;
 	ComponentContainer<vec3> colors;
 	ComponentContainer<Wall> walls;
-	ComponentContainer<WalkTimer> walkTimers;
+	ComponentContainer<TurnTimer> turnTimers;
 	ComponentContainer<Stopable> stopables;
 	ComponentContainer<Exit> exits;
 	ComponentContainer<Win> wins;
@@ -33,12 +33,15 @@ public:
 	ComponentContainer<Clickable> clickables;
 	ComponentContainer<Camera> cameras;
 	ComponentContainer<Light> lights;
-	ComponentContainer<RotateTimer> rotateTimers;
 	ComponentContainer<Trap> traps;
 	ComponentContainer<Trappable> trappables;
 	ComponentContainer<Guard> guards;
 	ComponentContainer<Conversation> conversations;
 	ComponentContainer<GameState> gameStates;
+	ComponentContainer<Movie> movies;
+	ComponentContainer<Tool> tools;
+	ComponentContainer<UI> uis;
+	ComponentContainer<Exploded> explodeds;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -57,7 +60,7 @@ public:
 		registry_list.push_back(&debugComponents);
 		registry_list.push_back(&colors);
 		registry_list.push_back(&walls);
-		registry_list.push_back(&walkTimers);
+		registry_list.push_back(&turnTimers);
 		registry_list.push_back(&stopables);;
 		registry_list.push_back(&exits);
 		registry_list.push_back(&wins);
@@ -66,12 +69,15 @@ public:
 		registry_list.push_back(&clickables);
 		registry_list.push_back(&cameras);
 		registry_list.push_back(&lights);
-		registry_list.push_back(&rotateTimers);
 		registry_list.push_back(&traps);
 		registry_list.push_back(&trappables);
 		registry_list.push_back(&guards);
 		registry_list.push_back(&conversations);
 		registry_list.push_back(&gameStates);
+		registry_list.push_back(&movies);
+		registry_list.push_back(&tools);
+		registry_list.push_back(&uis);
+		registry_list.push_back(&explodeds);
 	}
 
 	void clear_all_components() {
