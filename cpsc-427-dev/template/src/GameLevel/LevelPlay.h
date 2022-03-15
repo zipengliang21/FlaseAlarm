@@ -51,6 +51,7 @@ private:
 	Mix_Chunk *fire_alarm_sound;
 	Mix_Chunk *trap_sound;
 	Mix_Chunk *explode_sound;
+	Mix_Chunk *startLevel_sound;
 
 	void ProcessKeyPress();
 

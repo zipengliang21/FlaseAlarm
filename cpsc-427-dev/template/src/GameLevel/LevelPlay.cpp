@@ -40,6 +40,8 @@ LevelPlay::LevelPlay(RenderSystem *renderer, LevelManager *manager, GLFWwindow *
 	explode_sound = Mix_LoadWAV(audio_path("explode.wav").c_str());
 	assert(explode_sound);
 
+	startLevel_sound = Mix_LoadWAV(audio_path("start.wav").c_str());
+	assert(startLevel_sound);
 }
 
 LevelPlay::~LevelPlay()
@@ -55,6 +57,8 @@ LevelPlay::~LevelPlay()
 		Mix_FreeChunk(fire_alarm_sound);
 	if (explode_sound != nullptr)
 		Mix_FreeChunk(explode_sound);
+	if (startLevel_sound != nullptr)
+		Mix_FreeChunk(startLevel_sound);
 	Mix_CloseAudio();
 }
 
@@ -903,6 +907,8 @@ void LevelPlay::Restart()
 			}
 		}
 	}
+	// play start level music
+	Mix_PlayChannel(-1, startLevel_sound, 0);
 
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 
