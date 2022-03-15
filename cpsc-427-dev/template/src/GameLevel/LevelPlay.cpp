@@ -145,7 +145,7 @@ void LevelPlay::step(float elapsed_ms)
 			registry.deathTimers.remove(entity);
 			screen.darken_screen_factor = 0;
 			// go back to menu when restarting the game
-			Restart();
+			//Restart();
 			manager->GoLevelSelection();
 			return;
 		}
@@ -907,6 +907,7 @@ void LevelPlay::Restart()
 			}
 		}
 	}
+	
 	// play start level music
 	Mix_PlayChannel(-1, startLevel_sound, 0);
 
