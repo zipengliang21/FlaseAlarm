@@ -356,6 +356,12 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 		}
 	}
 
+	if (key == GLFW_KEY_R && action == GLFW_PRESS) {
+		if (registry.stopeds.has(player)) {
+			registry.stopeds.remove(player);
+		}
+	}
+
 	// get the reference of the texture id that player is using
 	auto &playerUsedTex = registry.renderRequests.get(player).used_texture;
 
@@ -566,54 +572,82 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 		vec2 velocity = registry.motions.get(player).velocityGoal;
 
 		vec2 position = registry.motions.get(player).position;
-		//vec2 position = registry.motions.get(entity_other).position;
+		vec2 position_other = registry.motions.get(other).position;
 		Mix_PlayChannel(-1, wall_collision_sound, 0);
-		if (abs(velocity.x) > abs(velocity.y) || abs(registry.motions.get(player).velocity.x) > abs(registry.motions.get(player).velocity.y)) {
-			if (velocity.x > 0 || registry.motions.get(player).velocity.x > 0) {
-				left_to_right = 1;
+
+		vec2 diff = position_other - position;
+		if (abs(diff.x) > abs(diff.y)) {
+			if (diff.x > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
 				registry.motions.get(player).position = { position.x - 30.f, position.y };
 			}
-			else if (velocity.x < 0 || registry.motions.get(player).velocity.x < 0) {
-				left_to_right = 0;
+			else if (diff.x < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
 				registry.motions.get(player).position = { position.x + 30.f, position.y };
 			}
-			else {
-				if (left_to_right) {
-					registry.motions.get(player).position = { position.x - 30.f, position.y };
-				}
-				else {
-					registry.motions.get(player).position = { position.x + 30.f, position.y };
-				}
-			}
 		}
-		else if (abs(velocity.x) <= abs(velocity.y) || abs(registry.motions.get(player).velocity.x) <= abs(registry.motions.get(player).velocity.y)) {
-			if (velocity.y > 0 || registry.motions.get(player).velocity.y > 0) {
-				bot_to_top = 0;
+		else {
+			if (diff.y > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
 				registry.motions.get(player).position = { position.x, position.y - 30.f };
 			}
-			else if (velocity.y < 0 || registry.motions.get(player).velocity.y < 0) {
-				bot_to_top = 1;
+			else if (diff.y < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
 				registry.motions.get(player).position = { position.x, position.y + 30.f };
 			}
-			else {
-				if (bot_to_top) {
-
-					registry.motions.get(player).position = { position.x, position.y + 30.f };
-				}
-				else {
-					registry.motions.get(player).position = { position.x, position.y - 30.f };
-				}
-
-			}
 		}
+
+
+		//if (abs(velocity.x) > abs(velocity.y) || abs(registry.motions.get(player).velocity.x) > abs(registry.motions.get(player).velocity.y)) {
+			//if (velocity.x > 0 || registry.motions.get(player).velocity.x > 0) {
+			//	left_to_right = 1;
+			//	registry.motions.get(player).velocityGoal = { 0, 0 };
+			//	registry.motions.get(player).velocity = { 0, 0 };
+			//	registry.motions.get(player).position = { position.x - 30.f, position.y };
+			//}
+			//else if (velocity.x < 0 || registry.motions.get(player).velocity.x < 0) {
+			//	left_to_right = 0;
+			//	registry.motions.get(player).velocityGoal = { 0, 0 };
+			//	registry.motions.get(player).velocity = { 0, 0 };
+			//	registry.motions.get(player).position = { position.x + 30.f, position.y };
+			//}
+			//else {
+			//	if (left_to_right) {
+			//		registry.motions.get(player).position = { position.x - 30.f, position.y };
+			//	}
+			//	else {
+			//		registry.motions.get(player).position = { position.x + 30.f, position.y };
+			//	}
+			//}
+		//}
+		//else if (abs(velocity.x) <= abs(velocity.y) || abs(registry.motions.get(player).velocity.x) <= abs(registry.motions.get(player).velocity.y)) {
+			//if (velocity.y > 0 || registry.motions.get(player).velocity.y > 0) {
+			//	bot_to_top = 0;
+			//	registry.motions.get(player).velocityGoal = { 0, 0 };
+			//	registry.motions.get(player).velocity = { 0, 0 };
+			//	registry.motions.get(player).position = { position.x, position.y - 30.f };
+			//}
+			//else if (velocity.y < 0 || registry.motions.get(player).velocity.y < 0) {
+			//	bot_to_top = 1;
+			//	registry.motions.get(player).velocityGoal = { 0, 0 };
+			//	registry.motions.get(player).velocity = { 0, 0 };
+			//	registry.motions.get(player).position = { position.x, position.y + 30.f };
+			//}
+			//else {
+			//	if (bot_to_top) {
+
+			//		registry.motions.get(player).position = { position.x, position.y + 30.f };
+			//	}
+			//	else {
+			//		registry.motions.get(player).position = { position.x, position.y - 30.f };
+			//	}
+
+			//}
+		//}
 
 		//registry.motions.get(entity).position = { position.x, position.y };
 		return true;
