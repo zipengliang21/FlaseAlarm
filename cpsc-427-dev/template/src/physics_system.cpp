@@ -100,6 +100,24 @@ void PhysicsSystem::step(float elapsed_ms)
 		// TODO: iterate through all entities with Wall component, check collision with special wall collision algorithm
 	}
 
+	//check if player collide with wall
+	if (registry.players.entities.size() > 0) {
+		int palyer_collide = 0;
+		Entity player = registry.players.entities[0];
+		Motion& motion_player = registry.motions.get(player);
+		for (int i = 0; i < registry.walls.entities.size(); i++) {
+			Entity wall_i = registry.walls.entities[i];
+			Motion& motion_i = registry.motions.get(wall_i);
+			if (collides(motion_i, motion_player)) {
+				palyer_collide = 1;
+			}
+		}
+		if (palyer_collide == 0 && registry.stopeds.has(player)) {
+			registry.stopeds.remove(player);
+		}
+	}
+
+
 	// debugging of bounding boxes
 	if (debugging.in_debug_mode)
 	{

@@ -306,8 +306,8 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 	// get player instance's reference
 	auto &playerInst = registry.players.get(player);
 
-	if (key == GLFW_KEY_W) {
-		registry.stopeds.remove(player);
+	if (key == GLFW_KEY_W && !registry.stopeds.has(player)) {
+		//registry.stopeds.remove(player);
 		if (action == GLFW_PRESS) {
 
 			motion.velocityGoal = { 0,-PLAYER_SPEED };
@@ -319,8 +319,8 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			motion.velocityGoal = { 0,0 };
 		}
 	}
-	else if (key == GLFW_KEY_S) {
-		registry.stopeds.remove(player);
+	else if (key == GLFW_KEY_S && !registry.stopeds.has(player)) {
+		//registry.stopeds.remove(player);
 		if (action == GLFW_PRESS) {
 			motion.velocityGoal = { 0,PLAYER_SPEED };
 
@@ -331,8 +331,8 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			motion.velocityGoal = { 0,0 };
 		}
 	}
-	else if (key == GLFW_KEY_A) {
-		registry.stopeds.remove(player);
+	else if (key == GLFW_KEY_A && !registry.stopeds.has(player)) {
+		//registry.stopeds.remove(player);
 		if (action == GLFW_PRESS) {
 			motion.velocityGoal = { -PLAYER_SPEED,0 };
 
@@ -343,8 +343,8 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			motion.velocityGoal = { 0,0 };
 		}
 	}
-	else if (key == GLFW_KEY_D) {
-		registry.stopeds.remove(player);
+	else if (key == GLFW_KEY_D && !registry.stopeds.has(player)) {
+		//registry.stopeds.remove(player);
 		if (action == GLFW_PRESS) {
 			motion.velocityGoal = { PLAYER_SPEED,0 };
 
@@ -496,17 +496,21 @@ void LevelPlay::ProcessKeyPress()
 	auto &playerInst = registry.players.get(player);
 
 	motion.velocityGoal = { 0,0 };
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && !registry.stopeds.has(player)) {
 		motion.velocityGoal.y = -PLAYER_SPEED;
 	}
-	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
+	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && !registry.stopeds.has(player)) {
 		motion.velocityGoal.y = PLAYER_SPEED;
 	}
-	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
+	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && !registry.stopeds.has(player)) {
 		motion.velocityGoal.x = -PLAYER_SPEED;
 	}
-	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
+	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && !registry.stopeds.has(player)) {
 		motion.velocityGoal.x = PLAYER_SPEED;
+	}
+	else {
+		motion.velocityGoal.x = 0;
+		motion.velocityGoal.y = 0;
 	}
 }
 
@@ -555,6 +559,9 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 	if (registry.stopables.has(other)) {
 		if (!registry.stopeds.has(player)) {
 			registry.stopeds.emplace(player);
+		}
+		else {
+			return true;
 		}
 		vec2 velocity = registry.motions.get(player).velocityGoal;
 
