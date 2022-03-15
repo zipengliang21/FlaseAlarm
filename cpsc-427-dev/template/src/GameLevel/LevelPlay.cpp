@@ -865,6 +865,9 @@ void LevelPlay::Restart()
 
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 
+	//add background 
+	createBackground(renderer, { w / 2.0,h / 2.0 }, { w,h }, TEXTURE_ASSET_ID::FLOOR_BG);
+
 	// add tool grid
 	createUIBox(renderer, { window_width_px * 0.8,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
 	createUIBox(renderer, { window_width_px * 0.865,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");

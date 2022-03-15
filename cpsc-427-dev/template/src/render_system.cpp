@@ -226,6 +226,10 @@ void RenderSystem::draw()
 
 	std::vector<Entity> entitiesDrawFinal;
 
+	for (Entity entity : registry.background.entities) {
+		drawTexturedMesh(entity, projection_2D);
+	}
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
@@ -236,6 +240,11 @@ void RenderSystem::draw()
 		if (registry.uis.has(entity))
 		{
 			entitiesDrawFinal.push_back(entity);
+			continue;
+		}
+
+		if (registry.background.has(entity))
+		{
 			continue;
 		}
 

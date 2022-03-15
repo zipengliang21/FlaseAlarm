@@ -119,7 +119,8 @@ class RenderSystem {
 			textures_path("cover_bg/2.jpg"),
 			textures_path("cover_bg/3.jpg"),
 			textures_path("tool_grid.png"),
-			textures_path("selection_bg.jpg")
+			textures_path("selection_bg.jpg"),
+			textures_path("floor.jpg"),
 	};
 
 	std::array<GLuint, effect_count> effects;

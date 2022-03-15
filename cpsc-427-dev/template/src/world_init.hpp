@@ -80,3 +80,6 @@ Entity createMovie(RenderSystem *renderer, vec2 pos, vec2 size, std::vector<TEXT
 Entity createTool(RenderSystem *renderer, vec2 position, Tool::ToolType type);
 
 void createExplodeds(RenderSystem *renderer,int count, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId, float life);
+
+// create background
+Entity createBackground(RenderSystem* renderer, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId);

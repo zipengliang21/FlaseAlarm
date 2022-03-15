@@ -267,6 +267,10 @@ struct UI
 
 };
 
+struct Background {
+
+};
+
 // this struct is used for exploding
 struct Exploded
 {
@@ -391,7 +395,8 @@ enum class TEXTURE_ASSET_ID {
 	COVER3 = COVER2 + 1,
 	TOOL_GRID = COVER3 + 1,
 	SELECTION_BG= TOOL_GRID + 1,
-	TEXTURE_COUNT =SELECTION_BG+1
+	FLOOR_BG = SELECTION_BG + 1,
+	TEXTURE_COUNT = FLOOR_BG +1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 

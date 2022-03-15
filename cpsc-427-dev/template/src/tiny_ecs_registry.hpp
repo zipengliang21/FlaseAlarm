@@ -41,6 +41,7 @@ public:
 	ComponentContainer<Movie> movies;
 	ComponentContainer<Tool> tools;
 	ComponentContainer<UI> uis;
+	ComponentContainer<Background> background;
 	ComponentContainer<Exploded> explodeds;
 
 	// constructor that adds all containers for looping over them
@@ -77,6 +78,7 @@ public:
 		registry_list.push_back(&movies);
 		registry_list.push_back(&tools);
 		registry_list.push_back(&uis);
+		registry_list.push_back(&background);
 		registry_list.push_back(&explodeds);
 	}
 

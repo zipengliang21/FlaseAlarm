@@ -225,6 +225,33 @@ Entity createUIBox(RenderSystem *renderer, vec2 position, vec2 size, enum TEXTUR
 	return entity;
 }
 
+Entity createBackground(RenderSystem* renderer, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0,0 };
+	motion.position = position;
+	motion.scale = size;
+
+	registry.background.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ textureAssetId, // TEXTURE_ASSET_ID
+		 EFFECT_ASSET_ID::UI,
+		 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+
 Entity createTextBox(RenderSystem *renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction) {
 	auto entity = Entity();
 
