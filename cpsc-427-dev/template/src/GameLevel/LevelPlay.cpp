@@ -64,7 +64,7 @@ LevelPlay::~LevelPlay()
 
 void LevelPlay::step(float elapsed_ms)
 {
-	ProcessKeyPress();
+	//ProcessKeyPress();
 
 	// traversal the count down events, if time out, run it.
 	for (auto it = countdownEvents.begin(); it != countdownEvents.end();)
