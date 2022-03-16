@@ -10,7 +10,7 @@ using namespace std;
 
 // Game configuration
 const size_t MAX_BUG = 5;
-const float PLAYER_SPEED = 200;
+const float PLAYER_SPEED = 70;
 
 
 int bot_to_top = 0;
@@ -605,54 +605,6 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 			}
 		}
 
-
-		//if (abs(velocity.x) > abs(velocity.y) || abs(registry.motions.get(player).velocity.x) > abs(registry.motions.get(player).velocity.y)) {
-			//if (velocity.x > 0 || registry.motions.get(player).velocity.x > 0) {
-			//	left_to_right = 1;
-			//	registry.motions.get(player).velocityGoal = { 0, 0 };
-			//	registry.motions.get(player).velocity = { 0, 0 };
-			//	registry.motions.get(player).position = { position.x - 30.f, position.y };
-			//}
-			//else if (velocity.x < 0 || registry.motions.get(player).velocity.x < 0) {
-			//	left_to_right = 0;
-			//	registry.motions.get(player).velocityGoal = { 0, 0 };
-			//	registry.motions.get(player).velocity = { 0, 0 };
-			//	registry.motions.get(player).position = { position.x + 30.f, position.y };
-			//}
-			//else {
-			//	if (left_to_right) {
-			//		registry.motions.get(player).position = { position.x - 30.f, position.y };
-			//	}
-			//	else {
-			//		registry.motions.get(player).position = { position.x + 30.f, position.y };
-			//	}
-			//}
-		//}
-		//else if (abs(velocity.x) <= abs(velocity.y) || abs(registry.motions.get(player).velocity.x) <= abs(registry.motions.get(player).velocity.y)) {
-			//if (velocity.y > 0 || registry.motions.get(player).velocity.y > 0) {
-			//	bot_to_top = 0;
-			//	registry.motions.get(player).velocityGoal = { 0, 0 };
-			//	registry.motions.get(player).velocity = { 0, 0 };
-			//	registry.motions.get(player).position = { position.x, position.y - 30.f };
-			//}
-			//else if (velocity.y < 0 || registry.motions.get(player).velocity.y < 0) {
-			//	bot_to_top = 1;
-			//	registry.motions.get(player).velocityGoal = { 0, 0 };
-			//	registry.motions.get(player).velocity = { 0, 0 };
-			//	registry.motions.get(player).position = { position.x, position.y + 30.f };
-			//}
-			//else {
-			//	if (bot_to_top) {
-
-			//		registry.motions.get(player).position = { position.x, position.y + 30.f };
-			//	}
-			//	else {
-			//		registry.motions.get(player).position = { position.x, position.y - 30.f };
-			//	}
-
-			//}
-		//}
-
 		//registry.motions.get(entity).position = { position.x, position.y };
 		return true;
 	}
@@ -877,7 +829,7 @@ void LevelPlay::Restart()
 					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { 0.f, 0.f });
 				}
 				else {
-					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { -100.f, 0.f });
+					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { -50.f, 0.f });
 				}
 			}
 			else if (level_map[row][col] == 'C') {

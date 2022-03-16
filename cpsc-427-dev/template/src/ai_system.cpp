@@ -6,7 +6,7 @@
 #include <iostream>
 #include <queue>
 
-const float GUARD_VELOCITY = 100.f;
+const float GUARD_VELOCITY = 50.0f;
 const float CALC_INTERVAL = 0.5f; // Calculate the shortest-path every 0.5 seconds
 
 using namespace std;
@@ -77,7 +77,7 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 	//visited[playerPos.y][playerPos.x] = 1;
 
 	// 
-	const ivec2 directions[] = { ivec2(1,0),ivec2(-1,0),ivec2(0,1),ivec2(0,-1), ivec2(-1,-1),ivec2(-1,1),ivec2(1,-1),ivec2(1,1) };
+	const vector<ivec2> directions = { ivec2(1,0),ivec2(-1,0),ivec2(0,1),ivec2(0,-1), ivec2(-1,-1),ivec2(-1,1),ivec2(1,-1),ivec2(1,1) };
 	int searchNum = 0;
 
 	Node cur;
@@ -121,7 +121,7 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 	if (chaseVector.x != chaseVector.x)
 	{
 		srand(glfwGetTime());
-		chaseVector = normalize(vec2(directions[rand()]));
+		chaseVector = normalize(vec2(directions[ rand() % directions.size()]));
 	}
 
 	// print
