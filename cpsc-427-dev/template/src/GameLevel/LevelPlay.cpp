@@ -319,7 +319,7 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			// refresh player's direction
 			playerInst.SwitchDirection(Player::Direction::UP, glfwGetTime());
 		}
-		else if (action == GLFW_RELEASE) {
+		else if (action == GLFW_RELEASE && motion.velocityGoal.x == 0 && motion.velocityGoal.y == -PLAYER_SPEED) {
 			motion.velocityGoal = { 0,0 };
 		}
 	}
@@ -331,7 +331,7 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			// refresh player's direction
 			playerInst.SwitchDirection(Player::Direction::DOWN, glfwGetTime());
 		}
-		else if (action == GLFW_RELEASE) {
+		else if (action == GLFW_RELEASE && motion.velocityGoal.x == 0 && motion.velocityGoal.y == PLAYER_SPEED) {
 			motion.velocityGoal = { 0,0 };
 		}
 	}
@@ -343,7 +343,7 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			// refresh player's direction
 			playerInst.SwitchDirection(Player::Direction::LEFT, glfwGetTime());
 		}
-		else if (action == GLFW_RELEASE) {
+		else if (action == GLFW_RELEASE && motion.velocityGoal.x == -PLAYER_SPEED && motion.velocityGoal.y == 0) {
 			motion.velocityGoal = { 0,0 };
 		}
 	}
@@ -355,7 +355,7 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 			// refresh player's direction
 			playerInst.SwitchDirection(Player::Direction::RIGHT, glfwGetTime());
 		}
-		else if (action == GLFW_RELEASE) {
+		else if (action == GLFW_RELEASE && motion.velocityGoal.x == PLAYER_SPEED && motion.velocityGoal.y == 0) {
 			motion.velocityGoal = { 0,0 };
 		}
 	}
