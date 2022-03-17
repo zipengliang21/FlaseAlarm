@@ -6,7 +6,7 @@
 #include <iostream>
 #include <queue>
 
-const float GUARD_VELOCITY = 100.f;
+const float GUARD_VELOCITY = 50.0f;
 const float CALC_INTERVAL = 0.5f; // Calculate the shortest-path every 0.5 seconds
 
 using namespace std;
@@ -77,7 +77,7 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 	//visited[playerPos.y][playerPos.x] = 1;
 
 	// 
-	const ivec2 directions[] = { ivec2(1,0),ivec2(-1,0),ivec2(0,1),ivec2(0,-1), ivec2(-1,-1),ivec2(-1,1),ivec2(1,-1),ivec2(1,1) };
+	const vector<ivec2> directions = { ivec2(1,0),ivec2(-1,0),ivec2(0,1),ivec2(0,-1), ivec2(-1,-1),ivec2(-1,1),ivec2(1,-1),ivec2(1,1) };
 	int searchNum = 0;
 
 	Node cur;
@@ -115,15 +115,17 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 			}
 		}
 	}
-	cout << "Search Nums=" << searchNum << endl;
 	//cur.firstDir.y = -cur.firstDir.y;
 	vec2 chaseVector = normalize(vec2(cur.firstDir));
 
 	if (chaseVector.x != chaseVector.x)
 	{
 		srand(glfwGetTime());
-		chaseVector = normalize(vec2(directions[rand()]));
+		chaseVector = normalize(vec2(directions[ rand() % directions.size()]));
 	}
+
+	// print
+	cout << "Search Nums=" << searchNum << endl;
 	cout << "Chase Vector=(" << chaseVector.x << "," << chaseVector.y << ")" << endl;
 	return chaseVector;
 }
@@ -131,6 +133,9 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 
 void AISystem::step(float elapsed_ms)
 {
+	if (enable == false)
+		return;
+
 	// trigger the trap effect, guards will start to chase the player with the shortest path
 	// TODO: currently, the shortest path is guard move toward the player directly that will ignore wall, which need to be changed
 	if (registry.trappables.size() > 0) {
@@ -158,7 +163,7 @@ void AISystem::step(float elapsed_ms)
 			// calculate the chase vector
 			ivec2 playerPosIndex = player_motion.position / vec2(WALL_SIZE, WALL_SIZE);
 			ivec2 guardPosIndex=guard_motion.position / vec2(WALL_SIZE, WALL_SIZE);
-			vec2 vector_chase = calcChaseVectorV1(gameState.gameLevel.levelMap, guardPosIndex, playerPosIndex);
+			vec2 vector_chase = calcChaseVectorV1(gameState.GetCurrentMap(), guardPosIndex, playerPosIndex);
 
 			Character::Direction dir;
 			auto &guardObj = registry.deadlys.get(guard);
@@ -193,4 +198,9 @@ void AISystem::step(float elapsed_ms)
 			remainWaitTime -= elapsed_ms / 1000.0f;
 		}
 	}
+}
+
+void AISystem::SetEnable(bool enable)
+{
+	this->enable = enable;
 }

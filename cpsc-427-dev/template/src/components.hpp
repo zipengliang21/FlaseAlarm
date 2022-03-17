@@ -8,6 +8,22 @@
 
 enum class TEXTURE_ASSET_ID;
 
+
+struct Movie
+{
+public:
+	Movie(std::vector<TEXTURE_ASSET_ID> textures, double frameInterval = 0.1); // frameInterval: units s(seconds)
+
+	void SetTextures(std::vector<TEXTURE_ASSET_ID> textures);
+
+	virtual TEXTURE_ASSET_ID GetTexId(double nowTime);
+protected:
+	int curTexIndex;
+	std::vector<TEXTURE_ASSET_ID> textures;
+	double frameInterval; // while running, every duration of "frameInterval" switch an apperance
+	double lastSwitchTime;
+};
+
 // the generic character that can show 4-direction's appearance
 struct Character
 {
@@ -39,6 +55,27 @@ struct Player:public Character
 	// switch direction
 	void SwitchDirection(Direction dir, double nowTime);
 };
+
+// tool
+struct Tool
+{
+	enum class ToolType{SANDGLASS,REMOTE_CONTROL,HAMMER};
+
+	Tool(ToolType type);
+
+	TEXTURE_ASSET_ID GetTexId(double nowTime);
+
+	vec2 GetUIPosition()const;
+
+	vec2 GetUISize()const;
+
+	char GetCommandChar()const;
+
+private:
+	ToolType type;
+	Movie movie;
+};
+
 
 struct Guard
 {
@@ -98,6 +135,7 @@ struct Motion {
 	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 10, 10 };
 	vec2 velocityGoal = { 0.f, 0.f };
+	Motion() {}
 };
 
 // Stucture to store collision information
@@ -135,13 +173,20 @@ struct DeathTimer
 };
 
 // Timer that controls how long before guard turns around
-struct WalkTimer {
-	float counter_ms = 12000;
+struct TurnTimer {
+	float counter_ms = 0;
+
+	TurnTimer(float turnTime) :turnTime(turnTime),counter_ms(turnTime) {}
+
+	bool UpdateAndCheckIsTimeout(float elapsed_ms);
+
+private:
+	float turnTime;
 };
 
-struct RotateTimer {
-	float counter_ms = 3000;
-};
+//struct RotateTimer {
+//	float counter_ms = 3000;
+//};
 
 // Single Vertex Buffer element for non-textured meshes (coloured.vs.glsl & chicken.vs.glsl)
 struct ColoredVertex
@@ -214,6 +259,25 @@ struct Conversation
 	}
 	ConversationState conversationState;
 	Entity textBox;
+};
+
+// this struct is used for marking which entity is a ui element
+struct UI
+{
+
+};
+
+struct Background {
+
+};
+
+// this struct is used for exploding
+struct Exploded
+{
+	float life; // decrease every loop
+	float initLife;
+	vec2 initSize;
+	Exploded(float life,vec2 initSize) :life(life),initLife(life),initSize(initSize) {}
 };
 
 /**
@@ -320,27 +384,37 @@ enum class TEXTURE_ASSET_ID {
 	NPC_DURING_CONVERSATION = NPC_NO_CONVERSATION + 1,
 	NPC_CRIME_DETECTED = NPC_DURING_CONVERSATION + 1,
 	NPC_NO_CRIME_DETECTED = NPC_CRIME_DETECTED + 1,
-	TEXTURE_COUNT = NPC_NO_CRIME_DETECTED + 1
+	TITLE = NPC_NO_CRIME_DETECTED + 1,
+	PRESS_ANY = TITLE + 1,
+	SANDGLASS = PRESS_ANY + 1,
+	REMOTE_CONTROL = SANDGLASS + 1,
+	HAMMER = REMOTE_CONTROL + 1,
+	COVER0 = HAMMER + 1,
+	COVER1 = COVER0 + 1,
+	COVER2 = COVER1 + 1,
+	COVER3 = COVER2 + 1,
+	TOOL_GRID = COVER3 + 1,
+	SELECTION_BG= TOOL_GRID + 1,
+	FLOOR_BG = SELECTION_BG + 1,
+	TEXTURE_COUNT = FLOOR_BG +1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
 enum class EFFECT_ASSET_ID {
-	COLOURED = 0,
-	EGG = COLOURED + 1,
-	CHICKEN = EGG + 1,
-	TEXTURED = CHICKEN + 1,
-	WIND = TEXTURED + 1,
-	EFFECT_COUNT = WIND + 1
+	EGG=0,
+	WIND = EGG+1,
+	TEXTURED = WIND+1,
+	UI= TEXTURED +1,
+	EFFECT_COUNT = UI + 1
 };
 const int effect_count = (int)EFFECT_ASSET_ID::EFFECT_COUNT;
 
 enum class GEOMETRY_BUFFER_ID {
-	CHICKEN = 0,
-	SPRITE = CHICKEN + 1,
-	EGG = SPRITE + 1,
-	DEBUG_LINE = EGG + 1,
+	BUG = 0,
+	DEBUG_LINE = BUG + 1,
 	SCREEN_TRIANGLE = DEBUG_LINE + 1,
-	GEOMETRY_COUNT = SCREEN_TRIANGLE + 1
+	SPRITE = SCREEN_TRIANGLE + 1,
+	GEOMETRY_COUNT = SPRITE + 1
 };
 const int geometry_count = (int)GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
 

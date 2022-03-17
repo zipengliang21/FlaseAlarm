@@ -24,7 +24,7 @@ class RenderSystem {
 	// Associated id with .obj path
 	const std::vector < std::pair<GEOMETRY_BUFFER_ID, std::string>> mesh_paths =
 	{
-		  std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN, mesh_path("chicken.obj"))
+		  //std::pair<GEOMETRY_BUFFER_ID, std::string>(GEOMETRY_BUFFER_ID::CHICKEN, mesh_path("chicken.obj"))
 		  // specify meshes of other assets here
 	};
 
@@ -108,17 +108,28 @@ class RenderSystem {
 			textures_path("npc_no_conversation_yet.png"),
 			textures_path("npc_conversation.png"),
 			textures_path("npc_crime_detected.png"),
-			textures_path("npc_no_crime.png")			
+			textures_path("npc_no_crime.png"),
+			textures_path("title.png"),
+			textures_path("press_any.png"),
+			textures_path("tool/sandglass.png"),
+			textures_path("tool/remote_control.png"),
+			textures_path("tool/hammer.png"),
+			textures_path("cover_bg/0.jpg"),
+			textures_path("cover_bg/1.jpg"),
+			textures_path("cover_bg/2.jpg"),
+			textures_path("cover_bg/3.jpg"),
+			textures_path("tool_grid.png"),
+			textures_path("selection_bg.jpg"),
+			textures_path("floor.jpg"),
 	};
 
 	std::array<GLuint, effect_count> effects;
 	// Make sure these paths remain in sync with the associated enumerators.
 	const std::array<std::string, effect_count> effect_paths = {
-		shader_path("coloured"),
 		shader_path("egg"),
-		shader_path("chicken"),
+		shader_path("wind"),
 		shader_path("textured"),
-		shader_path("wind") };
+		shader_path("ui") };
 
 	std::array<GLuint, geometry_count> vertex_buffers;
 	std::array<GLuint, geometry_count> index_buffers;
@@ -150,7 +161,10 @@ public:
 	// Draw all entities
 	void draw();
 
-	mat3 translationMatrix = { {-0.5f, 0.f, 0.f}, {0.f, 1.0f, 0.f}, {0.f, 0.f, 0.f} };
+	//mat3 translationMatrix = { {-0.5f, 0.f, 0.f}, {0.f, 1.0f, 0.f}, {0.f, 0.f, 0.f} };
+
+	// the view matrix
+	mat3 viewMatrix = glm::mat3(1.0f);
 
 	mat3 createProjectionMatrix();
 

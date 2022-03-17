@@ -15,6 +15,9 @@ class AISystem
 public:
 	AISystem(){}
 	void step(float elapsed_ms);
+
+	void SetEnable(bool enable);
 private:
+	bool enable;
 	float remainWaitTime; // initialized to be 0. when calculated, to be a number, means shouldn't refresh after a while.
 };

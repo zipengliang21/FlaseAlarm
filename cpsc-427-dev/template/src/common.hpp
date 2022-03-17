@@ -33,8 +33,12 @@ inline std::string text_path(const std::string& name) { return data_path() + "/g
 inline std::string level_map_path(const std::string& name) { return data_path() + "/levels/" + std::string(name); };
 
 
-const int window_width_px = 1366;
-const int window_height_px = 768;
+extern int window_width_px;
+extern int window_height_px;
+
+// Background size
+//const float bg_X = window_width_px * 1.5;
+//const float bg_Y = window_height_px * 1.5;
 
 #ifndef M_PI
 #define M_PI 3.14159265358979323846f

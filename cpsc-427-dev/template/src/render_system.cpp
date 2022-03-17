@@ -39,7 +39,8 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED || 
+		render_request.used_effect == EFFECT_ASSET_ID::UI)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_texcoord_loc = glGetAttribLocation(program, "in_texcoord");
@@ -65,10 +66,19 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 		GLuint texture_id =
 			texture_gl_handles[(GLuint)registry.renderRequests.get(entity).used_texture];
 
+		assert(texture_id != (int)TEXTURE_ASSET_ID::BUG);
 		glBindTexture(GL_TEXTURE_2D, texture_id);
 		gl_has_errors();
+
+		if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED)
+		{
+			GLint translation_loc = glGetUniformLocation(program, "view");
+			assert(translation_loc >= 0);
+			glUniformMatrix3fv(translation_loc, 1, GL_FALSE, (float *)&viewMatrix);
+			gl_has_errors();
+		}
 	}
-	else if (render_request.used_effect == EFFECT_ASSET_ID::CHICKEN || render_request.used_effect == EFFECT_ASSET_ID::EGG)
+	else if (render_request.used_effect == EFFECT_ASSET_ID::EGG)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
 		GLint in_color_loc = glGetAttribLocation(program, "in_color");
@@ -84,17 +94,14 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 							  sizeof(ColoredVertex), (void *)sizeof(vec3));
 		gl_has_errors();
 
-		GLint currProgram;
-		glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
-		// Setting uniform values to the currently bound program 
-		GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
-		glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
-		GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
-		glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
-		mat3 translation = translationMatrix;
-		GLuint translation_loc = glGetUniformLocation(currProgram, "translation");
-		glUniformMatrix3fv(translation_loc, 1, GL_FALSE, (float*)&translation);
-		gl_has_errors();
+		//GLint currProgram;
+		//glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+		//// Setting uniform values to the currently bound program 
+		//GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+		//glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float*)&transform.mat);
+		//GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+		//glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float*)&projection);
+		//gl_has_errors();
 	}
 	else
 	{
@@ -117,14 +124,16 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 	GLint currProgram;
 	glGetIntegerv(GL_CURRENT_PROGRAM, &currProgram);
+	assert(currProgram >= 0);
+
 	// Setting uniform values to the currently bound program
-	GLuint transform_loc = glGetUniformLocation(currProgram, "transform");
+	GLint transform_loc = glGetUniformLocation(currProgram, "transform");
+	assert(transform_loc >= 0);
 	glUniformMatrix3fv(transform_loc, 1, GL_FALSE, (float *)&transform.mat);
-	GLuint projection_loc = glGetUniformLocation(currProgram, "projection");
+
+	GLint projection_loc = glGetUniformLocation(currProgram, "projection");
+	assert(projection_loc >= 0);
 	glUniformMatrix3fv(projection_loc, 1, GL_FALSE, (float *)&projection);
-	mat3 translation = translationMatrix;
-	GLuint translation_loc = glGetUniformLocation(currProgram, "translation");
-	glUniformMatrix3fv(translation_loc, 1, GL_FALSE, (float*)&translation);
 
 	gl_has_errors();
 	// Drawing of num_indices/3 triangles specified in the index buffer
@@ -214,13 +223,39 @@ void RenderSystem::draw()
 							  // sprites back to front
 	gl_has_errors();
 	mat3 projection_2D = createProjectionMatrix();
+
+	std::vector<Entity> entitiesDrawFinal;
+
+	for (Entity entity : registry.background.entities) {
+		drawTexturedMesh(entity, projection_2D);
+	}
+
 	// Draw all textured meshes that have a position and size component
 	for (Entity entity : registry.renderRequests.entities)
 	{
-		if (!registry.motions.has(entity))
+		if (!registry.motions.has(entity)) // not motions
 			continue;
+
+		// mark the elements that should be drawn on the top layer
+		if (registry.uis.has(entity))
+		{
+			entitiesDrawFinal.push_back(entity);
+			continue;
+		}
+
+		if (registry.background.has(entity))
+		{
+			continue;
+		}
+
 		// Note, its not very efficient to access elements indirectly via the entity
 		// albeit iterating through all Sprites in sequence. A good point to optimize
+		drawTexturedMesh(entity, projection_2D);
+	}
+
+	// draw the elments on the top layer
+	for (Entity &entity : entitiesDrawFinal)
+	{
 		drawTexturedMesh(entity, projection_2D);
 	}
 
