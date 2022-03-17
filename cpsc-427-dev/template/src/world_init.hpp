@@ -24,9 +24,9 @@ const float CONVERSATION_BB_WIDTH = 1.1f * 512.f;
 const float CONVERSATION_BB_HEIGHT = 0.13f * 512.f;
 const float TUTORIAL_BB_WIDTH = 2.67f * 512.f;
 const float TUTORIAL_BB_HEIGHT = 1.5f * 512.f;
-const float CAMERA_BB_WEIGHT = 0.4f * 161.f;
-const float CAMERA_BB_HEIGHT = 0.4f * 140.f;
-const float LIGHT_BB_WEIGHT = 0.4f * 278.f;
+const float CAMERA_BB_WIDTH = 0.4f * 161.f;
+const float CAMERA_BB_HEIGHT = 0.4f * 94.f;
+const float LIGHT_BB_WIDTH = 0.4f * 310.f;
 const float LIGHT_BB_HEIGHT = 0.4f * 252.f;
 const float TRAP_BB_WIDTH = 0.1f * 504.f;
 const float TRAP_BB_HEIGHT = 0.15f * 444.f;
@@ -43,9 +43,9 @@ Entity createExit(RenderSystem* renderer, vec2 position);
 // the textbox,  or button, display an image asset as a box
 Entity createTextBox(RenderSystem* renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction);
 // the camera
-Entity createCamera(RenderSystem* renderer, vec2 position);
+Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction);
 // the light
-Entity createLight(RenderSystem* renderer, vec2 position);
+Entity createLight(RenderSystem* renderer, vec2 position, uint16_t direction);
 // the textbox
 Entity createTextBox(RenderSystem* renderer, vec2 position);
 // the trap

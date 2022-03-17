@@ -63,6 +63,7 @@ private:
 
 	// OpenGL window handle
 	GLFWwindow* window;
+	bool isFullScreen;
 
 	// Number of bug eaten by the chicken, displayed in the window title
 	unsigned int points;
@@ -83,7 +84,7 @@ private:
 	Mix_Music* background_music;
 	Mix_Chunk* chicken_dead_sound;
 	Mix_Chunk* chicken_eat_sound;
-	Mix_Chunk* wall_collision_sound;
+	Mix_Chunk* death_sound;
 	Mix_Chunk* fire_alarm_sound;
 	Mix_Chunk* trap_sound;
 

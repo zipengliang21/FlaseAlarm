@@ -47,8 +47,8 @@ WorldSystem::~WorldSystem() {
 		Mix_FreeChunk(chicken_dead_sound);
 	if (chicken_eat_sound != nullptr)
 		Mix_FreeChunk(chicken_eat_sound);
-	if (wall_collision_sound != nullptr)
-		Mix_FreeChunk(wall_collision_sound);
+	if (death_sound != nullptr)
+		Mix_FreeChunk(death_sound);
 	if (fire_alarm_sound != nullptr)
 		Mix_FreeChunk(fire_alarm_sound);
 	Mix_CloseAudio();
@@ -92,11 +92,15 @@ GLFWwindow *WorldSystem::create_window() {
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Chicken Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(window_width_px, window_height_px, "False Alarm", nullptr, nullptr);
 	if (window == nullptr) {
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+	isFullScreen = false;
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	glfwSetWindowPos(window, mode->width / 7, mode->height / 5);
 
 	// Setting callbacks to member functions (that's why the redirect is needed)
 	// Input is handled using GLFW, for more info see
@@ -123,11 +127,11 @@ GLFWwindow *WorldSystem::create_window() {
 	background_music = Mix_LoadMUS(audio_path("music.wav").c_str());
 	chicken_dead_sound = Mix_LoadWAV(audio_path("chicken_dead.wav").c_str());
 	chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
-	wall_collision_sound = Mix_LoadWAV(audio_path("wall_collision.wav").c_str());
+	death_sound = Mix_LoadWAV(audio_path("wall_collision.wav").c_str());
 	fire_alarm_sound = Mix_LoadWAV(audio_path("fire_alarm.wav").c_str());
 	trap_sound = Mix_LoadWAV(audio_path("trap.wav").c_str());
 
-	if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr || wall_collision_sound == nullptr || fire_alarm_sound == nullptr) {
+	if (background_music == nullptr || chicken_dead_sound == nullptr || chicken_eat_sound == nullptr || death_sound == nullptr || fire_alarm_sound == nullptr) {
 		fprintf(stderr, "Failed to load sounds\n %s\n %s\n %s\n make sure the data directory is present",
 			audio_path("music.wav").c_str(),
 			audio_path("chicken_dead.wav").c_str(),
@@ -448,10 +452,10 @@ void WorldSystem::showLevelContent(GameLevel& level, int levelIndex) {
 				}
 			}
 			else if (level_map[row][col] == 'C') {
-				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
 			}
 			else if (level_map[row][col] == 'L') {
-				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
 			}
 			else if (level_map[row][col] == 'N') {
 				createNPC(renderer,  { col * WALL_SIZE, row * WALL_SIZE });
@@ -496,7 +500,7 @@ void WorldSystem::handle_collisions() {
 				if (!registry.deathTimers.has(entity)) {
 					// Scream, reset timer, and make the chicken sink
 					registry.deathTimers.emplace(entity);
-					Mix_PlayChannel(-1, chicken_dead_sound, 0);
+					Mix_PlayChannel(-1, death_sound, 0);
 					registry.motions.get(entity_other).velocity = { 0, 0 };
 					// !!! TODO A1: change the chicken orientation and color on death
 				}
@@ -518,30 +522,29 @@ void WorldSystem::handle_collisions() {
 				if (!registry.stopeds.has(entity)) {
 					registry.stopeds.emplace(entity);
 				}
+
 				vec2 velocity = registry.motions.get(entity).velocityGoal;
-				
 				vec2 position = registry.motions.get(entity).position;
-				//vec2 position = registry.motions.get(entity_other).position;
-				Mix_PlayChannel(-1, wall_collision_sound, 0);
+
 				if (abs(velocity.x) > abs(velocity.y) || abs(registry.motions.get(entity).velocity.x) > abs(registry.motions.get(entity).velocity.y)) {
 					if (velocity.x > 0 || registry.motions.get(entity).velocity.x >0) {
 						left_to_right = 1;
 						registry.motions.get(entity).velocityGoal = { 0, 0 };
 						registry.motions.get(entity).velocity = { 0, 0 };
-						registry.motions.get(entity).position = { position.x - 30.f, position.y };
+						registry.motions.get(entity).position = { position.x - 5.f, position.y };
 					}
 					else if (velocity.x < 0 || registry.motions.get(entity).velocity.x <0) {
 						left_to_right = 0;
 						registry.motions.get(entity).velocityGoal = { 0, 0 };
 						registry.motions.get(entity).velocity = { 0, 0 };
-						registry.motions.get(entity).position = { position.x + 30.f, position.y };
+						registry.motions.get(entity).position = { position.x + 5.f, position.y };
 					}
 					else {
 						if (left_to_right) {
-							registry.motions.get(entity).position = { position.x - 30.f, position.y };
+							registry.motions.get(entity).position = { position.x - 5.f, position.y };
 						}
 						else {
-							registry.motions.get(entity).position = { position.x + 30.f, position.y };
+							registry.motions.get(entity).position = { position.x + 5.f, position.y };
 						}
 					}
 				}
@@ -550,21 +553,21 @@ void WorldSystem::handle_collisions() {
 						bot_to_top = 0;
 						registry.motions.get(entity).velocityGoal = { 0, 0 };
 						registry.motions.get(entity).velocity = { 0, 0 };
-						registry.motions.get(entity).position = { position.x, position.y - 30.f };
+						registry.motions.get(entity).position = { position.x, position.y - 5.f };
 					}
 					else if (velocity.y < 0 || registry.motions.get(entity).velocity.y<0) {
 						bot_to_top = 1;
 						registry.motions.get(entity).velocityGoal = { 0, 0 };
 						registry.motions.get(entity).velocity = { 0, 0 };
-						registry.motions.get(entity).position = { position.x, position.y + 30.f };
+						registry.motions.get(entity).position = { position.x, position.y + 5.f };
 					}
 					else {
 						if (bot_to_top) {
 							
-							registry.motions.get(entity).position = { position.x, position.y + 30.f };
+							registry.motions.get(entity).position = { position.x, position.y + 5.f };
 						}
 						else {
-							registry.motions.get(entity).position = { position.x, position.y - 30.f };
+							registry.motions.get(entity).position = { position.x, position.y - 5.f };
 						}
 						
 					}
@@ -624,6 +627,18 @@ void WorldSystem::on_key(int key, int, int action, int mod) {
 	// key is of 'type' GLFW_KEY_
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_F) {
+		if (!isFullScreen) {
+			glfwSetWindowMonitor(window, monitor, 0, 0, window_width_px, window_height_px, GLFW_DONT_CARE);
+			isFullScreen = true;
+		} else {
+			glfwSetWindowMonitor(window, nullptr, mode->width / 4, mode->height / 4, window_width_px, window_height_px, GLFW_DONT_CARE);
+			isFullScreen = false;
+		}
+	}
 
 	GameState* gameState = &registry.gameStates.get(gameStateEntity);
 	if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
