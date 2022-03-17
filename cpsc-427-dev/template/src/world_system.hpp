@@ -45,6 +45,7 @@ private:
 
 	// OpenGL window handle
 	GLFWwindow* window;
+	bool isFullScreen;
 
 	// Level Manager, all the logic is in it
 	std::unique_ptr<LevelManager> levelManager;

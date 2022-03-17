@@ -133,7 +133,7 @@ Entity createGuard(RenderSystem *renderer, vec2 position, vec2 v)
 }
 
 
-Entity createCamera(RenderSystem *renderer, vec2 position)
+Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction)
 {
 	auto entity = Entity();
 
@@ -142,11 +142,16 @@ Entity createCamera(RenderSystem *renderer, vec2 position)
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Initialize the motion
-	auto &motion = registry.motions.emplace(entity);
-	motion.position = position;
+	auto& motion = registry.motions.emplace(entity);
 
 	// Setting initial values, scale is negative to make it face the opposite way
-	motion.scale = vec2({ CAMERA_BB_WEIGHT, CAMERA_BB_HEIGHT });
+	if (direction == 0) {
+		motion.scale = { -CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
+		motion.position = { position.x - 5.f, position.y + 5.f };
+	} else {
+		motion.scale = { CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
+		motion.position = { position.x + 5.f, position.y + 5.f };
+	}
 
 	// Create and (empty) Eagle component to be able to refer to all eagles
 	registry.cameras.emplace(entity);
@@ -159,7 +164,7 @@ Entity createCamera(RenderSystem *renderer, vec2 position)
 	return entity;
 }
 
-Entity createLight(RenderSystem *renderer, vec2 position)
+Entity createLight(RenderSystem* renderer, vec2 position, uint16_t direction)
 {
 	auto entity = Entity();
 
@@ -171,14 +176,29 @@ Entity createLight(RenderSystem *renderer, vec2 position)
 	registry.turnTimers.emplace(entity, LIGHT_TURN_TIME);
 
 	// Initialize the motion
-	auto &motion = registry.motions.emplace(entity);
-	motion.velocity = { -0.5f, 0 };
-	motion.position = position;
-
-	// Setting initial values, scale is negative to make it face the opposite way
-	//motion.scale = mesh.original_size * 2.f;
-	//motion.scale.x *= -1;
-	motion.scale = vec2({ -LIGHT_BB_WEIGHT, LIGHT_BB_HEIGHT });
+	auto& motion = registry.motions.emplace(entity);
+	if (direction == 0) {
+		motion.angle = 0.5f;
+		motion.velocity = { 0.5f, 0 };
+		motion.position = { position.x - 10.f, position.y - 10.f };
+		motion.scale = { LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
+	} else if (direction == 1) {
+		motion.angle = -0.5f;
+		motion.velocity = { 0.5f, 0 };
+		motion.position = { position.x + 10.f, position.y - 10.f };
+		motion.scale = { -LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
+	} else if (direction == 2) {
+		motion.angle = -0.5f;
+		motion.velocity = { -0.5f, 0 };
+		motion.position = { position.x - 10.f, position.y + 10.f };
+		motion.scale = { LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
+	} else {
+		motion.angle = 0.5f;
+		motion.velocity = { -0.5f, 0 };
+		motion.position = { position.x + 10.f, position.y + 10.f };
+		motion.scale = { -LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
+	}
+	
 
 	// Create and (empty) Eagle component to be able to refer to all eagles
 	registry.lights.emplace(entity);

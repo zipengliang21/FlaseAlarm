@@ -72,11 +72,15 @@ GLFWwindow *WorldSystem::create_window() {
 	glfwWindowHint(GLFW_RESIZABLE, 0);
 
 	// Create the main window (for rendering, keyboard, and mouse input)
-	window = glfwCreateWindow(window_width_px, window_height_px, "Chicken Game Assignment", nullptr, nullptr);
+	window = glfwCreateWindow(window_width_px, window_height_px, "False Alarm", nullptr, nullptr);
 	if (window == nullptr) {
 		fprintf(stderr, "Failed to glfwCreateWindow");
 		return nullptr;
 	}
+	isFullScreen = false;
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	glfwSetWindowPos(window, mode->width / 7, mode->height / 5);
 
 	// Setting callbacks to member functions (that's why the redirect is needed)
 	// Input is handled using GLFW, for more info see
@@ -142,14 +146,27 @@ void WorldSystem::key_callback(int key, int scancode, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
-	levelManager->OnKey(key, scancode, action, mod);
+	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
+	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
+	if (action == GLFW_RELEASE && key == GLFW_KEY_F) {
+		if (!isFullScreen) {
+			glfwSetWindowMonitor(window, monitor, 0, 0, window_width_px, window_height_px, GLFW_DONT_CARE);
+			isFullScreen = true;
+		} else {
+			glfwSetWindowMonitor(window, nullptr, mode->width / 4, mode->height / 4, window_width_px, window_height_px, GLFW_DONT_CARE);
+			isFullScreen = false;
+		}
+	}
 
-	// Resetting game
-	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
-		int w, h;
-		glfwGetWindowSize(window, &w, &h);
-
-		//restart_game();
+	GameState* gameState = &registry.gameStates.get(gameStateEntity);
+	if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
+		std::cout << "On key for tutorial page is pressed" << std::endl;
+		if (key == GLFW_KEY_M && action == GLFW_RELEASE) {
+			// go back to menu
+			std::cout << "M key pressed and released" << std::endl;
+			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
+			restart_game();
+		}
 	}
 
 	// switch Debugging
