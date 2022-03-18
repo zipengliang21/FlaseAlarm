@@ -146,6 +146,14 @@ void WorldSystem::key_callback(int key, int scancode, int action, int mod) {
 	// action can be GLFW_PRESS GLFW_RELEASE GLFW_REPEAT
 	// !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 
+	levelManager->OnKey(key, scancode, action, mod);
+
+	// Resetting game
+	if (action == GLFW_RELEASE && key == GLFW_KEY_R) {
+		int w, h;
+		glfwGetWindowSize(window, &w, &h);
+	}
+
 	GLFWmonitor* monitor = glfwGetPrimaryMonitor();
 	const GLFWvidmode* mode = glfwGetVideoMode(monitor);
 	if (action == GLFW_RELEASE && key == GLFW_KEY_F) {
@@ -155,17 +163,6 @@ void WorldSystem::key_callback(int key, int scancode, int action, int mod) {
 		} else {
 			glfwSetWindowMonitor(window, nullptr, mode->width / 4, mode->height / 4, window_width_px, window_height_px, GLFW_DONT_CARE);
 			isFullScreen = false;
-		}
-	}
-
-	GameState* gameState = &registry.gameStates.get(gameStateEntity);
-	if (gameState->state == GameState::GAME_STATE::TUTORIAL_PAGE) {
-		std::cout << "On key for tutorial page is pressed" << std::endl;
-		if (key == GLFW_KEY_M && action == GLFW_RELEASE) {
-			// go back to menu
-			std::cout << "M key pressed and released" << std::endl;
-			gameState->state = GameState::GAME_STATE::LEVEL_SELECTION;
-			restart_game();
 		}
 	}
 
