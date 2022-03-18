@@ -47,7 +47,7 @@ private:
 	// music references
 	Mix_Chunk *chicken_dead_sound;
 	Mix_Chunk *chicken_eat_sound;
-	Mix_Chunk *wall_collision_sound;
+	Mix_Chunk *death_sound;
 	Mix_Chunk *fire_alarm_sound;
 	Mix_Chunk *trap_sound;
 	Mix_Chunk *explode_sound;
