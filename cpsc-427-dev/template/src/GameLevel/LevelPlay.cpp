@@ -28,8 +28,8 @@ LevelPlay::LevelPlay(RenderSystem *renderer, LevelManager *manager, GLFWwindow *
 	chicken_eat_sound = Mix_LoadWAV(audio_path("chicken_eat.wav").c_str());
 	assert(chicken_eat_sound);
 
-	wall_collision_sound = Mix_LoadWAV(audio_path("wall_collision.wav").c_str());
-	assert(wall_collision_sound);
+	death_sound = Mix_LoadWAV(audio_path("death.wav").c_str());
+	assert(death_sound);
 
 	fire_alarm_sound = Mix_LoadWAV(audio_path("fire_alarm.wav").c_str());
 	assert(fire_alarm_sound);
@@ -51,8 +51,8 @@ LevelPlay::~LevelPlay()
 		Mix_FreeChunk(chicken_dead_sound);
 	if (chicken_eat_sound != nullptr)
 		Mix_FreeChunk(chicken_eat_sound);
-	if (wall_collision_sound != nullptr)
-		Mix_FreeChunk(wall_collision_sound);
+	if (death_sound != nullptr)
+		Mix_FreeChunk(death_sound);
 	if (fire_alarm_sound != nullptr)
 		Mix_FreeChunk(fire_alarm_sound);
 	if (explode_sound != nullptr)
@@ -530,9 +530,9 @@ bool LevelPlay::if_collisions_player_with_deadly(Entity other)
 	if (registry.deadlys.has(other)) {
 		// initiate death unless already dying
 		if (!registry.deathTimers.has(player)) {
+			Mix_PlayChannel(-1, death_sound, 0);
 			// Scream, reset timer, and make the chicken sink
 			registry.deathTimers.emplace(player);
-			Mix_PlayChannel(-1, chicken_dead_sound, 0);
 			registry.motions.get(other).velocity = { 0, 0 };
 			// !!! TODO A1: change the chicken orientation and color on death
 		}
@@ -577,31 +577,30 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 
 		vec2 position = registry.motions.get(player).position;
 		vec2 position_other = registry.motions.get(other).position;
-		Mix_PlayChannel(-1, wall_collision_sound, 0);
 
 		vec2 diff = position_other - position;
 		if (abs(diff.x) > abs(diff.y)) {
 			if (diff.x > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x - 30.f, position.y };
+				registry.motions.get(player).position = { position.x - 5.f, position.y };
 			}
 			else if (diff.x < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x + 30.f, position.y };
+				registry.motions.get(player).position = { position.x + 5.f, position.y };
 			}
 		}
 		else {
 			if (diff.y > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x, position.y - 30.f };
+				registry.motions.get(player).position = { position.x, position.y - 5.f };
 			}
 			else if (diff.y < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x, position.y + 30.f };
+				registry.motions.get(player).position = { position.x, position.y + 5.f };
 			}
 		}
 
@@ -833,10 +832,10 @@ void LevelPlay::Restart()
 				}
 			}
 			else if (level_map[row][col] == 'C') {
-				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
 			}
 			else if (level_map[row][col] == 'L') {
-				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
 			}
 			else if (level_map[row][col] == 'N') {
 				createNPC(renderer, { col * WALL_SIZE, row * WALL_SIZE });

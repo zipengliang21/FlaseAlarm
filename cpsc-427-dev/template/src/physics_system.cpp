@@ -94,12 +94,12 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity entity_j = motion_container.entities[j];
 			for (Entity entity : registry.lights.entities) {
 				if (entity == entity_i) {
-					motion_i.scale.x += 90.f;
-					motion_i.scale.y -= 30.f;
+					motion_i.scale.x += 80.f;
+					motion_i.scale.y -= 20.f;
 					break;
 				} else if (entity == entity_j) {
-					motion_j.scale.x += 90.f;
-					motion_j.scale.y -= 30.f;
+					motion_j.scale.x += 80.f;
+					motion_j.scale.y -= 20.f;
 					break;
 				}
 				motion_j = motion_jc;

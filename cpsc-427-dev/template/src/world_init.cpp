@@ -147,6 +147,12 @@ Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction)
 	// Setting initial values, scale is negative to make it face the opposite way
 	if (direction == 0) {
 		motion.scale = { -CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
+		motion.position = { position.x - 5.f, position.y - 5.f };
+	} else if (direction == 1) {
+		motion.scale = { CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
+		motion.position = { position.x + 5.f, position.y - 5.f };
+	} else if (direction == 2) {
+		motion.scale = { -CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
 		motion.position = { position.x - 5.f, position.y + 5.f };
 	} else {
 		motion.scale = { CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
