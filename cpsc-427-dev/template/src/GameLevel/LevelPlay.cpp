@@ -750,7 +750,7 @@ void LevelPlay::if_clicked_remote_control_button(Entity entity)
 			for (int col = 0; col < level_map[row].size(); col++)
 			{
 				if (level_map[row][col] == 'L') {
-					createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+					createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
 				}
 			}
 		}
@@ -833,10 +833,10 @@ void LevelPlay::Restart()
 				}
 			}
 			else if (level_map[row][col] == 'C') {
-				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
 			}
 			else if (level_map[row][col] == 'L') {
-				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
 			}
 			else if (level_map[row][col] == 'N') {
 				createNPC(renderer, { col * WALL_SIZE, row * WALL_SIZE });
