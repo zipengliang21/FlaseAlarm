@@ -850,7 +850,7 @@ void LevelPlay::Restart()
 				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
 			}
 			else if (level_map[row][col] == 'K') {
-				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 2);
+				createLight(renderer, { col * WALL_SIZE + 40, row * WALL_SIZE - 7 }, 2);
 			}
 			else if (level_map[row][col] == 'L') {
 				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
