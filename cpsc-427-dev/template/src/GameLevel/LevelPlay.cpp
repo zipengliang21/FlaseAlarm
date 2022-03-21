@@ -583,24 +583,24 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 			if (diff.x > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x - 5.f, position.y };
+				registry.motions.get(player).position = { position.x - 15.f, position.y };
 			}
 			else if (diff.x < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x + 5.f, position.y };
+				registry.motions.get(player).position = { position.x + 15.f, position.y };
 			}
 		}
 		else {
 			if (diff.y > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x, position.y - 5.f };
+				registry.motions.get(player).position = { position.x, position.y - 15.f };
 			}
 			else if (diff.y < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x, position.y + 5.f };
+				registry.motions.get(player).position = { position.x, position.y + 15.f };
 			}
 		}
 
@@ -824,7 +824,7 @@ void LevelPlay::Restart()
 				player = createStudent(renderer, { col * WALL_SIZE, row * WALL_SIZE });
 			}
 			else if (level_map[row][col] == 'G') {
-				if (gameState.GetCurrentLevelIndex() == 3) {
+				if (gameState.GetCurrentLevelIndex() != 1 && gameState.GetCurrentLevelIndex() != 2) {
 					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { 0.f, 0.f });
 				}
 				else {

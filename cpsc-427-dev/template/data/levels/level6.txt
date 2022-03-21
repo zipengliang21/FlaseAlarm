@@ -1,8 +1,8 @@
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 W                   W                                          W                                    W
 W   S               W                                          W                                    W
-W         W         W                                          W                                    W
-W         W         W                                          W                                    W
+W                   W                                          W                                    W
+W                   W                                          W                                    W
 W         W         W                WWWWWWWWWWWWWWWW          W                                    W
 W         W         W       W        W                         W        WWWWWWWWWWWWWW       WWWWWWWW
 W         W         W       W        W                         W        W            W              W

@@ -15,6 +15,9 @@ GameState::GameState() :currLevelIndex(-1)
 	LoadLevel(1);
 	LoadLevel(2);
 	LoadLevel(3);
+	LoadLevel(4);
+	LoadLevel(5);
+	LoadLevel(6);
 }
 
 const GameState::GameMap &GameState::GetCurrentMap() const
