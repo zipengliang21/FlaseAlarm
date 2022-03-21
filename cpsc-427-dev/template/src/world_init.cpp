@@ -194,7 +194,7 @@ Entity createLight(RenderSystem* renderer, vec2 position, uint16_t direction)
 		motion.position = { position.x + 10.f, position.y - 10.f };
 		motion.scale = { -LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
 	} else if (direction == 2) {
-		motion.angle = -0.5f;
+		motion.angle = 0.5f;
 		motion.velocity = { -0.5f, 0 };
 		motion.position = { position.x - 10.f, position.y + 10.f };
 		motion.scale = { LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };

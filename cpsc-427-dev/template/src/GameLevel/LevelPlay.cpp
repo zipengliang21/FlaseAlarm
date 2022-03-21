@@ -831,8 +831,26 @@ void LevelPlay::Restart()
 					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { -50.f, 0.f });
 				}
 			}
+			else if (level_map[row][col] == 'Z') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 0);
+			}
+			else if (level_map[row][col] == 'X') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+			}
 			else if (level_map[row][col] == 'C') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 2);
+			}
+			else if (level_map[row][col] == 'V') {
 				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
+			}
+			else if (level_map[row][col] == 'H') {
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 0);
+			}
+			else if (level_map[row][col] == 'J') {
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+			}
+			else if (level_map[row][col] == 'K') {
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 2);
 			}
 			else if (level_map[row][col] == 'L') {
 				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
