@@ -17,7 +17,7 @@ W                     W                          T              W               
 W                     W                                         W                                   W
 W                     W                                         W                                   W
 W                     W               W                         W                                   W
-W                     W       T       W             LC          W                                   W
+W                     W       T       W             LV          W                                   W
 WWWWWWWWWWWWWWWWWWWWWWW               W               WWWWWWWWWWW                 WWWWWWWWWWWWWWWWWWW
 W                                     W               W                                             W
 W                                     W               W                                             W
@@ -31,7 +31,7 @@ W                                     W               W                         
 W            T                        WWWWWWWWWWWWWWWWW                                             W
 W                                                     W                                             W
 W                                                     W                                             W
-WWWWWWWWWWWWWWWWWWWWWWWWWWWW                          W                                  LC         W
+WWWWWWWWWWWWWWWWWWWWWWWWWWWW                          W                                  LV         W
 W                          W                          W                                    WWWWWWWWWW
 W                          W                          W                                    W        W
 W                          W            T             W                                    W        W
