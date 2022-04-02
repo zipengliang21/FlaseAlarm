@@ -43,6 +43,9 @@ public:
 	ComponentContainer<UI> uis;
 	ComponentContainer<Background> background;
 	ComponentContainer<Exploded> explodeds;
+	ComponentContainer<Wind> winds;
+	ComponentContainer<WindParticle> windParticles;
+	ComponentContainer<Bee> bees;
 
 	// constructor that adds all containers for looping over them
 	// IMPORTANT: Don't forget to add any newly added containers!
@@ -80,6 +83,9 @@ public:
 		registry_list.push_back(&uis);
 		registry_list.push_back(&background);
 		registry_list.push_back(&explodeds);
+		registry_list.push_back(&winds);
+		registry_list.push_back(&windParticles);
+		registry_list.push_back(&bees);
 	}
 
 	void clear_all_components() {

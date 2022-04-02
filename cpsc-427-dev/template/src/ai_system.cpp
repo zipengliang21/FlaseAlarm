@@ -6,7 +6,7 @@
 #include <iostream>
 #include <queue>
 
-const float GUARD_VELOCITY = 50.0f;
+const float GUARD_VELOCITY = 100.0f;
 const float CALC_INTERVAL = 0.5f; // Calculate the shortest-path every 0.5 seconds
 
 using namespace std;

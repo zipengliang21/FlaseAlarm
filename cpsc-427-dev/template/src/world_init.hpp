@@ -5,6 +5,8 @@
 #include "render_system.hpp"
 #include "conversation_state.hpp"
 
+#include <random>
+
 // These are ahrd coded to the dimensions of the entity texture
 const float STUDENT_BB_WIDTH = 0.3f * 165.f;
 const float STUDENT_BB_HEIGHT = 0.3f * 165.f;
@@ -31,14 +33,39 @@ const float LIGHT_BB_HEIGHT = 0.4f * 252.f;
 const float TRAP_BB_WIDTH = 0.1f * 504.f;
 const float TRAP_BB_HEIGHT = 0.15f * 444.f;
 const float WALL_SIZE = 20.2f;
-const float TOOL_UI_SIZE = 80.0f;
 
-const float GUARD_TURN_TIME = 12000; // units of ms
-const float LIGHT_TURN_TIME = 3000; // units of ms
+// tool
+const float TOOL_UI_SIZE = 80.0f;
+const float TOOL_UI_SIZE_COEF = 0.065;
+const float TOOL1_UI_X_POS_COEF = 0.735;
+const float TOOL2_UI_X_POS_COEF = TOOL1_UI_X_POS_COEF + TOOL_UI_SIZE_COEF;
+const float TOOL3_UI_X_POS_COEF = TOOL2_UI_X_POS_COEF + TOOL_UI_SIZE_COEF;
+const float TOOL4_UI_X_POS_COEF = TOOL3_UI_X_POS_COEF + TOOL_UI_SIZE_COEF;
 
 const char SANDGLASS_CHAR = '1';
 const char REMOTE_CONTROL_CHAR = '2';
 const char HAMMER_CHAR = '3';
+const char BEE_CHAR = '4';
+
+// bee
+const float BEE_GOING_TIME = 2.0f;
+const float BEE_STAY_TIME = 5.0f;
+const float BEE_LEAVE_TIME = 2.0f;
+
+// wind
+const float WIND_WIDTH_SIZE = WALL_SIZE * 3.0f;
+const float WIND_LENGTH_SIZE = WALL_SIZE * 5.0f;
+const int WIND_PARTICLE_LIMIT = 20;
+
+// minimap
+const float MINIMAP_WIDTH_COEF = 0.2f;
+const float MINIMAP_POS_X = 20.0f;
+const float MINIMAP_POS_Y = 20.0f;
+
+const float GUARD_TURN_TIME = 12000; // units of ms
+const float LIGHT_TURN_TIME = 3000; // units of ms
+
+extern std::default_random_engine eng;
 
 // the player
 Entity createStudent(RenderSystem* renderer, vec2 pos);
@@ -80,6 +107,11 @@ Entity createMovie(RenderSystem *renderer, vec2 pos, vec2 size, std::vector<TEXT
 Entity createTool(RenderSystem *renderer, vec2 position, Tool::ToolType type);
 
 void createExplodeds(RenderSystem *renderer,int count, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId, float life);
+
+Entity createWind(RenderSystem *renderer, vec2 position, float width, float length, Direction dir);
+Entity createWindParticle(RenderSystem *renderer, const Wind &wind, const Entity &windEntity);
+
+Entity createBee(RenderSystem *renderer, const Entity &targetEntity, vec2 beeBornPos);
 
 // create background
 Entity createBackground(RenderSystem* renderer, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId);

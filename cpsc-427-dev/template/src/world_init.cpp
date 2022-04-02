@@ -5,6 +5,8 @@
 
 using namespace std;
 
+std::default_random_engine eng;
+
 Entity createStudent(RenderSystem *renderer, vec2 pos)
 {
 	auto entity = Entity();
@@ -29,7 +31,8 @@ Entity createStudent(RenderSystem *renderer, vec2 pos)
 		entity,
 		{ TEXTURE_ASSET_ID::PLAYER_UP_0, // TEXTURE_COUNT indicates that no txture is needed
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+		true });
 
 	return entity;
 }
@@ -61,7 +64,8 @@ Entity createWall(RenderSystem *renderer, vec2 position)
 		entity,
 		{ TEXTURE_ASSET_ID::WALL, // TODo
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+		true });
 
 	return entity;
 }
@@ -93,7 +97,8 @@ Entity createExit(RenderSystem *renderer, vec2 position)
 		entity,
 		{ TEXTURE_ASSET_ID::EXIT, // TODo
 			EFFECT_ASSET_ID::TEXTURED,
-			GEOMETRY_BUFFER_ID::SPRITE });
+			GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
@@ -127,13 +132,14 @@ Entity createGuard(RenderSystem *renderer, vec2 position, vec2 v)
 		entity,
 		{ TEXTURE_ASSET_ID::EAGLE,
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
 
 
-Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction)
+Entity createCamera(RenderSystem *renderer, vec2 position, uint16_t direction)
 {
 	auto entity = Entity();
 
@@ -142,19 +148,22 @@ Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction)
 	registry.meshPtrs.emplace(entity, &mesh);
 
 	// Initialize the motion
-	auto& motion = registry.motions.emplace(entity);
+	auto &motion = registry.motions.emplace(entity);
 
 	// Setting initial values, scale is negative to make it face the opposite way
 	if (direction == 0) {
 		motion.scale = { -CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
 		motion.position = { position.x - 5.f, position.y - 5.f };
-	} else if (direction == 1) {
+	}
+	else if (direction == 1) {
 		motion.scale = { CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
 		motion.position = { position.x + 5.f, position.y - 5.f };
-	} else if (direction == 2) {
+	}
+	else if (direction == 2) {
 		motion.scale = { -CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
 		motion.position = { position.x - 5.f, position.y + 5.f };
-	} else {
+	}
+	else {
 		motion.scale = { CAMERA_BB_WIDTH, CAMERA_BB_HEIGHT };
 		motion.position = { position.x + 5.f, position.y + 5.f };
 	}
@@ -165,12 +174,13 @@ Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction)
 		entity,
 		{ TEXTURE_ASSET_ID::CAMERA,
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
 
-Entity createLight(RenderSystem* renderer, vec2 position, uint16_t direction)
+Entity createLight(RenderSystem *renderer, vec2 position, uint16_t direction)
 {
 	auto entity = Entity();
 
@@ -182,29 +192,32 @@ Entity createLight(RenderSystem* renderer, vec2 position, uint16_t direction)
 	registry.turnTimers.emplace(entity, LIGHT_TURN_TIME);
 
 	// Initialize the motion
-	auto& motion = registry.motions.emplace(entity);
+	auto &motion = registry.motions.emplace(entity);
 	if (direction == 0) {
 		motion.angle = 0.5f;
 		motion.velocity = { 0.5f, 0 };
 		motion.position = { position.x - 10.f, position.y - 10.f };
 		motion.scale = { LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
-	} else if (direction == 1) {
+	}
+	else if (direction == 1) {
 		motion.angle = -0.5f;
 		motion.velocity = { 0.5f, 0 };
 		motion.position = { position.x + 10.f, position.y - 10.f };
 		motion.scale = { -LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
-	} else if (direction == 2) {
+	}
+	else if (direction == 2) {
 		motion.angle = 0.5f;
 		motion.velocity = { -0.5f, 0 };
 		motion.position = { position.x - 10.f, position.y + 10.f };
 		motion.scale = { LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
-	} else {
+	}
+	else {
 		motion.angle = 0.5f;
 		motion.velocity = { -0.5f, 0 };
 		motion.position = { position.x + 10.f, position.y + 10.f };
 		motion.scale = { -LIGHT_BB_WIDTH, LIGHT_BB_HEIGHT };
 	}
-	
+
 
 	// Create and (empty) Eagle component to be able to refer to all eagles
 	registry.lights.emplace(entity);
@@ -213,7 +226,8 @@ Entity createLight(RenderSystem* renderer, vec2 position, uint16_t direction)
 		entity,
 		{ TEXTURE_ASSET_ID::LIGHT,
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
@@ -246,21 +260,106 @@ Entity createUIBox(RenderSystem *renderer, vec2 position, vec2 size, enum TEXTUR
 		entity,
 		{ textureAssetId, // TEXTURE_ASSET_ID
 		 EFFECT_ASSET_ID::UI,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
 
-Entity createBackground(RenderSystem* renderer, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId) {
+Entity createWind(RenderSystem *renderer, vec2 position, float width, float length, Direction dir)
+{
 	auto entity = Entity();
 
 	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
-	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto &motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0,0 };
+	motion.position = position;
+
+	registry.winds.emplace(entity, position, width, length, dir);
+
+	// no rendering but let it born particles at render function
+
+	//registry.renderRequests.insert(
+	//	entity,
+	//	{ textureAssetId, // TEXTURE_ASSET_ID
+	//	 EFFECT_ASSET_ID::UI,
+	//	 GEOMETRY_BUFFER_ID::SPRITE });
+
+	return entity;
+}
+
+Entity createWindParticle(RenderSystem *renderer, const Wind &wind, const Entity &windEntity)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	WindParticle &windParticle = registry.windParticles.emplace(entity, wind, windEntity, glfwGetTime());
+
+	// Initialize the motion
+	auto &motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0,0 };
+	motion.position = windParticle.GetPos(glfwGetTime());
+	motion.scale = vec2(WALL_SIZE * 0.25f);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::WIND_PARTICLE, // TEXTURE_ASSET_ID
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
+
+	return entity;
+}
+
+Entity createBee(RenderSystem *renderer, const Entity &targetEntity, vec2 beeBornPos)
+{
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	uniform_real_distribution<float> uni(-GUARD_BB_WIDTH, GUARD_BB_WIDTH);
+	vec2 diffPosWithTarget(uni(eng), uni(eng));
+
+	Bee &bee = registry.bees.emplace(entity, targetEntity, diffPosWithTarget, beeBornPos);
+
+	// Initialize the motion
+	auto &motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0,0 };
+	motion.position = beeBornPos;
+	motion.scale = vec2(WALL_SIZE * 0.5f);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::BEE,
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
+
+	return entity;
+}
+
+Entity createBackground(RenderSystem *renderer, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh &mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
 	registry.meshPtrs.emplace(entity, &mesh);
 
 
 	// Initialize the motion
-	auto& motion = registry.motions.emplace(entity);
+	auto &motion = registry.motions.emplace(entity);
 	motion.angle = 0.f;
 	motion.velocity = { 0,0 };
 	motion.position = position;
@@ -271,8 +370,9 @@ Entity createBackground(RenderSystem* renderer, vec2 position, vec2 size, enum T
 	registry.renderRequests.insert(
 		entity,
 		{ textureAssetId, // TEXTURE_ASSET_ID
-		 EFFECT_ASSET_ID::UI,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 EFFECT_ASSET_ID::TEXTURED,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
@@ -302,7 +402,8 @@ Entity createTextBox(RenderSystem *renderer, vec2 position, enum TEXTURE_ASSET_I
 		entity,
 		{ textureAssetId, // TEXTURE_ASSET_ID
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
@@ -330,7 +431,8 @@ Entity createTrap(RenderSystem *renderer, vec2 position) {
 		entity,
 		{ TEXTURE_ASSET_ID::TRAP,
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
@@ -344,7 +446,8 @@ Entity createLine(vec2 position, vec2 scale)
 		entity,
 		{ TEXTURE_ASSET_ID::TEXTURE_COUNT,
 		 EFFECT_ASSET_ID::EGG,
-		 GEOMETRY_BUFFER_ID::DEBUG_LINE });
+		 GEOMETRY_BUFFER_ID::DEBUG_LINE,
+		false});
 
 	// Create motion
 	Motion &motion = registry.motions.emplace(entity);
@@ -392,7 +495,8 @@ Entity createNPC(RenderSystem *renderer, vec2 position)
 		entity,
 		{ TEXTURE_ASSET_ID::NPC_STUDENT,
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		true});
 
 	return entity;
 
@@ -423,7 +527,8 @@ Entity createMovie(RenderSystem *renderer, vec2 pos, vec2 size, std::vector<TEXT
 		entity,
 		{ TEXTURE_ASSET_ID::BUG, // TEXTURE_ASSET_ID
 		 EFFECT_ASSET_ID::UI,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
@@ -451,16 +556,15 @@ Entity createTool(RenderSystem *renderer, vec2 position, Tool::ToolType type)
 		entity,
 		{ tool.GetTexId(0),
 		 EFFECT_ASSET_ID::TEXTURED,
-		 GEOMETRY_BUFFER_ID::SPRITE });
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		false});
 
 	return entity;
 }
 
 void createExplodeds(RenderSystem *renderer, int count, vec2 position, vec2 size, TEXTURE_ASSET_ID textureAssetId, float life)
 {
-	std::default_random_engine e;
-	e.seed(glfwGetTime() * 1000);
-		std::uniform_real_distribution<double> uni(0, 1);
+	std::uniform_real_distribution<double> uni(0, 1);
 
 	for (int i = 0; i < count; ++i)
 	{
@@ -472,9 +576,9 @@ void createExplodeds(RenderSystem *renderer, int count, vec2 position, vec2 size
 
 
 		//Initialize the motion
-		float v0 = 50+uni(e)*350; // initialized abs of velocity
-		float angle = uni(e)*360; // emit direction angle
-		vec2 initSize = (float)uni(e) * size;
+		float v0 = 50 + uni(eng) * 350; // initialized abs of velocity
+		float angle = uni(eng) * 360; // emit direction angle
+		vec2 initSize = (float)uni(eng) * size;
 
 		auto &motion = registry.motions.emplace(entity);
 		motion.angle = angle;
@@ -488,7 +592,8 @@ void createExplodeds(RenderSystem *renderer, int count, vec2 position, vec2 size
 			entity,
 			{ textureAssetId,
 			 EFFECT_ASSET_ID::TEXTURED,
-			 GEOMETRY_BUFFER_ID::SPRITE });
+			 GEOMETRY_BUFFER_ID::SPRITE,
+			true});
 	}
 	return;
 }

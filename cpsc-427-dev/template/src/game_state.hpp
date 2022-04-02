@@ -1,3 +1,5 @@
+#pragma once
+
 // stlib
 #include <glm/glm.hpp>
 
@@ -25,9 +27,14 @@ public:
 	// returns the current map
 	const GameMap &GetCurrentMap()const;
 
+	// returns the pixel size of the current map
+	glm::vec2 GetMapPixelSize() const;
+
 	int GetUnlockedLevel() const;
 
 	void WinAtLevel(int winLevelIndex);
+
+	bool AtValidLevel() const;
 
 	int GetCurrentLevelIndex() const;
 

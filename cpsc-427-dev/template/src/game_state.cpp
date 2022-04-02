@@ -2,6 +2,7 @@
 #include "game_state.hpp"
 
 #include "common.hpp"
+#include "world_init.hpp"
 
 // maximum levels of game we are going to provide
 const int MAX_LEVEL = 6;
@@ -25,6 +26,11 @@ const GameState::GameMap &GameState::GetCurrentMap() const
 	return levelMaps.at(currLevelIndex);
 }
 
+glm::vec2 GameState::GetMapPixelSize() const
+{
+	return glm::vec2(GetCurrentMap()[0].size() * WALL_SIZE, GetCurrentMap().size() * WALL_SIZE);
+}
+
 int GameState::GetUnlockedLevel() const
 {
 	return unlockedLevel;
@@ -40,6 +46,11 @@ void GameState::WinAtLevel(int winLevelIndex)
 	}
 }
 
+bool GameState::AtValidLevel() const
+{
+	return currLevelIndex!=-1;
+}
+
 int GameState::GetCurrentLevelIndex() const
 {
 	return currLevelIndex;
@@ -47,7 +58,7 @@ int GameState::GetCurrentLevelIndex() const
 
 void GameState::SetCurrentLevelIndex(int index)
 {
-	assert(levelMaps.find(index) != levelMaps.end());
+	//assert(levelMaps.find(index) != levelMaps.end());
 	currLevelIndex = index;
 }
 
