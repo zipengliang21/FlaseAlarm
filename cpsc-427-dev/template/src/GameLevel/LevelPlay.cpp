@@ -638,7 +638,6 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 				registry.motions.get(player).position = { position.x, position.y + 15.f };
 			}
 		}
-
 		//registry.motions.get(entity).position = { position.x, position.y };
 		return true;
 	}
