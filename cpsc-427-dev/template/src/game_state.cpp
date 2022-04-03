@@ -3,6 +3,7 @@
 
 #include "common.hpp"
 #include "world_init.hpp"
+#include "LevelPlay.hpp"
 
 // maximum levels of game we are going to provide
 const int MAX_LEVEL = 6;
@@ -102,13 +103,33 @@ void GameState::LoadUnlockedLevel()
 
 void GameState::SaveUnlockedLevel()
 {
-	std::ofstream unlockedLevelFile;
-	unlockedLevelFile.open(UNLOCKED_LEVEL_FILE_PATH);
+	// std::ofstream unlockedLevelFile;
+	// unlockedLevelFile.open(UNLOCKED_LEVEL_FILE_PATH);
+	// std::cout << "before saving" << std::endl;
+
+	// unlockedLevelFile << unlockedLevel << "\n";
+	// std::cout << unlockedLevel << std::endl;
+
+	// std::cout << "after saving" << std::endl;
+	// unlockedLevelFile.close();
+
 	std::cout << "before saving" << std::endl;
+	if (!jsonObject.empty())  {
+		jsonObject.clear();
+	}
 
-	unlockedLevelFile << unlockedLevel << "\n";
-	std::cout << unlockedLevel << std::endl;
-
+	jsonObject["currLevelIndex"] = currLevelIndex;
+	jsonObject["unlockedLevel"] = unlockedLevel;
+	jsonObject["playerMotion"] = registry.motions.get(LevelPlay::player);
 	std::cout << "after saving" << std::endl;
-	unlockedLevelFile.close();
+
+	std::string s = j.dump();
+
+	// write json to file
+	std::ofstream o("game_status.json");
+	o << j << std::endl;
+
+
+
+	
 }

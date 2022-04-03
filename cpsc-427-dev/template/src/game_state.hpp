@@ -11,7 +11,12 @@
 #include <map>
 #include <set>
 
-// internal
+
+// json library
+#include <json.hpp>
+using json = nlohmann::json;
+
+#include "tiny_ecs_registry.hpp"
 
 // maximum levels of game we are going to provide
 extern const int MAX_LEVEL;
@@ -43,6 +48,7 @@ public:
 private:
 	int currLevelIndex;
 	int unlockedLevel;
+	json jsonObject; // json variable for save and load
 	std::map<int, GameMap> levelMaps; // key = level index; value = level map;
 
 	void LoadLevel(int levelIndex);
