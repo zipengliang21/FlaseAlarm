@@ -76,22 +76,29 @@ private:
 	// in the step(), every countdown event is be checked, if it's timeout, call its callback function
 	struct CountdownEvent
 	{
-		double runTime;
+		float runTime;
 		TimeCallBack cb;
-		CountdownEvent(double runTime,  TimeCallBack cb) :
+		CountdownEvent(float runTime,  TimeCallBack cb) :
 			runTime(runTime),cb(cb){}
 	};
 
 	// stored all the countdown events
-	std::vector<CountdownEvent> countdownEvents;
+	std::list<CountdownEvent> countdownEvents;
 
 	void if_clicked_sandglass_button(Entity entity);
 
 	void if_clicked_remote_control_button(Entity entity);
 
+	void if_clicked_bee_button(Entity entity);
+
 	// input a mouse cursor position, returns true, and make the row and col index of the clicked grid
 	bool GetClickedRowCol(vec2 cursor, int &row, int &col);
 
+	// add wind particles and remove dead wind particles
+	void UpdateWindParticle();
+
+	// 
+	void UpdateBee(float dt);
 };
 
 // Interpolate

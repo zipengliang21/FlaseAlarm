@@ -31,6 +31,9 @@ void LevelSelection::Restart()
 	createUIBox(renderer, { w / 2, 6 * (h - 50) / paddingFactor }, { BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT }, getTextureIDOfLevelButton(5), "level5");
 	createUIBox(renderer, { w / 2, 7 * (h - 50) / paddingFactor }, { BUTTON_BB_WIDTH, BUTTON_BB_HEIGHT }, getTextureIDOfLevelButton(6), "level6");
 
+
+	registry.gameStates.get(manager->gameStateEntity).SetCurrentLevelIndex(-1);
+	renderer->useMask = false;
 }
 
 void LevelSelection::OnKey(int key, int, int action, int mod)

@@ -8,6 +8,7 @@
 // stlib
 #include <iostream>
 #include <sstream>
+#include <random>
 
 using namespace std;
 
@@ -129,7 +130,10 @@ TEXTURE_ASSET_ID Player::GetTexId(double nowTime)
 
 	// if now is not the time to refresh, return directly.
 	if (lastSwitchTime + switchFrame > nowTime)
+	{
+		//cout << nowTime << " curTexId: " << (int)curTexId << endl;
 		return curTexId;
+	}
 
 	// do refresh
 	switch (curDir)
@@ -176,13 +180,16 @@ TEXTURE_ASSET_ID Player::GetTexId(double nowTime)
 		break;
 	}
 	lastSwitchTime = nowTime; // update frame time
+	//cout << nowTime << " curTexId: " << (int)curTexId << endl;
 	return curTexId;
 }
 
 void Player::SwitchDirection(Direction dir, double nowTime)
 {
 	if (dir == curDir)
+	{
 		return;
+	}
 
 	lastSwitchTime = nowTime;
 	switch (dir)
@@ -340,6 +347,11 @@ Tool::Tool(ToolType type) :type(type), movie({})
 	case ToolType::HAMMER:
 		movie.SetTextures({ TEXTURE_ASSET_ID::HAMMER });
 		break;
+	case ToolType::BEE:
+		movie.SetTextures({ TEXTURE_ASSET_ID::BEE });
+		break;
+	default:
+		assert(0);
 	}
 }
 
@@ -354,14 +366,19 @@ vec2 Tool::GetUIPosition() const
 	switch (type)
 	{
 	case ToolType::SANDGLASS:
-		pos={ window_width_px*0.8,window_height_px*0.1 };
+		pos = { window_width_px * TOOL1_UI_X_POS_COEF,window_height_px * 0.1 };
 		break;
 	case ToolType::REMOTE_CONTROL:
-		pos = { window_width_px * 0.865,window_height_px * 0.1 };
+		pos = { window_width_px * TOOL2_UI_X_POS_COEF,window_height_px * 0.1 };
 		break;
 	case ToolType::HAMMER:
-		pos = { window_width_px * 0.93,window_height_px * 0.1 };
+		pos = { window_width_px * TOOL3_UI_X_POS_COEF,window_height_px * 0.1 };
 		break;
+	case ToolType::BEE:
+		pos = { window_width_px * TOOL4_UI_X_POS_COEF,window_height_px * 0.1 };
+		break;
+	default:
+		assert(0);
 	}
 	return pos;
 }
@@ -385,6 +402,11 @@ char Tool::GetCommandChar() const
 	case ToolType::HAMMER:
 		c = HAMMER_CHAR;
 		break;
+	case ToolType::BEE:
+		c = BEE_CHAR;
+		break;
+	default:
+		assert(0);
 	}
 	return c;
 }
@@ -398,4 +420,195 @@ bool TurnTimer::UpdateAndCheckIsTimeout(float elapsed_ms)
 		return true;
 	}
 	return false;
+}
+
+WindParticle::WindParticle(const Wind &parentWind, const Entity &windEntity, float t0) :windEntity(windEntity)
+{
+	//   vx in [length/5.0, length/1.0]
+//   A  in [0.1*width, 0.5*width]
+//   T  in [0.1*length, 2.0*length]
+	this->t0 = t0;
+	pos0 = parentWind.pos;
+
+	uniform_real_distribution<float> uniVx(parentWind.length / 5.0f, parentWind.length / 1.0f);
+	v = uniVx(eng);
+
+	uniform_real_distribution<float> uniA(parentWind.width * 0.1f, parentWind.width * 1.0f);
+	A = uniA(eng);
+
+	uniform_real_distribution<float> uniT(parentWind.length * 0.01f, parentWind.length * 1.0f);
+	T = uniT(eng);
+
+	parentLength = parentWind.length;
+	dir = parentWind.dir;
+}
+
+bool WindParticle::IsAlive(float t) const
+{
+	return v * (t - t0) < parentLength;
+}
+
+vec2 WindParticle::GetPos(float t) const
+{
+	vec2 diffPos;
+	float sign = -1;
+	if (dir == Direction::RIGHT || dir == Direction::DOWN)
+		sign = 1;
+	diffPos.x = sign * v * (t - t0);
+	diffPos.y = A * sin(2.0 * M_PI / T * (t - t0));
+
+	if (dir == Direction::UP || dir == Direction::DOWN)
+		swap(diffPos.x, diffPos.y);
+	return pos0 + diffPos;
+}
+
+bool Wind::InRange(vec2 objPos) const
+{
+	vec2 xRangeDiff(-length, 0);
+	if (dir == Direction::RIGHT || dir == Direction::DOWN)
+		xRangeDiff = vec2(0, length);
+
+	vec2 yRangeDiff = { -0.5f * width,+0.5f * width };
+
+	if (dir == Direction::UP || dir == Direction::DOWN)
+	{
+		swap(xRangeDiff, yRangeDiff);
+	}
+
+	vec2 xRange = vec2(pos.x) + xRangeDiff;
+	vec2 yRange = vec2(pos.y) + yRangeDiff;
+
+	bool inRange = xRange[0] <= objPos.x && objPos.x <= xRange[1] && yRange[0] <= objPos.y && objPos.y <= yRange[1];
+	return inRange;
+}
+
+void Wind::Influence(Motion &motion) const
+{
+	if (InRange(motion.position) == false)
+		return;
+
+	float sign = -1;
+	if (dir == Direction::RIGHT || dir == Direction::DOWN)
+		sign = 1;
+
+	vec2 vGoal = { sign * 100.0f,0 };
+	if (dir == Direction::UP || dir == Direction::DOWN)
+	{
+		swap(vGoal.x, vGoal.y);
+	}
+
+	motion.velocityGoal = vGoal;
+	cout << "flowing" << endl;
+}
+
+Direction Wind::GetWindDirByChar(char c)
+{
+	Direction dir;
+	switch (c)
+	{
+	case '<':dir = Direction::LEFT; break;
+	case '>':dir = Direction::RIGHT; break;
+	case 'v':dir = Direction::DOWN; break;
+	case '^':dir = Direction::UP; break;
+	default: assert(0);
+	}
+	return dir;
+}
+
+char Wind::GetWindDirChar(Direction dir)
+{
+	char c;
+	switch (dir)
+	{
+	case Direction::LEFT:c = '<'; break;
+	case Direction::RIGHT:c = '>'; break;
+	case Direction::DOWN:c = 'v'; break;
+	case Direction::UP:c = '^'; break;
+	default: assert(0);
+	}
+	return c;
+}
+
+Bee::Bee(const Entity &targetEntity, vec2 diffPosWithTarget, vec2 bornPos) :usedTime(0), targetEntity(targetEntity),
+diffPosWithTarget(diffPosWithTarget),
+bornPos(bornPos),
+goingTime(BEE_GOING_TIME),
+stayTime(BEE_STAY_TIME),
+leaveTime(BEE_LEAVE_TIME)
+{
+
+	uniform_real_distribution<float> uniA(WALL_SIZE * 0.1f, WALL_SIZE * 2.0f);
+	A = uniA(eng);
+
+	uniform_real_distribution<float> uniT(0.1f, 1.0f);
+	T = uniT(eng);
+}
+
+Bee::State Bee::GetState() const
+{
+	// current: go for chasing target
+	if (usedTime < goingTime)
+	{
+		return State::GOING;
+	}
+
+	// current: floating on the target
+	if (usedTime < goingTime + stayTime)
+	{
+		return State::STAY;
+	}
+
+	// current: leave the target
+	if (usedTime < goingTime + stayTime + leaveTime)
+	{
+		return State::LEAVE;
+	}
+	assert(0);
+	return State();
+}
+
+void Bee::ModifyMotion(float dt, Motion &beeMotion, const Motion &targetMotion)
+{
+	assert(IsAlive());
+
+	// current: go for chasing target
+	if (usedTime < goingTime)
+	{
+		float remainTime = goingTime - usedTime; // the remaining time for the bees to chase the target
+		vec2 remainJourney = (targetMotion.position+diffPosWithTarget) - beeMotion.position;
+		beeMotion.position += remainJourney * (dt / remainTime);
+
+		usedTime += dt;
+		return;
+	}
+
+	// current: floating on the target
+	if (usedTime < goingTime + stayTime)
+	{
+		float remainTime = goingTime +stayTime - usedTime; // the remaining time for the bees to stay
+		beeMotion.position = (targetMotion.position + diffPosWithTarget);
+
+		// y diff
+		float yDiff = A * sin(2.0f*M_PI/T * usedTime);
+		beeMotion.position.y += yDiff;
+
+		usedTime += dt;
+		return;
+	}
+
+	// current: leave the target
+	if (usedTime < goingTime + stayTime + leaveTime)
+	{
+		float remainTime = goingTime + stayTime+leaveTime - usedTime; // the remaining time for the bees to leave
+		vec2 remainJourney = bornPos - beeMotion.position;
+		beeMotion.position += remainJourney * (dt / remainTime);
+
+		usedTime += dt;
+		return;
+	}
+}
+
+bool Bee::IsAlive() const
+{
+	return usedTime <= (goingTime + stayTime + leaveTime);
 }
