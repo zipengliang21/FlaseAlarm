@@ -86,3 +86,61 @@ World_system.cpp line 546-547, handle the collision between the player and the t
 World_init.cpp line 133-190: Initialize camera and light entities
 World_system.cpp line 445-450: Add camera and light to the background
 Physics_system.cpp line 43-45: Change the direction of the light once after a while
+
+**Milestone 3**
+
+**Project restructure (src/GameLevel):** 
+
+restructure the project to distinguish the different use of the system in different functional pages (cover page, level selection page, game page, and tutorial page). Moved some key functions such as onKey() and step() for each functional page to its own class to enhance cohesion in the code design. Also introduced a new GameState class to control and keep track of the current level and current progress in the game. 
+
+**Camera control (following player):**
+
+LevelManager.cpp line 112: reset camera matrix
+Levelplay.cpp Line 223-225, update camera translation matrix according to player’s current position and window width and height in each step.
+
+**Cover movie:**
+
+LevelCover.cpp entire file: create cover movie and press any key to continue to level selection
+LevelManager.cpp line 19-21 load cover music
+LevelManager.cpp line 42 call the constructor of cover
+
+**Sandglass:**
+
+It’s a new game item. When the player “collides” with the sandglass, it will pick up this item, which will show in the item box. To use this item, click it in the item box. When sandglass is used, it will stop all the enemy(i.e guards and cameras) for 5 seconds. 
+LevelPlay.cpp, line 845, create sandglass
+LevelPlay.cpp, line 235, 259, when the player picks up the item, the item will be added into the item box. 
+LevelPlay.cpp, inside onMouseButton function, line 479-483, when the user uses mouse to left click the sandglass item, it triggers the if_clicked_sandglass_button function.
+LevelPlay.cpp line 676~732 if_clicked_sandglass_button function. This is called when the sandglass item is being clicked. We will have a 5s timer and we will have a callback function. During this 5 seconds, all guards and cameras motion will be setted 0. After 5 seconds, their motion will go back to their original motion before the sandglass effect.  
+
+
+**Hammer:**
+
+ New game item(Tool), When the player "collide" with the hammer, it will pick up the hammer and store the hammer in the player's item box. When player want to use the hammer, player can drag the hammer onto the wall the player want to break, and release on the wall to break the wall.
+GameLevel/LevelPlay.cpp line 916: create hammer in the map, using character "3"
+GameLevel/LevelPlay.cpp line 396 OnMouseButton function: in line 418-472, we check if any hammer is hovered and check the break the wall in vector shouldBreakWall.  If user clicked on hammer we store the hammer in hoverHammer in line 491-495, and track position hammer to break surrounding walls
+In GameLevel/LevelPlay.cpp line 387-394, we track the movement of the mouse
+World_init.cpp line 459-494: include physical based particle animation when the user break the wall with a hammer
+
+**Mouse Gesture:**
+
+Tracker hammer action while the user dragging hammer and menu button selection. 
+Mouse movement is tracked by OnMouseMove function in LevelPlay.cpp line 387-394 to update hammer's position
+Mouse button click is tracked by OnMouseButton function in LevelSelection.cpp line 60-93
+
+**Remote Control:**
+
+new item, turns off all security cameras for 5 seconds
+GameLevel/LevelPlay.cpp line 396 OnMouseButton function: line 485~489 check if user selected remote control from item box
+GameLevel/LevelPlay.cpp line 734 if_clicked_remote_control_button function: if remote control is selected, shuts off camera by removing all light entities. After 5 seconds, reload the level map and recreate all light entities via callback.
+
+**Security Camera:**
+
+additional enemy. Player will die if the player gets scanned by camera light.
+World_init.cpp line 136-206: Add three new directions when initializing camera and light
+World_system.cpp line 95-110: Update light collision justification algorithm
+
+**Full screen toggle:**
+
+use f key to toggle between full screen mode and window mode
+World_system.cpp line 157-167: Add key control for toggling into and out of full screen
+

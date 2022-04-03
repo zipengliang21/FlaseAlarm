@@ -114,6 +114,7 @@ class RenderSystem {
 			textures_path("tool/sandglass.png"),
 			textures_path("tool/remote_control.png"),
 			textures_path("tool/hammer.png"),
+			textures_path("tool/bee.png"),
 			textures_path("cover_bg/0.jpg"),
 			textures_path("cover_bg/1.jpg"),
 			textures_path("cover_bg/2.jpg"),
@@ -121,6 +122,7 @@ class RenderSystem {
 			textures_path("tool_grid.png"),
 			textures_path("selection_bg.jpg"),
 			textures_path("floor.jpg"),
+			textures_path("wind_particle.png"),
 	};
 
 	std::array<GLuint, effect_count> effects;
@@ -165,6 +167,10 @@ public:
 
 	// the view matrix
 	mat3 viewMatrix = glm::mat3(1.0f);
+
+	// mask function
+	bool useMask;
+	vec2 playerPos;
 
 	mat3 createProjectionMatrix();
 

@@ -19,7 +19,7 @@ W                                                              W                
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW                         WWWWWWWWWWWWW      WWWWWWWWWWWWWWWWWWW
-W                                                                                                   W
+W         v                                                                                         W
 W                                                                                                   W
 W                                                                                                   W
 W                                                                                                   W
@@ -35,24 +35,24 @@ WWWWWWWWWWWWWWWWWWWWW         WWWWWWWW                         WWWWWWWWWWWWW    
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
-W                                    W                         W                                    W
+W                                    W>                        W                                    W
 W                                    W            2            W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
-W                                    W                         W                3                   W
+W                                    W                        <W                3                   W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 W                                    W    N                    W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
-W                                    W                         W                                    W
+W                                    W                     4   W                                    W
 W                                    W                         W                                    W
 W                                    W                         W                                    W
 W                                    W           S             W                                    W
 W                                    W                         W                                    W
-W                                    W                         W                                    W
+W               ^                    W                         W                                    W
 WWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWWW
 

@@ -8,6 +8,7 @@
 
 enum class TEXTURE_ASSET_ID;
 
+enum class Direction { UP, LEFT, DOWN, RIGHT };
 
 struct Movie
 {
@@ -59,7 +60,7 @@ struct Player:public Character
 // tool
 struct Tool
 {
-	enum class ToolType{SANDGLASS,REMOTE_CONTROL,HAMMER};
+	enum class ToolType{SANDGLASS, REMOTE_CONTROL, HAMMER, BEE};
 
 	Tool(ToolType type);
 
@@ -280,6 +281,81 @@ struct Exploded
 	Exploded(float life,vec2 initSize) :life(life),initLife(life),initSize(initSize) {}
 };
 
+/*
+
+below is an example of a wind's influence range:
+    
+          |----------|    -
+ pos -->  |-->-->--> |    |<-width
+          |----------|    -
+
+          |<-length->|
+
+	 dir = Direction::RIGHT
+*/
+struct Wind
+{
+	vec2 pos;
+	float width; // the width of wind
+	float length; // the length of wind
+	Direction dir;
+	int particleCount;
+	Wind(vec2 pos, float width, float length, Direction dir) :pos(pos), width(width), length(length), dir(dir), particleCount(0) {}
+
+	bool InRange(vec2 objPos) const;
+
+	// make a motion be influence by this wind
+	void Influence(Motion &motion) const;
+
+	// get a direction by a character that "<>v^" means left/right/down/up
+	static Direction GetWindDirByChar(char c);
+	static char GetWindDirChar(Direction dir);
+};
+
+
+struct WindParticle
+{
+private:
+	float t0; // born time
+	vec2 pos0; // born position
+	float v; // velocity at flowing direction
+	float A; // amplitude of sin curve
+	float T; // period of sin curve
+	float parentLength;
+public:
+	Entity windEntity;
+	Direction dir;
+	WindParticle(const Wind &parentWind, const Entity &windEntity, float t0);
+
+	// x = x0 + v * t
+	// y = y0 + A sin(2*pi/T * t)
+	vec2 GetPos(float t) const;
+	bool IsAlive(float t) const;
+};
+
+struct Bee
+{
+private:
+	float usedTime;
+	vec2 diffPosWithTarget;
+	vec2 bornPos;
+	float goingTime;
+	float stayTime;
+	float leaveTime;
+	float A;// amplitude of sin curve
+	float T; // period of sin curve
+public:
+	Entity targetEntity; // the target purchased by bee
+	enum class State{GOING,STAY,LEAVE};
+	//State state;
+
+	Bee(const Entity &targetEntity, vec2 diffPosWithTarget, vec2 bornPos);
+
+	State GetState() const;
+	void ModifyMotion(float dt, Motion &beeMotion, const Motion &targetMotion);
+	bool IsAlive() const;
+};
+
 /**
  * The following enumerators represent global identifiers refering to graphic
  * assets. For example TEXTURE_ASSET_ID are the identifiers of each texture
@@ -389,14 +465,16 @@ enum class TEXTURE_ASSET_ID {
 	SANDGLASS = PRESS_ANY + 1,
 	REMOTE_CONTROL = SANDGLASS + 1,
 	HAMMER = REMOTE_CONTROL + 1,
-	COVER0 = HAMMER + 1,
+	BEE = HAMMER + 1,
+	COVER0 = BEE + 1,
 	COVER1 = COVER0 + 1,
 	COVER2 = COVER1 + 1,
 	COVER3 = COVER2 + 1,
 	TOOL_GRID = COVER3 + 1,
 	SELECTION_BG= TOOL_GRID + 1,
 	FLOOR_BG = SELECTION_BG + 1,
-	TEXTURE_COUNT = FLOOR_BG +1
+	WIND_PARTICLE = FLOOR_BG + 1,
+	TEXTURE_COUNT = WIND_PARTICLE + 1
 };
 const int texture_count = (int)TEXTURE_ASSET_ID::TEXTURE_COUNT;
 
@@ -422,9 +500,17 @@ struct RenderRequest {
 	TEXTURE_ASSET_ID used_texture = TEXTURE_ASSET_ID::TEXTURE_COUNT;
 	EFFECT_ASSET_ID used_effect = EFFECT_ASSET_ID::EFFECT_COUNT;
 	GEOMETRY_BUFFER_ID used_geometry = GEOMETRY_BUFFER_ID::GEOMETRY_COUNT;
+	bool showOnMinimap;
 
 	void changeTexture(TEXTURE_ASSET_ID newTexture) {
 		used_texture = newTexture;
 	}
+
+	RenderRequest(TEXTURE_ASSET_ID used_texture, EFFECT_ASSET_ID used_effect, GEOMETRY_BUFFER_ID used_geometry, bool showOnMinimap) :
+		used_texture(used_texture),
+		used_effect(used_effect),
+		used_geometry(used_geometry),
+		showOnMinimap(showOnMinimap)
+	{}
 };
 

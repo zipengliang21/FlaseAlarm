@@ -17,6 +17,7 @@ public:
 	Entity()
 	{
 		id = id_count++;
+		assert(id_count < INT_MAX);
 		// Note, indices of already deleted entities arent re-used in this simple implementation.
 	}
 	operator unsigned int() { return id; } // this enables automatic casting to int

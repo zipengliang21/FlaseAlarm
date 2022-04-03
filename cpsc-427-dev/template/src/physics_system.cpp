@@ -57,9 +57,9 @@ void PhysicsSystem::step(float elapsed_ms)
 		}
 
 	}
-	
+
 	// calc all the explodeds 's life and erase dead instance
-	for (auto &e: registry.explodeds.entities)
+	for (auto &e : registry.explodeds.entities)
 	{
 		Exploded &inst = registry.explodeds.get(e);
 		inst.life -= elapsed_ms;
@@ -75,6 +75,13 @@ void PhysicsSystem::step(float elapsed_ms)
 
 		float lifeCoef = inst.life / inst.initLife; // [0,1], 0 for dead; 1 for born
 		motion.scale = inst.initSize * lifeCoef;
+	}
+
+	// be influence by wind
+	for (auto &inst : registry.winds.components)
+	{
+		Entity player = registry.players.entities[0];
+		inst.Influence(registry.motions.get(player));
 	}
 
 	// Check for collisions between all moving entities
@@ -94,11 +101,16 @@ void PhysicsSystem::step(float elapsed_ms)
 			Entity entity_j = motion_container.entities[j];
 			for (Entity entity : registry.lights.entities) {
 				if (entity == entity_i) {
-					motion_i.scale.x += 80.f;
+					if (motion_i.scale.x < 0)
+						motion_i.scale.x += 80.f;
+					else motion_i.scale.x -= 80.f;
 					motion_i.scale.y -= 20.f;
 					break;
-				} else if (entity == entity_j) {
-					motion_j.scale.x += 80.f;
+				}
+				else if (entity == entity_j) {
+					if (motion_j.scale.x < 0)
+						motion_j.scale.x += 80.f;
+					else motion_j.scale.x -= 80.f;
 					motion_j.scale.y -= 20.f;
 					break;
 				}

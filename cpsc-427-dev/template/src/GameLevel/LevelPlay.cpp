@@ -10,7 +10,7 @@ using namespace std;
 
 // Game configuration
 const size_t MAX_BUG = 5;
-const float PLAYER_SPEED = 70;
+const float PLAYER_SPEED = 200;
 
 
 int bot_to_top = 0;
@@ -64,7 +64,11 @@ LevelPlay::~LevelPlay()
 
 void LevelPlay::step(float elapsed_ms)
 {
-	//ProcessKeyPress();
+	ProcessKeyPress();
+
+	UpdateWindParticle();
+
+	UpdateBee(elapsed_ms / 1000.0f);
 
 	// traversal the count down events, if time out, run it.
 	for (auto it = countdownEvents.begin(); it != countdownEvents.end();)
@@ -91,11 +95,11 @@ void LevelPlay::step(float elapsed_ms)
 	Motion &player_motion = registry.motions.get(player);
 	Motion &guard_motion = registry.motions.get(guard);
 
-	player_motion.velocity.x = approach(player_motion.velocityGoal.x, player_motion.velocity.x, elapsed_ms / 5);
-	player_motion.velocity.y = approach(player_motion.velocityGoal.y, player_motion.velocity.y, elapsed_ms / 5);
+	player_motion.velocity.x = approach(player_motion.velocityGoal.x, player_motion.velocity.x, elapsed_ms);
+	player_motion.velocity.y = approach(player_motion.velocityGoal.y, player_motion.velocity.y, elapsed_ms);
 
-	guard_motion.velocity.x = approach(guard_motion.velocityGoal.x, guard_motion.velocity.x, elapsed_ms / 10);
-	guard_motion.velocity.y = approach(guard_motion.velocityGoal.y, guard_motion.velocity.y, elapsed_ms / 10);
+	guard_motion.velocity.x = approach(guard_motion.velocityGoal.x, guard_motion.velocity.x, elapsed_ms);
+	guard_motion.velocity.y = approach(guard_motion.velocityGoal.y, guard_motion.velocity.y, elapsed_ms);
 
 
 	// Remove debug info from the last step
@@ -167,6 +171,7 @@ void LevelPlay::step(float elapsed_ms)
 
 			// go back to menu when restarting the game
 			Restart();
+
 			manager->GoLevelSelection();
 			return;
 		}
@@ -200,25 +205,27 @@ void LevelPlay::step(float elapsed_ms)
 		}
 	}
 
-	Character::Direction dir;
-	if (abs(guardMotion.velocity.x) >= abs(guardMotion.velocity.y)) {
-		if (guardMotion.velocity.x >= 0) // now the guard is moving right
-			dir = Character::Direction::RIGHT;
-		else
-			dir = Character::Direction::LEFT;
-	}
-	else {
-		if (guardMotion.velocity.y >= 0) // now the guard is moving down
-			dir = Character::Direction::DOWN;
-		else
-			dir = Character::Direction::UP;
-	}
+	{
+		Character::Direction dir;
+		if (abs(guardMotion.velocity.x) >= abs(guardMotion.velocity.y)) {
+			if (guardMotion.velocity.x >= 0) // now the guard is moving right
+				dir = Character::Direction::RIGHT;
+			else
+				dir = Character::Direction::LEFT;
+		}
+		else {
+			if (guardMotion.velocity.y >= 0) // now the guard is moving down
+				dir = Character::Direction::DOWN;
+			else
+				dir = Character::Direction::UP;
+		}
 
-	// switch its direction
-	guardObj.SwitchDirection(dir, glfwGetTime());
+		// switch its direction
+		guardObj.SwitchDirection(dir, glfwGetTime());
 
-	// update guard's appearance
-	registry.renderRequests.get(guard).used_texture = guardObj.GetTexId(glfwGetTime());
+		// update guard's appearance
+		registry.renderRequests.get(guard).used_texture = guardObj.GetTexId(glfwGetTime());
+	}
 
 	// the translation matrix is:
 	//         [ 1 0 diffX ]
@@ -228,6 +235,8 @@ void LevelPlay::step(float elapsed_ms)
 	renderer->viewMatrix[2][0] = -player_motion.position.x + window_width_px / 2.0;
 	renderer->viewMatrix[2][1] = -player_motion.position.y + window_height_px / 2.0;
 
+	// set renderer's mask properties
+	renderer->playerPos = player_motion.position;
 
 	// -------- end of step() -----------
 }
@@ -289,7 +298,7 @@ void LevelPlay::OnKey(int key, int, int action, int mod)
 
 	// detect NPC conversation changes
 	for (auto &npc : registry.conversations.entities) {
-		std::cout << "conversation checking..." << std::endl;
+		//std::cout << "conversation checking..." << std::endl;
 		auto &conversation = registry.conversations.get(npc);
 		if (conversation.conversationState.getState() == ConversationState::CONVERSATION_STATE::DURING_CONVERSATION) {
 			std::cout << "during conversation" << std::endl;
@@ -410,11 +419,13 @@ void LevelPlay::OnMouseButton(int button, int action, int mods)
 
 			GameState *gameState = &registry.gameStates.get(manager->gameStateEntity);
 			gameState->WinAtLevel(gameState->GetCurrentLevelIndex());
+			gameState->SetCurrentLevelIndex(-1);
 
 			manager->GoLevelSelection();
 			return;
 		}
 
+		// just for hammer function
 		do
 		{
 			if (hoverHammer.empty()) // hammer is not hovering
@@ -494,33 +505,57 @@ void LevelPlay::OnMouseButton(int button, int action, int mods)
 			return;
 		}
 
-		assert("uncompleted button action");
+		if (clickable.buttonAction == to_string(BEE_CHAR)) // clicked bee
+		{
+			if_clicked_bee_button(entity);
+			return;
+		}
+
+		assert(0 && "uncompleted button action");
 	}
 }
 
 void LevelPlay::ProcessKeyPress()
 {
-	Motion &motion = registry.motions.get(player);
+	if (registry.stopeds.has(player))
+		return;
 
 	// get player instance's reference
 	auto &playerInst = registry.players.get(player);
 
+	// if ASDW key pressing, make player refresh its appearance
+	if ((glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) ||
+		(glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) ||
+		(glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) ||
+		(glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS))
+	{
+		// get the reference of the texture id that player is using
+		auto &playerUsedTex = registry.renderRequests.get(player).used_texture;
+
+		// update player's appearance
+		playerUsedTex = playerInst.GetTexId(glfwGetTime());
+	}
+
+	return; // turn out the code below
+
+	Motion &motion = registry.motions.get(player);
+
 	motion.velocityGoal = { 0,0 };
-	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS && !registry.stopeds.has(player)) {
+	if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS) {
 		motion.velocityGoal.y = -PLAYER_SPEED;
+		//registry.players.get(player).SwitchDirection(Character::Direction::UP, glfwGetTime());
 	}
-	else if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS && !registry.stopeds.has(player)) {
+	if (glfwGetKey(window, GLFW_KEY_S) == GLFW_PRESS) {
 		motion.velocityGoal.y = PLAYER_SPEED;
+		//registry.players.get(player).SwitchDirection(Character::Direction::DOWN, glfwGetTime());
 	}
-	else if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS && !registry.stopeds.has(player)) {
+	if (glfwGetKey(window, GLFW_KEY_A) == GLFW_PRESS) {
 		motion.velocityGoal.x = -PLAYER_SPEED;
+		//registry.players.get(player).SwitchDirection(Character::Direction::LEFT, glfwGetTime());
 	}
-	else if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS && !registry.stopeds.has(player)) {
+	if (glfwGetKey(window, GLFW_KEY_D) == GLFW_PRESS) {
 		motion.velocityGoal.x = PLAYER_SPEED;
-	}
-	else {
-		motion.velocityGoal.x = 0;
-		motion.velocityGoal.y = 0;
+		//registry.players.get(player).SwitchDirection(Character::Direction::RIGHT, glfwGetTime());
 	}
 }
 
@@ -583,27 +618,26 @@ bool LevelPlay::if_collisions_player_with_stopable(Entity other)
 			if (diff.x > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x - 5.f, position.y };
+				registry.motions.get(player).position = { position.x - 15.f, position.y };
 			}
 			else if (diff.x < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x + 5.f, position.y };
+				registry.motions.get(player).position = { position.x + 15.f, position.y };
 			}
 		}
 		else {
 			if (diff.y > 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x, position.y - 5.f };
+				registry.motions.get(player).position = { position.x, position.y - 15.f };
 			}
 			else if (diff.y < 0) {
 				registry.motions.get(player).velocityGoal = { 0, 0 };
 				registry.motions.get(player).velocity = { 0, 0 };
-				registry.motions.get(player).position = { position.x, position.y + 5.f };
+				registry.motions.get(player).position = { position.x, position.y + 15.f };
 			}
 		}
-
 		//registry.motions.get(entity).position = { position.x, position.y };
 		return true;
 	}
@@ -690,7 +724,7 @@ void LevelPlay::if_clicked_sandglass_button(Entity entity)
 	guardMotion.velocity = { 0,0 };
 	guardMotion.velocityGoal = { 0,0 };
 
-	// for all the lights
+	// event for restoring all the lights
 	for (Entity light : registry.lights.entities)
 	{
 		auto &motion = registry.motions.get(light);
@@ -707,8 +741,8 @@ void LevelPlay::if_clicked_sandglass_button(Entity entity)
 		motion.velocityGoal = { 0,0 };
 	}
 
-	// for all the counter
-	for (Entity counter : registry.turnTimers.entities)
+	// event for restoring turnTimers
+	for (Entity &counter : registry.turnTimers.entities)
 	{
 		auto origin_counter_ms = registry.turnTimers.get(counter).counter_ms;
 		// insert it into the events, this callback function will be called at step() when timeout
@@ -719,7 +753,7 @@ void LevelPlay::if_clicked_sandglass_button(Entity entity)
 			});
 	}
 
-	//
+	// stop ai and register its restore event
 	ai.SetEnable(false);
 	countdownEvents.emplace_back(glfwGetTime() + stopTime, [=]()
 		{
@@ -748,8 +782,36 @@ void LevelPlay::if_clicked_remote_control_button(Entity entity)
 		for (int row = 0; row < level_map.size(); row++) {
 			for (int col = 0; col < level_map[row].size(); col++)
 			{
-				if (level_map[row][col] == 'L') {
+
+				if (level_map[row][col] == 'H') {
+					createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 0);
+				}
+				else if (level_map[row][col] == 'J') {
 					createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+				}
+				else if (level_map[row][col] == 'K') {
+					createLight(renderer, { col * WALL_SIZE + 40, row * WALL_SIZE - 7 }, 2);
+				}
+				else if (level_map[row][col] == 'L') {
+					createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
+				}
+			}
+		}
+
+		for (int row = 0; row < level_map.size(); row++) {
+			for (int col = 0; col < level_map[row].size(); col++)
+			{
+				if (level_map[row][col] == 'Z') {
+					createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 0);
+				}
+					else if (level_map[row][col] == 'X') {
+					createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+				}
+					else if (level_map[row][col] == 'C') {
+					createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 2);
+				}
+					else if (level_map[row][col] == 'V') {
+					createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
 				}
 			}
 		}
@@ -757,6 +819,67 @@ void LevelPlay::if_clicked_remote_control_button(Entity entity)
 
 	// register a callback event for restoring all the lights
 	countdownEvents.emplace_back(glfwGetTime() + 5.0f, RestoreLight);
+
+	// this ui is not shown anymore
+	registry.clickables.remove(entity);
+	registry.renderRequests.remove(entity);
+}
+
+void LevelPlay::if_clicked_bee_button(Entity entity)
+{
+	GameState &gameState = registry.gameStates.get(manager->gameStateEntity);
+	auto &levelMap = gameState.GetCurrentMap();
+
+	vec2 beeBornPos(levelMap[0].size() * WALL_SIZE, levelMap.size() * WALL_SIZE);
+
+	// add bees
+	for (int i = 0; i < 10; ++i)
+	{
+		createBee(renderer, guard, beeBornPos);
+	}
+
+
+	// for guard
+	float tStop = glfwGetTime() + BEE_GOING_TIME;
+	float tRestore = glfwGetTime() + BEE_GOING_TIME + BEE_STAY_TIME;
+	auto StopGuard = [=]()
+	{
+		// the ref of guard's motion
+		Motion &guardMotion = registry.motions.get(guard);
+
+		// insert it into the events, this callback function will be called at step() when timeout
+		this->countdownEvents.emplace_back(tRestore, [=]()
+			{
+				registry.motions.get(guard) = guardMotion;
+			});
+
+		// make guard stop
+		guardMotion.velocity = { 0,0 };
+		guardMotion.velocityGoal = { 0,0 };
+
+		// event for restoring turnTimers
+		for (Entity &counter : registry.turnTimers.entities)
+		{
+			float origin_counter_ms = registry.turnTimers.get(counter).counter_ms;
+			// insert it into the events, this callback function will be called at step() when timeout
+			countdownEvents.emplace_back(tRestore, [=]()
+				{
+					if (registry.turnTimers.has(counter)) // if player touched trap, counter is deleted
+						registry.turnTimers.get(counter).counter_ms = origin_counter_ms;
+				});
+		}
+
+		// stop ai and register its restore event
+		ai.SetEnable(false);
+		countdownEvents.emplace_back(tRestore, [=]()
+			{
+				ai.SetEnable(true);
+			});
+	};
+
+	// do register
+	countdownEvents.emplace_back(tStop, StopGuard);
+
 
 	// this ui is not shown anymore
 	registry.clickables.remove(entity);
@@ -786,6 +909,65 @@ bool LevelPlay::GetClickedRowCol(vec2 cursor, int &row, int &col)
 	return false;
 }
 
+void LevelPlay::UpdateWindParticle()
+{
+	// calc all the wind particles 's life and erase dead instance
+	for (auto &e : registry.windParticles.entities)
+	{
+		WindParticle &inst = registry.windParticles.get(e);
+		if (inst.IsAlive(glfwGetTime()) == false)
+		{
+			//cout << "-" << Wind::GetWindDirChar(inst.dir) << endl;
+
+			//
+			auto &wind = inst.windEntity;
+			if (registry.winds.has(wind))
+			{
+				registry.winds.get(wind).particleCount--;
+			}
+
+			registry.remove_all_components_of(e);
+			continue;
+		}
+
+		// if it's alive, update its position
+		auto &motion = registry.motions.get(e);
+		motion.position = inst.GetPos(glfwGetTime());
+	}
+
+	// add wind particles
+	{
+		for (auto &wind : registry.winds.entities)
+		{
+			auto &inst = registry.winds.get(wind);
+			//cout << Wind::GetWindDirChar(inst.dir) << ":" << inst.particleCount << endl;
+			if (inst.particleCount < WIND_PARTICLE_LIMIT)
+			{
+				createWindParticle(renderer, inst, wind);
+				inst.particleCount++;
+				//cout << Wind::GetWindDirChar(inst.dir) << endl;
+			}
+		}
+	}
+}
+
+void LevelPlay::UpdateBee(float dt)
+{
+	auto &targetMotion = registry.motions.get(guard);
+	for (auto &e : registry.bees.entities)
+	{
+		auto &motion = registry.motions.get(e);
+		auto &inst = registry.bees.get(e);
+
+		inst.ModifyMotion(dt, motion, targetMotion);
+
+		if (inst.IsAlive() == false)
+		{
+			registry.remove_all_components_of(e);
+		}
+	}
+}
+
 void LevelPlay::Restart()
 {
 	// Reset the game speed
@@ -804,6 +986,12 @@ void LevelPlay::Restart()
 
 	float w = window_width_px;
 	float h = window_height_px;
+
+	//add background 
+	const vec2 &mapSize = gameState.GetMapPixelSize();
+	vec2 bgCenter = mapSize / 2.0f;
+	vec2 bgSize(mapSize.x + window_width_px, mapSize.y + window_height_px);
+	createBackground(renderer, bgCenter, bgSize, TEXTURE_ASSET_ID::FLOOR_BG);
 
 	// recreate entity
 	for (int row = 0; row < level_map.size(); row++) {
@@ -824,15 +1012,33 @@ void LevelPlay::Restart()
 				player = createStudent(renderer, { col * WALL_SIZE, row * WALL_SIZE });
 			}
 			else if (level_map[row][col] == 'G') {
-				if (gameState.GetCurrentLevelIndex() == 3) {
+				if (gameState.GetCurrentLevelIndex() != 1 && gameState.GetCurrentLevelIndex() != 2) {
 					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { 0.f, 0.f });
 				}
 				else {
 					guard = createGuard(renderer, { col * WALL_SIZE, row * WALL_SIZE }, { -50.f, 0.f });
 				}
 			}
+			else if (level_map[row][col] == 'Z') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 0);
+			}
+			else if (level_map[row][col] == 'X') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+			}
 			else if (level_map[row][col] == 'C') {
+				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 2);
+			}
+			else if (level_map[row][col] == 'V') {
 				createCamera(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
+			}
+			else if (level_map[row][col] == 'H') {
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 0);
+			}
+			else if (level_map[row][col] == 'J') {
+				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 1);
+			}
+			else if (level_map[row][col] == 'K') {
+				createLight(renderer, { col * WALL_SIZE + 40, row * WALL_SIZE - 7 }, 2);
 			}
 			else if (level_map[row][col] == 'L') {
 				createLight(renderer, { col * WALL_SIZE, row * WALL_SIZE }, 3);
@@ -852,25 +1058,33 @@ void LevelPlay::Restart()
 			{
 				createTool(renderer, { col * WALL_SIZE, row * WALL_SIZE }, Tool::ToolType::HAMMER);
 			}
+			else if (level_map[row][col] == BEE_CHAR)
+			{
+				createTool(renderer, { col * WALL_SIZE, row * WALL_SIZE }, Tool::ToolType::BEE);
+			}
+			else if (level_map[row][col] == '<' | level_map[row][col] == '>' | level_map[row][col] == '^' | level_map[row][col] == 'v')
+			{
+				createWind(renderer, { col * WALL_SIZE, row * WALL_SIZE }, WIND_WIDTH_SIZE, WIND_LENGTH_SIZE, Wind::GetWindDirByChar(level_map[row][col]));
+			}
 			else
 			{
 				assert("undefined map element");
 			}
 		}
 	}
-	
+
 	// play start level music
 	Mix_PlayChannel(-1, startLevel_sound, 0);
 
 	registry.colors.insert(player, { 1, 0.8f, 0.8f });
 
-	//add background 
-	createBackground(renderer, { w / 2.0,h / 2.0 }, { w,h }, TEXTURE_ASSET_ID::FLOOR_BG);
-
 	// add tool grid
-	createUIBox(renderer, { window_width_px * 0.8,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
-	createUIBox(renderer, { window_width_px * 0.865,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
-	createUIBox(renderer, { window_width_px * 0.93,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
+	createUIBox(renderer, { window_width_px * TOOL1_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
+	createUIBox(renderer, { window_width_px * TOOL2_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
+	createUIBox(renderer, { window_width_px * TOOL3_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
+	createUIBox(renderer, { window_width_px * TOOL4_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
+
+	renderer->useMask = true;
 }
 
 float approach(float goal_v, float cur_v, float dt)

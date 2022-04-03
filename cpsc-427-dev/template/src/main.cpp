@@ -40,6 +40,7 @@ int main()
 	// initialize the main systems
 	renderer.init(window);
 	world.init(&renderer);
+	eng.seed(glfwGetTime());
 
 	// variable timestep loop
 	auto t = Clock::now();
