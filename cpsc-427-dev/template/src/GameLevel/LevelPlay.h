@@ -14,6 +14,8 @@ class LevelPlay :
 	public GameLevel
 {
 public:
+	Entity player;
+
 	LevelPlay(RenderSystem *renderer, LevelManager *manager, GLFWwindow *window);
 
 	virtual ~LevelPlay();
@@ -38,7 +40,7 @@ private:
 	float current_speed;
 	float next_bug_spawn;
 
-	Entity player;
+	// Entity player;
 	Entity guard;
 	Entity exit;
 	std::set<Entity> hoverHammer; // stores the hovering hammer 

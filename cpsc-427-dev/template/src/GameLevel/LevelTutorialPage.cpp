@@ -22,10 +22,10 @@ void LevelTutorialPage::handle_collisions()
 
 void LevelTutorialPage::OnKey(int key, int, int action, int mod)
 {
-	std::cout << "On key for tutorial page is pressed" << std::endl;
+	// std::cout << "On key for tutorial page is pressed" << std::endl;
 	if (key == GLFW_KEY_M && action == GLFW_RELEASE) {
 		// go back to menu
-		std::cout << "M key pressed and released" << std::endl;
+		// std::cout << "M key pressed and released" << std::endl;
 		manager->GoLevelSelection();
 	}
 }
