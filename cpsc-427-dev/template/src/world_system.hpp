@@ -18,6 +18,9 @@
 class WorldSystem
 {
 public:
+	// Level Manager, all the logic is in it
+	std::unique_ptr<LevelManager> levelManager;
+
 	WorldSystem();
 
 	// Releases all associated resources
@@ -47,8 +50,7 @@ private:
 	GLFWwindow* window;
 	bool isFullScreen;
 
-	// Level Manager, all the logic is in it
-	std::unique_ptr<LevelManager> levelManager;
+	
 
 	RenderSystem* renderer;
 

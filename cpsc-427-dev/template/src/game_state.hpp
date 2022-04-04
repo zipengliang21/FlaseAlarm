@@ -16,7 +16,8 @@
 #include <json.hpp>
 using json = nlohmann::json;
 
-#include "tiny_ecs_registry.hpp"
+// #include "tiny_ecs_registry.hpp"
+#include "common.hpp"
 
 // maximum levels of game we are going to provide
 extern const int MAX_LEVEL;
@@ -25,6 +26,8 @@ class GameState
 {
 public:
 	using GameMap = std::vector<std::vector<char>>;
+	int savedState;
+	json jsonObject; // json variable for save and load
 
 	// load all the level files and unlocked level list when create
 	GameState();
@@ -45,15 +48,28 @@ public:
 
 	void SetCurrentLevelIndex(int index);
 
+	void saveGameState(Entity& player);
+
+	void getSavedPlayerMotion();
+
+	void loadGameState();
+
+	
+	
+
 private:
 	int currLevelIndex;
 	int unlockedLevel;
-	json jsonObject; // json variable for save and load
+	
+	
+	
 	std::map<int, GameMap> levelMaps; // key = level index; value = level map;
 
 	void LoadLevel(int levelIndex);
 
 	void LoadUnlockedLevel();
 
-	void SaveUnlockedLevel();
+	void saveUnlockedLevel();
+
+	
 };

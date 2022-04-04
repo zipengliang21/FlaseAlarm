@@ -136,7 +136,33 @@ struct Motion {
 	vec2 velocity = { 0.f, 0.f };
 	vec2 scale = { 10, 10 };
 	vec2 velocityGoal = { 0.f, 0.f };
+	
 	Motion() {}
+
+	void to_json(json& j, const Motion& motion) {
+        j["position.x"] = motion.position.x;
+		j["position.y"] = motion.position.y;
+		j["angle"] = motion.angle;
+		j["velocity.x"] = motion.velocity.x;
+		j["velocity.y"] = motion.velocity.y;
+		j["scale.x"] = motion.scale.x;
+		j["scale.y"] = motion.scale.y;
+		j["velocityGoal.x"] = motion.velocityGoal.x;
+		j["velocityGoal.y"] = motion.velocityGoal.y;
+
+    }
+
+	void from_json(const json& j, Motion& motion) {
+        j.at("position.x").get_to(motion.position.x);
+        j.at("position.y").get_to(motion.position.y);
+		j.at("angle").get_to(motion.angle);
+		j.at("velocity.x").get_to(motion.velocity.x);
+		j.at("velocity.y").get_to(motion.velocity.y);
+		j.at("scale.x").get_to(motion.scale.x);
+		j.at("scale.y").get_to(motion.scale.y);
+		j.at("velocityGoal.x").get_to(motion.velocityGoal.x);
+		j.at("velocityGoal.y").get_to(motion.velocityGoal.y);
+    }
 };
 
 // Stucture to store collision information

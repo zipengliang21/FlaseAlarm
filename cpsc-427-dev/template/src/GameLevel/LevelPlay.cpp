@@ -1010,6 +1010,11 @@ void LevelPlay::Restart()
 			}
 			else if (level_map[row][col] == 'S') {
 				player = createStudent(renderer, { col * WALL_SIZE, row * WALL_SIZE });
+				// see if we recovers players' position
+				if (gameState.savedState == 1) {
+					Motion& playerMotion = registry.motions.get(player);
+					playerMotion.from_json(gameState.jsonObject, playerMotion);
+				}
 			}
 			else if (level_map[row][col] == 'G') {
 				if (gameState.GetCurrentLevelIndex() != 1 && gameState.GetCurrentLevelIndex() != 2) {
@@ -1072,6 +1077,9 @@ void LevelPlay::Restart()
 			}
 		}
 	}
+
+	// set saved state to 0, delete previous state
+	gameState.savedState = 0;
 
 	// play start level music
 	Mix_PlayChannel(-1, startLevel_sound, 0);

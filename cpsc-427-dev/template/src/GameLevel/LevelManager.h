@@ -21,6 +21,10 @@ class LevelManager
 {
 public:
 	Entity gameStateEntity;
+	std::unique_ptr<LevelCover> levelCover;
+	std::unique_ptr<LevelTutorialPage> levelTutorialPage;
+	std::unique_ptr<LevelSelection> levelSelection;
+	std::unique_ptr<LevelPlay> levelPlay;
 
 	LevelManager();
 
@@ -46,16 +50,15 @@ public:
 
 	void OnMouseButton(int button, int action, int mods);
 
+	void reloadState();
+
 private:
 	RenderSystem *renderer; 
 	GLFWwindow *window;
 
 	GameLevel *curLevel;
 
-	std::unique_ptr<LevelCover> levelCover;
-	std::unique_ptr<LevelTutorialPage> levelTutorialPage;
-	std::unique_ptr<LevelSelection> levelSelection;
-	std::unique_ptr<LevelPlay> levelPlay;
+	
 
 	Mix_Music *cover_bg_music;
 	Mix_Music *playing_bg_music;

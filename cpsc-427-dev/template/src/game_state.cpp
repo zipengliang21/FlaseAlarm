@@ -3,13 +3,14 @@
 
 #include "common.hpp"
 #include "world_init.hpp"
-#include "LevelPlay.hpp"
+#include "GameLevel\LevelPlay.h"
 
 // maximum levels of game we are going to provide
 const int MAX_LEVEL = 6;
 
 // file path to save level information to
 const std::string UNLOCKED_LEVEL_FILE_PATH = text_path("unlockedLevel.txt");
+const std::string GameStatus_JSON_FILE_PATH = text_path("game_status.json");
 
 GameState::GameState() :currLevelIndex(-1)
 {
@@ -43,7 +44,7 @@ void GameState::WinAtLevel(int winLevelIndex)
 	if (unlockedLevel < MAX_LEVEL && unlockedLevel == currLevelIndex) {
 
 		unlockedLevel += 1;
-		SaveUnlockedLevel();
+		saveUnlockedLevel();
 	}
 }
 
@@ -101,35 +102,60 @@ void GameState::LoadUnlockedLevel()
 
 }
 
-void GameState::SaveUnlockedLevel()
+void GameState::saveUnlockedLevel() {
+	std::ofstream unlockedLevelFile;
+	unlockedLevelFile.open(UNLOCKED_LEVEL_FILE_PATH);
+	std::cout << "before saving" << std::endl;
+
+	unlockedLevelFile << unlockedLevel << "\n";
+	std::cout << unlockedLevel << std::endl;
+
+	std::cout << "after saving" << std::endl;
+	unlockedLevelFile.close();
+}
+
+void GameState::saveGameState(Entity& player)
 {
-	// std::ofstream unlockedLevelFile;
-	// unlockedLevelFile.open(UNLOCKED_LEVEL_FILE_PATH);
-	// std::cout << "before saving" << std::endl;
-
-	// unlockedLevelFile << unlockedLevel << "\n";
-	// std::cout << unlockedLevel << std::endl;
-
-	// std::cout << "after saving" << std::endl;
-	// unlockedLevelFile.close();
+	
 
 	std::cout << "before saving" << std::endl;
 	if (!jsonObject.empty())  {
 		jsonObject.clear();
 	}
 
-	jsonObject["currLevelIndex"] = currLevelIndex;
-	jsonObject["unlockedLevel"] = unlockedLevel;
-	jsonObject["playerMotion"] = registry.motions.get(LevelPlay::player);
-	std::cout << "after saving" << std::endl;
+	
+	// if we exit half way during the game
+	if (registry.motions.has(player)) {
+		jsonObject["stateIsValid"] = true;
+		jsonObject["currLevelIndex"] = currLevelIndex;
+		Motion& playerMotion = registry.motions.get(player);
+		playerMotion.to_json(jsonObject, playerMotion);
+		std::cout << "after saving" << std::endl;
+	}
+	else {
+		// nothing to save
+		jsonObject["valid"] = false;
+	}
 
-	std::string s = j.dump();
+	std::string s = jsonObject.dump();
 
 	// write json to file
-	std::ofstream o("game_status.json");
-	o << j << std::endl;
-
-
-
+	std::ofstream o(GameStatus_JSON_FILE_PATH);
+	o << jsonObject << std::endl;
 	
+}
+
+// load game state to json and set to saved level
+void GameState::loadGameState() {
+	std::ifstream i(GameStatus_JSON_FILE_PATH);
+	i >> jsonObject;
+	bool stateIsValid = false;
+	jsonObject.at("stateIsValid").get_to(stateIsValid);
+	if (stateIsValid) {
+		jsonObject.at("currLevelIndex").get_to(currLevelIndex);
+		savedState = 1;
+	}
+	else {
+		savedState = 0;
+	}
 }
