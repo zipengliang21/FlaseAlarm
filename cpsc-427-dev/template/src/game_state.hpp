@@ -21,6 +21,9 @@ using json = nlohmann::json;
 
 // maximum levels of game we are going to provide
 extern const int MAX_LEVEL;
+// file path to save level information to
+const std::string UNLOCKED_LEVEL_FILE_PATH = text_path("unlockedLevel.txt");
+const std::string GameStatus_JSON_FILE_PATH = json_path("game_status.json");
 
 class GameState
 {
@@ -52,7 +55,7 @@ public:
 
 	void getSavedPlayerMotion();
 
-	void loadGameState();
+	bool loadGameState();
 
 	
 	

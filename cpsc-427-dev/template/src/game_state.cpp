@@ -8,9 +8,7 @@
 // maximum levels of game we are going to provide
 const int MAX_LEVEL = 6;
 
-// file path to save level information to
-const std::string UNLOCKED_LEVEL_FILE_PATH = text_path("unlockedLevel.txt");
-const std::string GameStatus_JSON_FILE_PATH = json_path("game_status.json");
+
 
 GameState::GameState() : currLevelIndex(-1)
 {
@@ -148,7 +146,7 @@ void GameState::saveGameState(Entity &player)
 }
 
 // load game state to json and set to saved level
-void GameState::loadGameState()
+bool GameState::loadGameState()
 {
 
 	std::ifstream i(GameStatus_JSON_FILE_PATH);
@@ -160,15 +158,23 @@ void GameState::loadGameState()
 		{
 			jsonObject.at("currLevelIndex").get_to(currLevelIndex);
 			savedState = 1;
+			// remove history after loaded
+			jsonObject["stateIsValid"] = false;
+			// write json to file
+			std::ofstream o(GameStatus_JSON_FILE_PATH);
+			o << jsonObject << std::endl;
+			return true;
 		}
 		else
 		{
 			savedState = 0;
+			return false;
 		}
 	}
 	else {
 		// missing keys don't resume anything
 		savedState = 0;
+		return false;
 
 	}
 }

@@ -569,7 +569,12 @@ bool LevelPlay::if_collisions_player_with_deadly(Entity other)
 			// Scream, reset timer, and make the chicken sink
 			registry.deathTimers.emplace(player);
 			registry.motions.get(other).velocity = { 0, 0 };
-			// !!! TODO A1: change the chicken orientation and color on death
+			// set saved history to invliad if dead
+			GameState &gameState = registry.gameStates.get(manager->gameStateEntity);
+			gameState.jsonObject["stateIsValid"] = false;
+			// write json to file
+			std::ofstream o(GameStatus_JSON_FILE_PATH);
+			o << gameState.jsonObject << std::endl;
 		}
 		return true;
 	}
@@ -657,6 +662,12 @@ bool LevelPlay::if_collisions_player_with_wins(Entity other)
 
 		// show at center of window
 		createUIBox(renderer, { window_width_px / 2.0,window_height_px / 2.0 }, { WIN_BB_WIDTH, WIN_BB_HEIGHT }, TEXTURE_ASSET_ID::WIN, "unlock new level");
+		// set saved history to invliad if win
+		GameState &gameState = registry.gameStates.get(manager->gameStateEntity);
+		gameState.jsonObject["stateIsValid"] = false;
+		// write json to file
+		std::ofstream o(GameStatus_JSON_FILE_PATH);
+		o << gameState.jsonObject << std::endl;
 		return true;
 	}
 	return false;
