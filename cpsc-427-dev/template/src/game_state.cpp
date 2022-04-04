@@ -10,9 +10,9 @@ const int MAX_LEVEL = 6;
 
 // file path to save level information to
 const std::string UNLOCKED_LEVEL_FILE_PATH = text_path("unlockedLevel.txt");
-const std::string GameStatus_JSON_FILE_PATH = text_path("game_status.json");
+const std::string GameStatus_JSON_FILE_PATH = json_path("game_status.json");
 
-GameState::GameState() :currLevelIndex(-1)
+GameState::GameState() : currLevelIndex(-1)
 {
 	LoadUnlockedLevel();
 	LoadLevel(1);
@@ -41,7 +41,8 @@ int GameState::GetUnlockedLevel() const
 void GameState::WinAtLevel(int winLevelIndex)
 {
 	// check if we are not at maximum level + we are playing the last unlocked level
-	if (unlockedLevel < MAX_LEVEL && unlockedLevel == currLevelIndex) {
+	if (unlockedLevel < MAX_LEVEL && unlockedLevel == currLevelIndex)
+	{
 
 		unlockedLevel += 1;
 		saveUnlockedLevel();
@@ -50,7 +51,7 @@ void GameState::WinAtLevel(int winLevelIndex)
 
 bool GameState::AtValidLevel() const
 {
-	return currLevelIndex!=-1;
+	return currLevelIndex != -1;
 }
 
 int GameState::GetCurrentLevelIndex() const
@@ -60,7 +61,7 @@ int GameState::GetCurrentLevelIndex() const
 
 void GameState::SetCurrentLevelIndex(int index)
 {
-	//assert(levelMaps.find(index) != levelMaps.end());
+	// assert(levelMaps.find(index) != levelMaps.end());
 	currLevelIndex = index;
 }
 
@@ -71,8 +72,8 @@ void GameState::LoadLevel(int levelIndex)
 
 	std::vector<std::vector<char>> temp_map;
 
-
-	while (std::getline(in, map_row)) {
+	while (std::getline(in, map_row))
+	{
 		std::vector<char> charVector(map_row.begin(), map_row.end());
 		temp_map.push_back(charVector);
 	}
@@ -86,7 +87,8 @@ void GameState::LoadUnlockedLevel()
 	std::string filename(UNLOCKED_LEVEL_FILE_PATH);
 	int levelInFile = -1;
 	std::ifstream input_file(filename);
-	if (!input_file.is_open()) {
+	if (!input_file.is_open())
+	{
 		std::cout << "Cannot open " << UNLOCKED_LEVEL_FILE_PATH << std::endl;
 	}
 	std::cout << "levelInFile before is " << levelInFile << std::endl;
@@ -98,43 +100,44 @@ void GameState::LoadUnlockedLevel()
 
 	input_file.close();
 	unlockedLevel = levelInFile;
-	std::cout << "unlockedLevel is " << unlockedLevel << std::endl;
-
+	// std::cout << "unlockedLevel is " << unlockedLevel << std::endl;
 }
 
-void GameState::saveUnlockedLevel() {
+void GameState::saveUnlockedLevel()
+{
 	std::ofstream unlockedLevelFile;
 	unlockedLevelFile.open(UNLOCKED_LEVEL_FILE_PATH);
-	std::cout << "before saving" << std::endl;
+	// std::cout << "before saving" << std::endl;
 
 	unlockedLevelFile << unlockedLevel << "\n";
 	std::cout << unlockedLevel << std::endl;
 
-	std::cout << "after saving" << std::endl;
+	// std::cout << "after saving" << std::endl;
 	unlockedLevelFile.close();
 }
 
-void GameState::saveGameState(Entity& player)
+void GameState::saveGameState(Entity &player)
 {
-	
 
-	std::cout << "before saving" << std::endl;
-	if (!jsonObject.empty())  {
+	// std::cout << "before saving" << std::endl;
+	if (!jsonObject.empty())
+	{
 		jsonObject.clear();
 	}
 
-	
 	// if we exit half way during the game
-	if (registry.motions.has(player)) {
+	if (registry.motions.has(player))
+	{
 		jsonObject["stateIsValid"] = true;
 		jsonObject["currLevelIndex"] = currLevelIndex;
-		Motion& playerMotion = registry.motions.get(player);
+		Motion &playerMotion = registry.motions.get(player);
 		playerMotion.to_json(jsonObject, playerMotion);
-		std::cout << "after saving" << std::endl;
+		// std::cout << "after saving" << std::endl;
 	}
-	else {
+	else
+	{
 		// nothing to save
-		jsonObject["valid"] = false;
+		jsonObject["stateIsValid"] = false;
 	}
 
 	std::string s = jsonObject.dump();
@@ -142,20 +145,30 @@ void GameState::saveGameState(Entity& player)
 	// write json to file
 	std::ofstream o(GameStatus_JSON_FILE_PATH);
 	o << jsonObject << std::endl;
-	
 }
 
 // load game state to json and set to saved level
-void GameState::loadGameState() {
+void GameState::loadGameState()
+{
+
 	std::ifstream i(GameStatus_JSON_FILE_PATH);
 	i >> jsonObject;
 	bool stateIsValid = false;
-	jsonObject.at("stateIsValid").get_to(stateIsValid);
-	if (stateIsValid) {
-		jsonObject.at("currLevelIndex").get_to(currLevelIndex);
-		savedState = 1;
+	if (jsonObject.contains("stateIsValid")) {
+		jsonObject.at("stateIsValid").get_to(stateIsValid);
+		if (stateIsValid)
+		{
+			jsonObject.at("currLevelIndex").get_to(currLevelIndex);
+			savedState = 1;
+		}
+		else
+		{
+			savedState = 0;
+		}
 	}
 	else {
+		// missing keys don't resume anything
 		savedState = 0;
+
 	}
 }
