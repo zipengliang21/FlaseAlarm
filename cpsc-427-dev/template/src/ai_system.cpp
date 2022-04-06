@@ -125,8 +125,8 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 	}
 
 	// print
-	cout << "Search Nums=" << searchNum << endl;
-	cout << "Chase Vector=(" << chaseVector.x << "," << chaseVector.y << ")" << endl;
+	// cout << "Search Nums=" << searchNum << endl;
+	// cout << "Chase Vector=(" << chaseVector.x << "," << chaseVector.y << ")" << endl;
 	return chaseVector;
 }
 

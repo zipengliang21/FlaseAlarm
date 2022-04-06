@@ -35,7 +35,7 @@ void LevelManager::init(RenderSystem *renderer, GLFWwindow *window)
 	// set renderer
 	this->renderer = renderer;
 
-	// 
+	// game state for save and load
 	gameStateEntity = createGameState();
 
 	// load level

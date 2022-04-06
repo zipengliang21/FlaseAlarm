@@ -38,6 +38,14 @@ void LevelSelection::Restart()
 
 void LevelSelection::OnKey(int key, int, int action, int mod)
 {
+	// resume previous state if user have previous state
+	if (key == GLFW_KEY_R && action == GLFW_RELEASE) {
+		GameState *gameState = &registry.gameStates.get(manager->gameStateEntity);
+		if (gameState->loadGameState()) {
+			manager->GoPlay();
+		}
+		
+	}
 
 }
 
