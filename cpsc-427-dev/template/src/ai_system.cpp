@@ -6,7 +6,7 @@
 #include <iostream>
 #include <queue>
 
-const float GUARD_VELOCITY = 50.0f;
+const float GUARD_VELOCITY = 100.0f;
 const float CALC_INTERVAL = 0.5f; // Calculate the shortest-path every 0.5 seconds
 
 using namespace std;
@@ -125,8 +125,8 @@ vec2 calcChaseVectorV1(const vector<vector<char>> &levelMap, ivec2 guardPos, ive
 	}
 
 	// print
-	cout << "Search Nums=" << searchNum << endl;
-	cout << "Chase Vector=(" << chaseVector.x << "," << chaseVector.y << ")" << endl;
+	// cout << "Search Nums=" << searchNum << endl;
+	// cout << "Chase Vector=(" << chaseVector.x << "," << chaseVector.y << ")" << endl;
 	return chaseVector;
 }
 

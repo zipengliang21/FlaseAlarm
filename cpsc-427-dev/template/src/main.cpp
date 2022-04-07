@@ -10,6 +10,8 @@
 #include "physics_system.hpp"
 #include "render_system.hpp"
 #include "world_system.hpp"
+#include "game_state.hpp"
+#include "GameLevel\LevelPlay.h"
 
 using Clock = std::chrono::high_resolution_clock;
 
@@ -40,6 +42,7 @@ int main()
 	// initialize the main systems
 	renderer.init(window);
 	world.init(&renderer);
+	eng.seed(glfwGetTime());
 
 	// variable timestep loop
 	auto t = Clock::now();
@@ -61,6 +64,8 @@ int main()
 
 		// TODO A2: you can implement the debug freeze here but other places are possible too.
 	}
+	GameState* gameState = &registry.gameStates.get(world.levelManager->gameStateEntity);
+	gameState->saveGameState(world.levelManager->levelPlay->player);
 
 	return EXIT_SUCCESS;
 }

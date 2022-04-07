@@ -30,6 +30,7 @@ inline std::string textures_path(const std::string& name) {return data_path() + 
 inline std::string audio_path(const std::string& name) {return data_path() + "/audio/" + std::string(name);};
 inline std::string mesh_path(const std::string& name) {return data_path() + "/meshes/" + std::string(name);};
 inline std::string text_path(const std::string& name) { return data_path() + "/game_text_file/" + std::string(name); };
+inline std::string json_path(const std::string& name) { return data_path() + "/game_json_file/" + std::string(name); };
 inline std::string level_map_path(const std::string& name) { return data_path() + "/levels/" + std::string(name); };
 
 

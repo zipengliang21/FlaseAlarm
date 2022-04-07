@@ -1,11 +1,13 @@
 // internal
 #include "render_system.hpp"
 #include <SDL.h>
+#include <glm/gtx/matrix_transform_2d.hpp>
 
+#include "world_init.hpp"
 #include "tiny_ecs_registry.hpp"
 
 void RenderSystem::drawTexturedMesh(Entity entity,
-									const mat3 &projection)
+	const mat3 &projection)
 {
 	Motion &motion = registry.motions.get(entity);
 	// Transformation code, see Rendering and Transformation in the template
@@ -39,7 +41,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 	gl_has_errors();
 
 	// Input data location as in the vertex buffer
-	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED || 
+	if (render_request.used_effect == EFFECT_ASSET_ID::TEXTURED ||
 		render_request.used_effect == EFFECT_ASSET_ID::UI)
 	{
 		GLint in_position_loc = glGetAttribLocation(program, "in_position");
@@ -49,7 +51,7 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(TexturedVertex), (void *)0);
+			sizeof(TexturedVertex), (void *)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_texcoord_loc);
@@ -76,7 +78,35 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 			assert(translation_loc >= 0);
 			glUniformMatrix3fv(translation_loc, 1, GL_FALSE, (float *)&viewMatrix);
 			gl_has_errors();
+
+				GLint loc;
+				loc = glGetUniformLocation(program, "useMask");
+				assert(loc >= 0);
+				glUniform1i(loc, useMask);
+				gl_has_errors();
+
+			// use mask
+			if (useMask)
+			{
+				// player pos
+				loc = glGetUniformLocation(program, "playerPos");
+				assert(loc >= 0);
+				glUniform2f(loc, playerPos.x, playerPos.y);
+				gl_has_errors();
+
+
+				// rBright and rDark
+				loc = glGetUniformLocation(program, "rBright");
+				assert(loc >= 0);
+				glUniform1f(loc, window_height_px/2.0f * 0.9f);
+				gl_has_errors();
+				loc = glGetUniformLocation(program, "rDark");
+				assert(loc >= 0);
+				glUniform1f(loc, window_height_px / 2.0f * 1.2f);
+				gl_has_errors();
+			}
 		}
+
 	}
 	else if (render_request.used_effect == EFFECT_ASSET_ID::EGG)
 	{
@@ -86,12 +116,12 @@ void RenderSystem::drawTexturedMesh(Entity entity,
 
 		glEnableVertexAttribArray(in_position_loc);
 		glVertexAttribPointer(in_position_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)0);
+			sizeof(ColoredVertex), (void *)0);
 		gl_has_errors();
 
 		glEnableVertexAttribArray(in_color_loc);
 		glVertexAttribPointer(in_color_loc, 3, GL_FLOAT, GL_FALSE,
-							  sizeof(ColoredVertex), (void *)sizeof(vec3));
+			sizeof(ColoredVertex), (void *)sizeof(vec3));
 		gl_has_errors();
 
 		//GLint currProgram;
@@ -213,7 +243,8 @@ void RenderSystem::draw()
 	// Clearing backbuffer
 	glViewport(0, 0, w, h);
 	glDepthRange(0.00001, 10);
-	glClearColor(0.663, 0.663, 0.663, 1.0);
+	//glClearColor(0.663, 0.663, 0.663, 1.0);
+	glClearColor(0, 0, 0, 1.0); // set default clear color to be black
 	glClearDepth(10.f);
 	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	glEnable(GL_BLEND);
@@ -226,12 +257,8 @@ void RenderSystem::draw()
 
 	std::vector<Entity> entitiesDrawFinal;
 
-	for (Entity entity : registry.background.entities) {
-		drawTexturedMesh(entity, projection_2D);
-	}
-
 	// Draw all textured meshes that have a position and size component
-	for (Entity entity : registry.renderRequests.entities)
+	for (Entity &entity : registry.renderRequests.entities)
 	{
 		if (!registry.motions.has(entity)) // not motions
 			continue;
@@ -240,11 +267,6 @@ void RenderSystem::draw()
 		if (registry.uis.has(entity))
 		{
 			entitiesDrawFinal.push_back(entity);
-			continue;
-		}
-
-		if (registry.background.has(entity))
-		{
 			continue;
 		}
 
@@ -258,6 +280,62 @@ void RenderSystem::draw()
 	{
 		drawTexturedMesh(entity, projection_2D);
 	}
+
+	/* --------------- draw minimap start --------------- */
+	do
+	{
+		if (registry.gameStates.size() == 0) // is in any level
+			break;
+
+		auto &gameState = registry.gameStates.components[0];
+		if (gameState.AtValidLevel() == false)
+			break;
+
+		const vec2 mapSize = gameState.GetMapPixelSize();
+		const float minimapWidth = window_width_px * MINIMAP_WIDTH_COEF;
+		const float scaleCoef = minimapWidth / mapSize.x;
+		const vec2 minimapPos = vec2(MINIMAP_POS_X, MINIMAP_POS_Y);
+
+		// set the view
+		mat3 originViewMatrix = viewMatrix;
+		bool originUseMask = useMask; // minimap not use the mask
+		useMask = false;
+		viewMatrix = mat3(1.0f);
+		viewMatrix = glm::translate(viewMatrix, minimapPos);
+		viewMatrix = glm::scale(viewMatrix, vec2(scaleCoef));
+
+		// draw a temperary background and remove it
+		{
+			vec2 bgCenter = mapSize / 2.0f - vec2(WALL_SIZE);
+			vec2 bgSize = mapSize - vec2(WALL_SIZE);
+			auto bgEntity = createBackground(this, bgCenter, bgSize, TEXTURE_ASSET_ID::FLOOR_BG);
+			drawTexturedMesh(bgEntity, projection_2D);
+			registry.remove_all_components_of(bgEntity);
+		}
+
+		// Draw all textured meshes that have a position and size component
+		for (Entity &entity : registry.renderRequests.entities)
+		{
+			if (!registry.motions.has(entity)) // not motions
+				continue;
+
+			auto &inst = registry.renderRequests.get(entity);
+			if (inst.showOnMinimap == false)
+			{
+				continue;
+			}
+
+			// Note, its not very efficient to access elements indirectly via the entity
+			// albeit iterating through all Sprites in sequence. A good point to optimize
+			drawTexturedMesh(entity, projection_2D);
+		}
+
+		// restore
+		useMask = originUseMask;
+		viewMatrix = originViewMatrix;
+
+	} while (0);
+	/* --------------- draw minimap end --------------- */
 
 	// Truely render to the screen
 	drawToScreen();
@@ -274,12 +352,12 @@ mat3 RenderSystem::createProjectionMatrix()
 	float top = 0.f;
 
 	gl_has_errors();
-	float right = (float) window_width_px;
-	float bottom = (float) window_height_px;
+	float right = (float)window_width_px;
+	float bottom = (float)window_height_px;
 
 	float sx = 2.f / (right - left);
 	float sy = 2.f / (top - bottom);
 	float tx = -(right + left) / (right - left);
 	float ty = -(top + bottom) / (top - bottom);
-	return {{sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f}};
+	return { {sx, 0.f, 0.f}, {0.f, sy, 0.f}, {tx, ty, 1.f} };
 }
