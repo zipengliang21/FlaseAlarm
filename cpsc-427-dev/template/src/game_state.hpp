@@ -33,6 +33,10 @@ public:
 
 	void SetCurrentLevelIndex(int index);
 
+	bool updatePoint(int levelIndex, int currentPoint);
+
+	int getHighestPoint(int levelIndex);
+
 private:
 	int currLevelIndex;
 	int unlockedLevel;

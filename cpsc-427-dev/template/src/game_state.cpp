@@ -101,3 +101,38 @@ void GameState::SaveUnlockedLevel()
 	std::cout << "after saving" << std::endl;
 	unlockedLevelFile.close();
 }
+
+bool GameState::updatePoint(int levelIndex, int currentPoint)
+{
+	std::ifstream in;
+	in.open(text_path("highestPoint" + std::to_string(levelIndex) + ".txt"));
+	std::string line;
+	std::getline(in, line);
+	std::stringstream  stream(line);
+	int highestPoint;
+	stream >> highestPoint;
+	in.close();
+
+	if (currentPoint > highestPoint) {
+		std::ofstream out;
+		out.open(text_path("highestPoint" + std::to_string(levelIndex) + ".txt"), std::ofstream::trunc);
+		out << currentPoint << "\n";
+		out.close();
+		return true;
+	}
+
+	return false;
+}
+
+int GameState::getHighestPoint(int levelIndex)
+{
+	std::ifstream in;
+	in.open(text_path("highestPoint" + std::to_string(levelIndex) + ".txt"));
+	std::string line;
+	std::getline(in, line);
+	std::stringstream  stream(line);
+	int highestPoint;
+	stream >> highestPoint;
+	in.close();
+	return highestPoint;
+}

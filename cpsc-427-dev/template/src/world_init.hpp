@@ -32,6 +32,13 @@ const float TRAP_BB_WIDTH = 0.1f * 504.f;
 const float TRAP_BB_HEIGHT = 0.15f * 444.f;
 const float WALL_SIZE = 20.2f;
 const float TOOL_UI_SIZE = 80.0f;
+const float MULTI_BB_SIZE = 0.15f * 315.f;
+const float DIGIT_BB_WIDTH = 0.45f * 111.f;
+const float DIGIT_BB_HEIGHT = 0.45f * 151.f;
+const float RECORD_BB_WIDTH = 245.f;
+const float RECORD_BB_HEIGHT = 27.f;
+const float HIGHEST_BB_WIDTH = 1.08f * 283.f;
+const float HIGHEST_BB_HEIGHT = 1.08f * 25.f;
 
 const float GUARD_TURN_TIME = 12000; // units of ms
 const float LIGHT_TURN_TIME = 3000; // units of ms
@@ -55,6 +62,15 @@ Entity createUIBox(RenderSystem *renderer, vec2 position, vec2 size, enum TEXTUR
 
 // the textbox,  or button, display an image asset as a box
 Entity createTextBox(RenderSystem *renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction);
+
+// trap counter
+Entity createTrapUI(RenderSystem* renderer, vec2 position);
+Entity createMultiply(RenderSystem* renderer, vec2 position);
+Entity createDigit(RenderSystem* renderer, vec2 position, int digit);
+
+// the records
+Entity createRecord(RenderSystem* renderer, vec2 position);
+Entity createHighest(RenderSystem* renderer, vec2 position);
 
 // the camera
 Entity createCamera(RenderSystem* renderer, vec2 position, uint16_t direction);
