@@ -667,13 +667,32 @@ bool LevelPlay::if_collisions_player_with_wins(Entity other)
 		//registry.clear_all_components();
 
 		// show at center of window
-		createUIBox(renderer, { window_width_px / 2.0,window_height_px / 2.0 }, { WIN_BB_WIDTH, WIN_BB_HEIGHT }, TEXTURE_ASSET_ID::WIN, "unlock new level");
+		createUIBox(renderer, { window_width_px * 0.5,window_height_px * 0.4 }, { WIN_BB_WIDTH, WIN_BB_HEIGHT }, TEXTURE_ASSET_ID::WIN, "unlock new level");
+
+		createTrapUI(renderer, { window_width_px * 0.45, window_height_px * 0.6 });
+		createMultiply(renderer, { window_width_px * 0.5, window_height_px * 0.6 });
+		digit = createDigit(renderer, { window_width_px * 0.55, window_height_px * 0.6 }, point);
+
+		GameState* gameState = &registry.gameStates.get(manager->gameStateEntity);
+		int highest = gameState->getHighestPoint(gameState->GetCurrentLevelIndex());
+		if (!displayed) {
+			if (highest < point) {
+				createRecord(renderer, { window_width_px * 0.5, window_height_px * 0.7 });
+				gameState->saveHighestPoint(gameState->GetCurrentLevelIndex(), point);
+				displayed = true;
+			}
+			else {
+				createHighest(renderer, { window_width_px * 0.5, window_height_px * 0.7 });
+				createDigit(renderer, { window_width_px * 0.635, window_height_px * 0.7 }, highest);
+				displayed = true;
+			}
+		}
+		
 		// set saved history to invliad if win
-		GameState &gameState = registry.gameStates.get(manager->gameStateEntity);
-		gameState.jsonObject["stateIsValid"] = false;
+		gameState->jsonObject["stateIsValid"] = false;
 		// write json to file
 		std::ofstream o(GameStatus_JSON_FILE_PATH);
-		o << gameState.jsonObject << std::endl;
+		o << gameState->jsonObject << std::endl;
 		return true;
 	}
 	return false;
@@ -697,6 +716,11 @@ bool LevelPlay::if_collisions_player_with_traps(Entity other)
 				registry.motions.get(entity).velocity = { 0 , 0 };
 			}
 		}
+
+		registry.remove_all_components_of(digit);
+		digit = createDigit(renderer, { window_width_px * 0.95, window_height_px * 0.9 }, point + 1);
+		point += 1;
+
 		return true;
 	}
 	return false;
@@ -989,6 +1013,8 @@ void LevelPlay::Restart()
 {
 	// Reset the game speed
 	current_speed = 1.f;
+	point = 0;
+	displayed = false;
 
 	if (registry.gameStates.size() == 0) {
 		//gameState->gameLevel.saveLevelToFile();
@@ -1108,6 +1134,11 @@ void LevelPlay::Restart()
 	createUIBox(renderer, { window_width_px * TOOL2_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
 	createUIBox(renderer, { window_width_px * TOOL3_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
 	createUIBox(renderer, { window_width_px * TOOL4_UI_X_POS_COEF,window_height_px * 0.1 }, { window_width_px * 0.1, window_width_px * 0.1 }, TEXTURE_ASSET_ID::TOOL_GRID, "");
+
+	// add trap counter
+	createTrapUI(renderer, { window_width_px * 0.85, window_height_px * 0.9 });
+	createMultiply(renderer, { window_width_px * 0.9, window_height_px * 0.9 });
+	digit = createDigit(renderer, { window_width_px * 0.95, window_height_px * 0.9 }, 0);
 
 	renderer->useMask = true;
 }

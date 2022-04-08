@@ -57,7 +57,9 @@ public:
 
 	bool loadGameState();
 
-	
+	int getHighestPoint(int levelIndex);
+
+	void saveHighestPoint(int levelIndex, int currentPoint);
 	
 
 private:

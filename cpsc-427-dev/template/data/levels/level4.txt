@@ -6,7 +6,7 @@ W                     W              W            W            W                
 W                     W              W            W            W                                    W
 W                     W              W            W            W                                    W
 W                     W              W                         W                                    W
-W                     W              W                         W                                    W
+W                     W              W            1            W                                    W
 W                     W              W                         W                                    W
 W                     W              W                         W                                    W
 W                     W              W            W            W                                    W
@@ -15,7 +15,7 @@ W                     W              W            W            W                
 W                     W              W            W            W                                    W
 W                     W              W                         W                                    W
 W                     W              W                         W                                    W
-W                     W              W T T T T T T T T T T T T W                                    W
+W                     W              W  T   T   T   T   T   T  W                                    W
 W                     W              W                         W                                    W
 W                     W              W            W            W                                    W
 WWWWWWWWWWWWWWWWWWWWWWW              WWWWWWWWWWWWWWWWWWWWWWWWWWW                                    W
@@ -37,7 +37,7 @@ W                                    W            W            W                
 W                                    W            W            W                                    W
 W                                    W            W            W                                    W
 W                                    W            W            W                                    W
-W                                    WWWWWWWWWWWWWWWWWWWWWWWWWWW                                    W
+W                                    W            W            W                                    W
 W                                    WWWWWWWWWWWWWWWWWWWWWWWWWWW                                    W
 W                                    W            W            W                                    W
 W                                    W     3      W      3     W                                    W

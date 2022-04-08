@@ -39,10 +39,13 @@ private:
 
 	float current_speed;
 	float next_bug_spawn;
+	int point;
+	bool displayed;
 
 	// Entity player;
 	Entity guard;
 	Entity exit;
+	Entity digit;
 	std::set<Entity> hoverHammer; // stores the hovering hammer 
 	std::map<std::pair<int, int>, Entity> walls; // key={row,col}, value=Entity of wall
 

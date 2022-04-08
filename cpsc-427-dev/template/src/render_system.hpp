@@ -123,6 +123,19 @@ class RenderSystem {
 			textures_path("selection_bg.jpg"),
 			textures_path("floor.jpg"),
 			textures_path("wind_particle.png"),
+			textures_path("multiply.png"),
+			textures_path("digit0.png"),
+			textures_path("digit1.png"),
+			textures_path("digit2.png"),
+			textures_path("digit3.png"),
+			textures_path("digit4.png"),
+			textures_path("digit5.png"),
+			textures_path("digit6.png"),
+			textures_path("digit7.png"),
+			textures_path("digit8.png"),
+			textures_path("digit9.png"),
+			textures_path("record.png"),
+			textures_path("highest.png")
 	};
 
 	std::array<GLuint, effect_count> effects;

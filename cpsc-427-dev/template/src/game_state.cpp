@@ -178,3 +178,24 @@ bool GameState::loadGameState()
 
 	}
 }
+
+int GameState::getHighestPoint(int levelIndex)
+{
+	std::ifstream in;
+	in.open(text_path("highestPoint" + std::to_string(levelIndex) + ".txt"));
+	std::string line;
+	std::getline(in, line);
+	std::stringstream  stream(line);
+	int highestPoint;
+	stream >> highestPoint;
+	in.close();
+	return highestPoint;
+}
+
+void GameState::saveHighestPoint(int levelIndex, int currentPoint)
+{
+	std::ofstream out;
+	out.open(text_path("highestPoint" + std::to_string(levelIndex) + ".txt"), std::ofstream::trunc);
+	out << currentPoint << "\n";
+	out.close();
+}

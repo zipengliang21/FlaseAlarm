@@ -350,6 +350,154 @@ Entity createBee(RenderSystem *renderer, const Entity &targetEntity, vec2 beeBor
 	return entity;
 }
 
+Entity createTrapUI(RenderSystem* renderer, vec2 position) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the position, scale, and physics components
+	//auto& trap = registry.traps.emplace(entity);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	// motion.angle = 0.f;
+	motion.velocity = { 0,0 };
+	motion.position = position;
+
+	// Setting initial values, scale is negative to make it face the opposite way
+	motion.scale = vec2({ TRAP_BB_WIDTH, TRAP_BB_HEIGHT }); // TODO
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::TRAP,
+		 EFFECT_ASSET_ID::UI,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		 false });
+
+	return entity;
+}
+
+Entity createMultiply(RenderSystem* renderer, vec2 position) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = { MULTI_BB_SIZE, MULTI_BB_SIZE };
+
+	registry.uis.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::MULTI,
+		 EFFECT_ASSET_ID::UI,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		 false });
+
+	return entity;
+}
+
+Entity createDigit(RenderSystem* renderer, vec2 position, int digit) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = { DIGIT_BB_WIDTH, DIGIT_BB_HEIGHT };
+
+	registry.uis.emplace(entity);
+
+	enum TEXTURE_ASSET_ID textureAssetId;
+	switch (digit) {
+		case 0: textureAssetId = TEXTURE_ASSET_ID::DIGIT0; break;
+		case 1: textureAssetId = TEXTURE_ASSET_ID::DIGIT1; break;
+		case 2: textureAssetId = TEXTURE_ASSET_ID::DIGIT2; break;
+		case 3: textureAssetId = TEXTURE_ASSET_ID::DIGIT3; break;
+		case 4: textureAssetId = TEXTURE_ASSET_ID::DIGIT4; break;
+		case 5: textureAssetId = TEXTURE_ASSET_ID::DIGIT5; break;
+		case 6: textureAssetId = TEXTURE_ASSET_ID::DIGIT6; break;
+		case 7: textureAssetId = TEXTURE_ASSET_ID::DIGIT7; break;
+		case 8: textureAssetId = TEXTURE_ASSET_ID::DIGIT8; break;
+		case 9: textureAssetId = TEXTURE_ASSET_ID::DIGIT9; break;
+		default: textureAssetId = TEXTURE_ASSET_ID::DIGIT0; break;
+	}
+
+	registry.renderRequests.insert(
+		entity,
+		{ textureAssetId, // TEXTURE_ASSET_ID
+		 EFFECT_ASSET_ID::UI,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		 false });
+
+	return entity;
+}
+
+Entity createRecord(RenderSystem* renderer, vec2 position) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = { RECORD_BB_WIDTH, RECORD_BB_HEIGHT };
+
+	registry.uis.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::RECORD,
+		 EFFECT_ASSET_ID::UI,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		 false });
+
+	return entity;
+}
+
+Entity createHighest(RenderSystem* renderer, vec2 position) {
+	auto entity = Entity();
+
+	// Store a reference to the potentially re-used mesh object (the value is stored in the resource cache)
+	Mesh& mesh = renderer->getMesh(GEOMETRY_BUFFER_ID::SPRITE);
+	registry.meshPtrs.emplace(entity, &mesh);
+
+	// Initialize the motion
+	auto& motion = registry.motions.emplace(entity);
+	motion.angle = 0.f;
+	motion.velocity = { 0, 0 };
+	motion.position = position;
+	motion.scale = { HIGHEST_BB_WIDTH, HIGHEST_BB_HEIGHT };
+
+	registry.uis.emplace(entity);
+
+	registry.renderRequests.insert(
+		entity,
+		{ TEXTURE_ASSET_ID::HIGHEST,
+		 EFFECT_ASSET_ID::UI,
+		 GEOMETRY_BUFFER_ID::SPRITE,
+		 false });
+
+	return entity;
+}
+
 Entity createBackground(RenderSystem *renderer, vec2 position, vec2 size, enum TEXTURE_ASSET_ID textureAssetId) {
 	auto entity = Entity();
 
@@ -376,7 +524,6 @@ Entity createBackground(RenderSystem *renderer, vec2 position, vec2 size, enum T
 
 	return entity;
 }
-
 
 Entity createTextBox(RenderSystem *renderer, vec2 position, enum TEXTURE_ASSET_ID textureAssetId, float width, float height, std::string buttonAction) {
 	auto entity = Entity();
