@@ -181,7 +181,11 @@ component.hpp: added three component, Wind, WindParticle and Explode. Wind has d
 - world_init.cpp: added createExplodeds(), createWind(), createWindParticle() to create new entities.
 - tiny_ecs_registry.hpp added three new component, wind, exploded, wind, windParticle 
 
-
+**View Mask:**
+- Render_system.hpp line 185 and line 186, add variables bool useMask and vec2 playerPos
+- LevelPlay.cpp, line 239, update playerPos in the step function so that it can be used in the render system class. Line 1143, inside the restart function, initialize the useMask value to be true. Otherwise, in levelSelection, it will be false.  
+- Render_system.cpp line 80 - line 106, use useMask as the conditional variable to apply the view mask effect. Pass the player location, dark radius, light radius to the textured shader. 
+- Texture.fs.glsl, the textured shader, render the view mask effect. So, if the fragment is within the light radius, render normally. Else if the fragment is outside the dark radius, render it to be dark. If the fragment is between light radius and dark radius, render the color from light to dark gradually. 
 
 **User Experience Feedback and Actions**
 **Feedback:**
