@@ -144,3 +144,17 @@ World_system.cpp line 95-110: Update light collision justification algorithm
 use f key to toggle between full screen mode and window mode
 World_system.cpp line 157-167: Add key control for toggling into and out of full screen
 
+**Milestone 4**
+
+**User Experience Feedback and Actions**
+**Feedback:**
+
+- A minimap are suggested by many users to improve user experience and get a overview of the game map.
+- User feedback on the navigation: previously the camera control uses the arrow key and moving the player uses wasd key, player feel thats a bit odd and hard to control the camera view.
+
+**Action: **
+
+- we added a minimap feature in the game play and players now can view the map structure and  current location in the map on the top left corner
+- we merge the camera control and player movement all to wasd key and now camera follows the player’s location and movement
+
+
