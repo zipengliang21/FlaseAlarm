@@ -187,6 +187,18 @@ component.hpp: added three component, Wind, WindParticle and Explode. Wind has d
 - Render_system.cpp line 80 - line 106, use useMask as the conditional variable to apply the view mask effect. Pass the player location, dark radius, light radius to the textured shader. 
 - Texture.fs.glsl, the textured shader, render the view mask effect. So, if the fragment is within the light radius, render normally. Else if the fragment is outside the dark radius, render it to be dark. If the fragment is between light radius and dark radius, render the color from light to dark gradually. 
 
+**Bee Item:**
+- summon a swarm of bees to trap the guard
+- GameLevel/LevelPlay.cpp OnMouseButton function: line 514-518 check if user selected bee from item box
+- GameLevel/LevelPlay.cpp if_clicked_bee_button function: line 869-928: create a swarm of bees, flying towards the guard’s position, set the guard’s velocity to 0, and restores its velocity when time is up.
+- World_init.cpp, createBee function: line 323-351: create a bee entity
+- Components.hpp, line 362-383: add the bee component
+- Components.cpp, line 532-614: added functions for getting/setting state of the bees
+- GetState function, line 547-568: get the current state of the bee: should it go toward the guard, stay or leave
+- ModifyMotion function, line 570-609: change the bee’s motion based on its current state, as long as its alive.
+- IsAlive function, line 611-614: return true if bee is alive (if the times ince the item is activated is less than the sum of times it flies toward the guard, traps the guard and leaves)
+- Tiny_ecs_registry.hpp: add bee component to the registry
+
 **User Experience Feedback and Actions**
 **Feedback:**
 
