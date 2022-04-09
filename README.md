@@ -146,6 +146,43 @@ World_system.cpp line 157-167: Add key control for toggling into and out of full
 
 **Milestone 4**
 
+**implemented features:**
+
+**Minimap:** It now shows the minimap of the current level on the top-left of the screen. Only the player and the walls are shown with other parts hidden. 
+Render_system.cpp  line 284-388 rendering of the minimap which only includes the wall and the position of the player. All other identities are hidden to make the game more interactive.
+
+
+**Point system:** 
+- record and display the number of test papers collected in each level. 
+- Game_state.cpp line 105-138: Add read and write to files recording points in each level 
+- highestPoint1.txt - highestPoint6.txt: Add text files to store highest point of each level
+- LevelPlay.cpp line 627-638, 664-667, 914-916: Add point update in files and display in the game window
+- World_init.cpp line 254-396: Add entities (digits, text message, …) for point display ui
+
+**External Library:**
+- I used nlohmann/json library to save user's Motion component and current state of program in a json file
+- Entry point is in game_state.cpp, to save we use the function saveGameState on line 117, to load we use the function loadGameState on line 149 
+- To change Motion into json form, I created 2 new functions in components.hpp, 1 called to_json (from object to json)  and another called from_json (from json to object)
+
+
+**Wind particle system with physics:**
+- Added a particle picture “wind_particle.png” to texture
+- LevelPlay.cpp: step() (starting from line 65) called UpdateWindParticle() (starting from line 953), calculation wind particles’ life cycle, remove dead particles,  and add new born particles.
+- LevelPlay::Restart() (starting from line 1012), added symbols ^, <, >, v to indicate the wind particle effect with direction in generating game elements.
+component.hpp: added three component, Wind, WindParticle and Explode. Wind has direction and particle number count, while WindParticle knows about parent wind. Exploded is used for exploding and calculate wind particle’s life system. 
+- component.cpp: added some useful function for wind:
+- WindParticle::WindParticle, to create new wind particle
+- bool WindParticle::IsAlive, to determine if a particle is still alive
+- vec2 WindParticle::GetPos, get current particle position since particle is always moving.
+- bool Wind::InRange, to determine if a object(player/guard) is in the effective range of wind
+- void Wind::Influence, use physics to influence an in range object’s motion.
+- Direction Wind::GetWindDirByChar, char Wind::GetWindDirChar, to convert the direction of wind with ^,<,>,v symbol.
+- Physicsystem.cpp: step() (starting around line 62): calculate particle’s life cycle and remove dead particles and update player’s motion if affected by wind.
+- world_init.cpp: added createExplodeds(), createWind(), createWindParticle() to create new entities.
+- tiny_ecs_registry.hpp added three new component, wind, exploded, wind, windParticle 
+
+
+
 **User Experience Feedback and Actions**
 **Feedback:**
 
